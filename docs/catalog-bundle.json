@@ -4,15 +4,16 @@
   "repository": "wllzhang/awesome-antigravity-tools",
   "site_url": "https://wllzhang.github.io/awesome-antigravity-tools/",
   "summary": {
-    "total_tools": 18,
+    "total_tools": 19,
     "total_categories": 4,
     "healthy_tools": 18,
-    "health_ratio_pct": 100.0,
+    "health_ratio_pct": 94.7,
     "total_stars": 60214,
     "total_forks": 7222,
     "average_health_score": 86.9,
     "by_status": {
-      "HEALTHY": 18
+      "HEALTHY": 18,
+      "UNAUDITED": 1
     },
     "by_language": [
       {
@@ -28,12 +29,12 @@
         "count": 4
       },
       {
-        "name": "Rust",
+        "name": "Unspecified",
         "count": 2
       },
       {
-        "name": "Unspecified",
-        "count": 1
+        "name": "Rust",
+        "count": 2
       },
       {
         "name": "PowerShell",
@@ -51,7 +52,7 @@
       },
       {
         "name": "macOS",
-        "count": 7
+        "count": 8
       },
       {
         "name": "Linux",
@@ -84,19 +85,19 @@
         "count": 4
       },
       {
+        "name": "Node.js",
+        "count": 4
+      },
+      {
+        "name": "ACP",
+        "count": 4
+      },
+      {
         "name": "Python",
         "count": 3
       },
       {
-        "name": "Node.js",
-        "count": 3
-      },
-      {
         "name": "Windows",
-        "count": 3
-      },
-      {
-        "name": "ACP",
         "count": 3
       },
       {
@@ -624,6 +625,41 @@
         "latest_release": "v1.5.6",
         "pushed_at": "2026-11-20T13:40:44Z",
         "days_inactive": 3
+      }
+    },
+    {
+      "id": "agy-remote-wecom",
+      "name": "agy-remote-wecom",
+      "repo": "lukeinx/agy-remote-wecom",
+      "url": "https://github.com/lukeinx/agy-remote-wecom",
+      "category": "dedicated-gateways-migration",
+      "description_en": "Control local Antigravity (agy) terminal and background agy acp sessions from WeCom on macOS over an outbound WebSocket connection, with session resume, attachments, model/mode switching, and tool-approval cards.",
+      "description_zh": "macOS 守护进程与生命周期 Hook 插件，通过企微智能机器人长连接（无需公网服务器）在手机企业微信遥控本机 Antigravity (agy) 终端会话与后台 agy acp 会话，支持会话切换与历史恢复、附件投递、模型/权限模式切换、工具审批卡片与产物回传。",
+      "exclusivity_reason_en": "Built exclusively around Google Antigravity's native agy CLI, lifecycle hook plugin specification, and agy acp background session protocol.",
+      "exclusivity_reason_zh": "专为 Google Antigravity 原生 agy CLI、生命周期 Hook 插件规范与 agy acp 后台会话协议打造。",
+      "platforms": [
+        "macOS"
+      ],
+      "tags": [
+        "Node.js",
+        "ACP",
+        "WeCom",
+        "Remote Control",
+        "Hook Plugin"
+      ],
+      "install_hint": "npm install -g agy-remote-wecom && agy-remote setup",
+      "added_at": "2026-11-24",
+      "telemetry": {
+        "status": "UNAUDITED",
+        "health_score": null,
+        "stars": 0,
+        "forks": 0,
+        "open_issues": 0,
+        "language": null,
+        "license": null,
+        "latest_release": null,
+        "pushed_at": null,
+        "days_inactive": null
       }
     },
     {

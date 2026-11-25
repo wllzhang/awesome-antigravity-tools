@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.zh-CN.md)
-[![收录工具数](https://img.shields.io/badge/精选收录-18%20%E4%B8%AA%E5%B7%A5%E5%85%B7-4285F4.svg)](#目录)
+[![收录工具数](https://img.shields.io/badge/精选收录-19%20%E4%B8%AA%E5%B7%A5%E5%85%B7-4285F4.svg)](#目录)
 [![每日健康巡检](https://github.com/wllzhang/awesome-antigravity-tools/actions/workflows/health-check.yml/badge.svg)](https://github.com/wllzhang/awesome-antigravity-tools/actions/workflows/health-check.yml)
 [![巡检状态](https://img.shields.io/badge/巡检状态-18/18%20%E6%B4%BB%E8%B7%83%20%28100%25%29-brightgreen)](health_report.zh-CN.md)
 [![Antigravity](https://img.shields.io/badge/Google-Antigravity-4285F4.svg?logo=google)](https://antigravity.google)
@@ -26,7 +26,7 @@
 - 正面攻克 Antigravity 运行时的特定缺陷、系统级死锁或配额盲区；
 - 由统一数据源 `data/tools.json` 驱动，每日自动执行健康度与活性巡检（`scripts/health-check.py`）。
 
-> **生态脉搏**：共收录 `18` 款专有工具（`4` 个分类）· 合计 `60.2k` Stars · `18/18` 活跃（`100.0%`）· 平均健康分：`86.9/100`（[完整巡检报告](health_report.zh-CN.md)）
+> **生态脉搏**：共收录 `19` 款专有工具（`4` 个分类）· 合计 `60.2k` Stars · `18/18` 活跃（`100.0%`）· 平均健康分：`86.9/100`（[完整巡检报告](health_report.zh-CN.md)）
 
 ---
 
@@ -35,7 +35,7 @@
 - [🚀 官方 CLI 与开发套件 (2)](#-官方-cli-与开发套件)
 - [🖥️ IDE 扩展与专属控制台 (5)](#️-ide-扩展与专属控制台)
 - [🔧 平台补丁与底层运行时修复 (5)](#-平台补丁与底层运行时修复)
-- [🔌 专用网关、ACP 适配器与迁移工具 (6)](#-专用网关acp-适配器与迁移工具)
+- [🔌 专用网关、ACP 适配器与迁移工具 (7)](#-专用网关acp-适配器与迁移工具)
 - [🏷️ 项目徽章 (Badge)](#️-项目徽章-badge)
 - [🤝 参与贡献](#-参与贡献)
 
@@ -79,6 +79,7 @@
 围绕 Antigravity 官方核心协议（`agy acp`）、原生插件规范（`plugin.json`）以及 Google AI（Flow）生态配套媒体网关打造的高性能工程工具。
 
 - [ACP-Ant](https://github.com/czg86389-hub/ACP-Ant) - 基于 Google 官方 Antigravity CLI ACP 协议构建的 OpenAI/Anthropic 兼容 API 服务，支持多账号独立代理与工具调用。 `Python` `ACP` `Gateway`
+- [agy-remote-wecom](https://github.com/lukeinx/agy-remote-wecom) - macOS 守护进程与生命周期 Hook 插件，通过企微智能机器人长连接（无需公网服务器）在手机企业微信遥控本机 Antigravity (agy) 终端会话与后台 agy acp 会话，支持会话切换与历史恢复、附件投递、模型/权限模式切换、工具审批卡片与产物回传。 `Node.js` `ACP` `WeCom` `Remote Control` `Hook Plugin`
 - [antigravity-acp](https://github.com/shubzkothekar/antigravity-acp) - 基于 Bun 构建的 Google Antigravity `agy` CLI ACP 服务端，支持实时流式输出与会话历史回放。 `TypeScript` `Bun` `ACP`
 - [antigravity-skill-porter](https://github.com/Pranav-Nexus/antigravity-skill-porter) - 专门用于将外部技能代码适配并打包为规范 Antigravity 原生插件（自动补全 `plugin.json` 与生命周期配置）的转换脚手架。 `CLI` `Converter` `Plugin`
 - [flow2api](https://github.com/TheSmallHanCat/flow2api) - 面向 Google Flow（Veo 3.1、Nano Banana 与 Omni）的 OpenAI 与 Gemini 兼容 API 网关，支持多账号池负载均衡、Cookie 自动刷新、代理与 Web 管理后台。 `Python` `Docker` `Google-Flow` `Gateway`

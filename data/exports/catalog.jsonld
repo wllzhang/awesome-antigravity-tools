@@ -4,7 +4,7 @@
   "name": "Awesome Antigravity Tools",
   "description": "Strictly curated directory of 100% Google Antigravity-exclusive engineering tools, IDE extensions, runtime hotfixes, and ACP gateways.",
   "url": "https://github.com/wllzhang/awesome-antigravity-tools",
-  "numberOfItems": 18,
+  "numberOfItems": 19,
   "itemListElement": [
     {
       "@type": "ListItem",
@@ -180,6 +180,19 @@
       "position": 14,
       "item": {
         "@type": "SoftwareApplication",
+        "name": "agy-remote-wecom",
+        "url": "https://github.com/lukeinx/agy-remote-wecom",
+        "applicationCategory": "Dedicated Gateways, ACP Adapters & Migration Tooling",
+        "operatingSystem": "macOS",
+        "description": "Control local Antigravity (agy) terminal and background agy acp sessions from WeCom on macOS over an outbound WebSocket connection, with session resume, attachments, model/mode switching, and tool-approval cards.",
+        "keywords": "Node.js, ACP, WeCom, Remote Control, Hook Plugin"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 15,
+      "item": {
+        "@type": "SoftwareApplication",
         "name": "antigravity-acp",
         "url": "https://github.com/shubzkothekar/antigravity-acp",
         "applicationCategory": "Dedicated Gateways, ACP Adapters & Migration Tooling",
@@ -190,7 +203,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 15,
+      "position": 16,
       "item": {
         "@type": "SoftwareApplication",
         "name": "antigravity-skill-porter",
@@ -203,7 +216,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 16,
+      "position": 17,
       "item": {
         "@type": "SoftwareApplication",
         "name": "flow2api",
@@ -216,7 +229,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 17,
+      "position": 18,
       "item": {
         "@type": "SoftwareApplication",
         "name": "liftgate",
@@ -229,7 +242,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 18,
+      "position": 19,
       "item": {
         "@type": "SoftwareApplication",
         "name": "refined-antigravity-acp",

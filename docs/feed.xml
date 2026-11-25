@@ -9,6 +9,13 @@
     <lastBuildDate>Tue, 24 Nov 2026 12:07:15 +0000</lastBuildDate>
     <docs>https://github.com/wllzhang/awesome-antigravity-tools</docs>
     <item>
+      <title>agy-remote-wecom (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
+      <link>https://github.com/lukeinx/agy-remote-wecom</link>
+      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-remote-wecom</guid>
+      <pubDate>Tue, 24 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Control local Antigravity (agy) terminal and background agy acp sessions from WeCom on macOS over an outbound WebSocket connection, with session resume, attachments, model/mode switching, and tool-approval cards. | Exclusivity: Built exclusively around Google Antigravity's native agy CLI, lifecycle hook plugin specification, and agy acp background session protocol. | Stars: 0 | Health: None/100</description>
+    </item>
+    <item>
       <title>agy-meme (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/jiangnanquan/agy-meme</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-meme</guid>

@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Curated Tools](https://img.shields.io/badge/Curated-18%20Tools-4285F4.svg)](#contents)
+[![Curated Tools](https://img.shields.io/badge/Curated-19%20Tools-4285F4.svg)](#contents)
 [![Daily Health Audit](https://github.com/wllzhang/awesome-antigravity-tools/actions/workflows/health-check.yml/badge.svg)](https://github.com/wllzhang/awesome-antigravity-tools/actions/workflows/health-check.yml)
 [![Repository Health](https://img.shields.io/badge/Health%20Audit-18/18%20Active%20%28100%25%29-brightgreen)](health_report.md)
 [![Antigravity](https://img.shields.io/badge/Google-Antigravity-4285F4.svg?logo=google)](https://antigravity.google)
@@ -26,7 +26,7 @@ Most "awesome" lists in the AI agent space are flooded with two types of noise:
 - Directly fixes critical Antigravity bugs, OS runtime limitations, or telemetry blind spots.
 - Verified daily by our automated health audit (`scripts/health-check.py`) and backed by a single-source-of-truth JSON catalog (`data/tools.json`).
 
-> **Ecosystem Pulse**: `18` curated tools across `4` categories · `60.2k` combined GitHub stars · `18/18` active (`100.0%`) · Avg Health Score: `86.9/100` ([Full Audit](health_report.md))
+> **Ecosystem Pulse**: `19` curated tools across `4` categories · `60.2k` combined GitHub stars · `18/18` active (`100.0%`) · Avg Health Score: `86.9/100` ([Full Audit](health_report.md))
 
 ---
 
@@ -35,7 +35,7 @@ Most "awesome" lists in the AI agent space are flooded with two types of noise:
 - [Official CLI & SDKs (2)](#-official-cli--sdks)
 - [IDE Extensions & Cockpits (5)](#️-ide-extensions--cockpits)
 - [Platform Fixes & Runtime Patches (5)](#-platform-fixes--runtime-patches)
-- [Dedicated Gateways, ACP Adapters & Migration Tooling (6)](#-dedicated-gateways-acp-adapters--migration-tooling)
+- [Dedicated Gateways, ACP Adapters & Migration Tooling (7)](#-dedicated-gateways-acp-adapters--migration-tooling)
 - [Badge](#️-badge)
 - [Contributing](#-contributing)
 
@@ -79,6 +79,7 @@ System-level hotfixes, localization injectors, network bridges, and patches solv
 Engineering utilities built around the official Antigravity Agent Client Protocol (`agy acp`), native plugin specifications (`plugin.json`), and companion Google AI (Flow) media API gateways.
 
 - [ACP-Ant](https://github.com/czg86389-hub/ACP-Ant) - OpenAI and Anthropic compatible API server bridging Google's official Antigravity CLI over ACP with per-account proxy and tool-calling support. `Python` `ACP` `Gateway`
+- [agy-remote-wecom](https://github.com/lukeinx/agy-remote-wecom) - Control local Antigravity (agy) terminal and background agy acp sessions from WeCom on macOS over an outbound WebSocket connection, with session resume, attachments, model/mode switching, and tool-approval cards. `Node.js` `ACP` `WeCom` `Remote Control` `Hook Plugin`
 - [antigravity-acp](https://github.com/shubzkothekar/antigravity-acp) - Bun-powered Agent Client Protocol server for Google Antigravity's `agy` CLI featuring live streaming and session history replay. `TypeScript` `Bun` `ACP`
 - [antigravity-skill-porter](https://github.com/Pranav-Nexus/antigravity-skill-porter) - CLI tool specifically adapting, wrapping, and validating external skills into native Antigravity plugins with `plugin.json` and tool name mapping. `CLI` `Converter` `Plugin`
 - [flow2api](https://github.com/TheSmallHanCat/flow2api) - OpenAI and Gemini compatible API gateway for Google Flow (Veo 3.1, Nano Banana, and Omni) featuring multi-account pooling, automatic cookie refresh, and proxy support. `Python` `Docker` `Google-Flow` `Gateway`

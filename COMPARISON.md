@@ -43,3 +43,4 @@
 | [liftgate](https://github.com/acking-you/liftgate) | `HEALTHY` | **84** | 43 | Rust | Apache-2.0 | `v0.2.9` | Windows, macOS, Linux |
 | [refined-antigravity-acp](https://github.com/simonepri/refined-antigravity-acp) | `HEALTHY` | **88** | 22 | TypeScript | MIT | `v1.6.8` | Cross-Platform |
 | [antigravity-skill-porter](https://github.com/Pranav-Nexus/antigravity-skill-porter) | `HEALTHY` | **80** | 6 | Python | MIT | `v1.0.1` | Cross-Platform |
+| [agy-remote-wecom](https://github.com/lukeinx/agy-remote-wecom) | `UNAUDITED` | - | 0 | - | - | - | macOS |
