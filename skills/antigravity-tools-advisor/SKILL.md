@@ -31,6 +31,7 @@ When diagnosing common Google Antigravity environment issues, query the catalog 
 4. **Quota HUDs, status bar countdowns, and account switching**: Compare `vscode-antigravity-cockpit`, `antigravity-panel`, `Antigravity-Manager`, and `AntigravityManager`.
 5. **Expose `agy acp` as OpenAI/Anthropic API or ACP server**: Compare `liftgate`, `ACP-Ant`, `antigravity-acp`, and `refined-antigravity-acp`.
 6. **Google Flow image/video generation (Veo 3.1, Nano Banana, Omni) over OpenAI/Gemini APIs**: Recommend `flow2api`.
+7. **Remote mobile control of local `agy` CLI & `agy acp` sessions via WeCom on macOS**: Recommend `agy-remote-wecom`.
 
 ## Output Rules
 

@@ -1,6 +1,10 @@
 name: Daily Repository Health Check & Prune Audit
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/health-check.yml'
   schedule:
     # Run daily at 02:00 UTC (10:00 AM Beijing time / CST)
     - cron: '0 2 * * *'
@@ -11,6 +15,10 @@ permissions:
   issues: write
   pages: write
   id-token: write
+
+concurrency:
+  group: health-check
+  cancel-in-progress: false
 
 jobs:
   health-check:
@@ -75,13 +83,30 @@ jobs:
             echo "updated=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "chore(audit): refresh daily telemetry, badges, docs, and web bundle [skip ci]"
-            git push
+            pushed=false
+            for attempt in 1 2 3 4; do
+              if git push origin HEAD:main; then
+                pushed=true
+                break
+              fi
+              echo "[!] git push attempt $attempt failed; retrying in $((attempt * 3))s..."
+              sleep $((attempt * 3))
+              git fetch origin main
+              git rebase origin/main
+            done
+            if [ "$pushed" != "true" ]; then
+              echo "[ERROR] Failed to push health audit commit after 4 attempts."
+              exit 1
+            fi
             echo "updated=true" >> "$GITHUB_OUTPUT"
           fi
 
   deploy-pages:
     needs: health-check
     if: needs.health-check.outputs.updated == 'true'
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

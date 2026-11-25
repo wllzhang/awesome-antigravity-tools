@@ -6,7 +6,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.zh-CN.md)
 [![收录工具数](https://img.shields.io/badge/精选收录-19%20%E4%B8%AA%E5%B7%A5%E5%85%B7-4285F4.svg)](#目录)
 [![每日健康巡检](https://github.com/wllzhang/awesome-antigravity-tools/actions/workflows/health-check.yml/badge.svg)](https://github.com/wllzhang/awesome-antigravity-tools/actions/workflows/health-check.yml)
-[![巡检状态](https://img.shields.io/badge/巡检状态-18/18%20%E6%B4%BB%E8%B7%83%20%28100%25%29-brightgreen)](health_report.zh-CN.md)
+[![巡检状态](https://img.shields.io/badge/巡检状态-19/19%20%E6%B4%BB%E8%B7%83%20%28100%25%29-brightgreen)](health_report.zh-CN.md)
 [![Antigravity](https://img.shields.io/badge/Google-Antigravity-4285F4.svg?logo=google)](https://antigravity.google)
 
 > 纯粹且极致：由 Schema 严格校验的精选目录，只收录 **100% 专为 Google Antigravity 设计研发** 的原生 IDE 扩展、底层系统补丁、运行时热修补与专用工程网关。
@@ -26,7 +26,7 @@
 - 正面攻克 Antigravity 运行时的特定缺陷、系统级死锁或配额盲区；
 - 由统一数据源 `data/tools.json` 驱动，每日自动执行健康度与活性巡检（`scripts/health-check.py`）。
 
-> **生态脉搏**：共收录 `19` 款专有工具（`4` 个分类）· 合计 `60.2k` Stars · `18/18` 活跃（`100.0%`）· 平均健康分：`86.9/100`（[完整巡检报告](health_report.zh-CN.md)）
+> **生态脉搏**：共收录 `19` 款专有工具（`4` 个分类）· 合计 `61.1k` Stars · `19/19` 活跃（`100.0%`）· 平均健康分：`86.4/100`（[完整巡检报告](health_report.zh-CN.md)）
 
 ---
 

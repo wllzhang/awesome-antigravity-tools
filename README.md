@@ -6,7 +6,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Curated Tools](https://img.shields.io/badge/Curated-19%20Tools-4285F4.svg)](#contents)
 [![Daily Health Audit](https://github.com/wllzhang/awesome-antigravity-tools/actions/workflows/health-check.yml/badge.svg)](https://github.com/wllzhang/awesome-antigravity-tools/actions/workflows/health-check.yml)
-[![Repository Health](https://img.shields.io/badge/Health%20Audit-18/18%20Active%20%28100%25%29-brightgreen)](health_report.md)
+[![Repository Health](https://img.shields.io/badge/Health%20Audit-19/19%20Active%20%28100%25%29-brightgreen)](health_report.md)
 [![Antigravity](https://img.shields.io/badge/Google-Antigravity-4285F4.svg?logo=google)](https://antigravity.google)
 
 > A strictly curated, schema-validated directory of **100% native, dedicated tools, IDE extensions, runtime hotfixes, and engineering gateways** built exclusively for Google Antigravity.
@@ -26,7 +26,7 @@ Most "awesome" lists in the AI agent space are flooded with two types of noise:
 - Directly fixes critical Antigravity bugs, OS runtime limitations, or telemetry blind spots.
 - Verified daily by our automated health audit (`scripts/health-check.py`) and backed by a single-source-of-truth JSON catalog (`data/tools.json`).
 
-> **Ecosystem Pulse**: `19` curated tools across `4` categories · `60.2k` combined GitHub stars · `18/18` active (`100.0%`) · Avg Health Score: `86.9/100` ([Full Audit](health_report.md))
+> **Ecosystem Pulse**: `19` curated tools across `4` categories · `61.1k` combined GitHub stars · `19/19` active (`100.0%`) · Avg Health Score: `86.4/100` ([Full Audit](health_report.md))
 
 ---
 

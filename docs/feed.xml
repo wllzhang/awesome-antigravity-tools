@@ -6,14 +6,14 @@
     <atom:link href="https://wllzhang.github.io/awesome-antigravity-tools/feed.xml" rel="self" type="application/rss+xml" />
     <description>Strictly 100% Google Antigravity-exclusive engineering tools, IDE extensions, runtime hotfixes, and ACP gateways.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 24 Nov 2026 12:07:15 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 25 Nov 2026 14:43:56 +0000</lastBuildDate>
     <docs>https://github.com/wllzhang/awesome-antigravity-tools</docs>
     <item>
       <title>agy-remote-wecom (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/lukeinx/agy-remote-wecom</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-remote-wecom</guid>
       <pubDate>Tue, 24 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Control local Antigravity (agy) terminal and background agy acp sessions from WeCom on macOS over an outbound WebSocket connection, with session resume, attachments, model/mode switching, and tool-approval cards. | Exclusivity: Built exclusively around Google Antigravity's native agy CLI, lifecycle hook plugin specification, and agy acp background session protocol. | Stars: 0 | Health: None/100</description>
+      <description>Control local Antigravity (agy) terminal and background agy acp sessions from WeCom on macOS over an outbound WebSocket connection, with session resume, attachments, model/mode switching, and tool-approval cards. | Exclusivity: Built exclusively around Google Antigravity's native agy CLI, lifecycle hook plugin specification, and agy acp background session protocol. | Stars: 0 | Health: 79/100</description>
     </item>
     <item>
       <title>agy-meme (IDE Extensions &amp; Cockpits)</title>
@@ -34,56 +34,56 @@
       <link>https://github.com/TheSmallHanCat/flow2api</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=flow2api</guid>
       <pubDate>Thu, 19 Nov 2026 00:00:00 +0000</pubDate>
-      <description>OpenAI and Gemini compatible API gateway for Google Flow (Veo 3.1, Nano Banana, and Omni) featuring multi-account pooling, automatic cookie refresh, and proxy support. | Exclusivity: Companion Google AI Pro/Ultra media gateway exposing Google Flow image and video generation alongside Antigravity workflows over OpenAI/Gemini APIs. | Stars: 3,191 | Health: 96/100</description>
+      <description>OpenAI and Gemini compatible API gateway for Google Flow (Veo 3.1, Nano Banana, and Omni) featuring multi-account pooling, automatic cookie refresh, and proxy support. | Exclusivity: Companion Google AI Pro/Ultra media gateway exposing Google Flow image and video generation alongside Antigravity workflows over OpenAI/Gemini APIs. | Stars: 3,196 | Health: 93/100</description>
     </item>
     <item>
       <title>antigravity-proxy (Platform Fixes &amp; Runtime Patches)</title>
       <link>https://github.com/yuaotian/antigravity-proxy</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-proxy</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Transparent Windows DLL-injection proxy utility that routes Antigravity process traffic through SOCKS5/HTTP proxies without requiring TUN mode. | Exclusivity: Targets Antigravity's Windows child processes (including language server binaries) that ignore system proxy settings. | Stars: 5,526 | Health: 93/100</description>
+      <description>Transparent Windows DLL-injection proxy utility that routes Antigravity process traffic through SOCKS5/HTTP proxies without requiring TUN mode. | Exclusivity: Targets Antigravity's Windows child processes (including language server binaries) that ignore system proxy settings. | Stars: 5,706 | Health: 93/100</description>
     </item>
     <item>
       <title>antigravity-sdk-python (Official CLI &amp; SDKs)</title>
       <link>https://github.com/google-antigravity/antigravity-sdk-python</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-sdk-python</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Official Apache-2.0 Python SDK for building programmatic AI agents and workflows powered directly by Google Antigravity. | Exclusivity: Official Python client library purpose-built for Google Antigravity's agent runtime. | Stars: 4,185 | Health: 100/100</description>
+      <description>Official Apache-2.0 Python SDK for building programmatic AI agents and workflows powered directly by Google Antigravity. | Exclusivity: Official Python client library purpose-built for Google Antigravity's agent runtime. | Stars: 4,206 | Health: 100/100</description>
     </item>
     <item>
       <title>antigravity-cli (Official CLI &amp; SDKs)</title>
       <link>https://github.com/google-antigravity/antigravity-cli</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-cli</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Official Antigravity CLI (`agy`) bringing the reasoning, execution, and orchestration capabilities of the Antigravity agent harness directly into the terminal. | Exclusivity: First-party official CLI harness for Google Antigravity (`agy` and `agy acp`). | Stars: 3,054 | Health: 84/100</description>
+      <description>Official Antigravity CLI (`agy`) bringing the reasoning, execution, and orchestration capabilities of the Antigravity agent harness directly into the terminal. | Exclusivity: First-party official CLI harness for Google Antigravity (`agy` and `agy acp`). | Stars: 3,102 | Health: 84/100</description>
     </item>
     <item>
       <title>AntigravityManager (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/Draculabo/AntigravityManager</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=draculabo-antigravity-manager</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Desktop application for managing Google accounts across Antigravity Classic, Antigravity IDE, and `agy` CLI with real-time quota views. | Exclusivity: Built specifically around Antigravity Classic, Antigravity IDE, and `agy` CLI local account and quota storage. | Stars: 2,572 | Health: 90/100</description>
+      <description>Desktop application for managing Google accounts across Antigravity Classic, Antigravity IDE, and `agy` CLI with real-time quota views. | Exclusivity: Built specifically around Antigravity Classic, Antigravity IDE, and `agy` CLI local account and quota storage. | Stars: 2,586 | Health: 90/100</description>
     </item>
     <item>
       <title>Antigravity-Chinese-Localization (Platform Fixes &amp; Runtime Patches)</title>
       <link>https://github.com/antigravity-cn-community/Antigravity-Chinese-Localization</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-chinese-localization</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>MIT-licensed one-click Chinese localization toolkit and UI translation patch tailored for Google Antigravity IDE. | Exclusivity: Targets Antigravity IDE's bundled UI string tables and resource packages exclusively. | Stars: 1,810 | Health: 93/100</description>
+      <description>MIT-licensed one-click Chinese localization toolkit and UI translation patch tailored for Google Antigravity IDE. | Exclusivity: Targets Antigravity IDE's bundled UI string tables and resource packages exclusively. | Stars: 2,302 | Health: 93/100</description>
     </item>
     <item>
       <title>antigravity-panel (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/n2ns/antigravity-panel</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-panel</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Quota monitor and cache manager for Google Antigravity IDE tracking Gemini, Claude, and GPT limits with usage trend analytics. | Exclusivity: Reads Google Antigravity IDE local quota telemetry and cache directories directly. | Stars: 889 | Health: 94/100</description>
+      <description>Quota monitor and cache manager for Google Antigravity IDE tracking Gemini, Claude, and GPT limits with usage trend analytics. | Exclusivity: Reads Google Antigravity IDE local quota telemetry and cache directories directly. | Stars: 899 | Health: 94/100</description>
     </item>
     <item>
       <title>ACP-Ant (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/czg86389-hub/ACP-Ant</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=acp-ant</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>OpenAI and Anthropic compatible API server bridging Google's official Antigravity CLI over ACP with per-account proxy and tool-calling support. | Exclusivity: Drives Google's official `agy` CLI strictly through its Agent Client Protocol interface. | Stars: 101 | Health: 93/100</description>
+      <description>OpenAI and Anthropic compatible API server bridging Google's official Antigravity CLI over ACP with per-account proxy and tool-calling support. | Exclusivity: Drives Google's official `agy` CLI strictly through its Agent Client Protocol interface. | Stars: 105 | Health: 93/100</description>
     </item>
     <item>
       <title>antigravity-acp (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
@@ -104,7 +104,7 @@
       <link>https://github.com/lbjlaq/Antigravity-Manager</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-manager</guid>
       <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Native desktop account manager and one-click switcher for Antigravity built with Tauri v2 (Rust) and React. | Exclusivity: Targets Antigravity's local profile, authentication state, and account switching workflow natively. | Stars: 33,866 | Health: 93/100</description>
+      <description>Native desktop account manager and one-click switcher for Antigravity built with Tauri v2 (Rust) and React. | Exclusivity: Targets Antigravity's local profile, authentication state, and account switching workflow natively. | Stars: 34,013 | Health: 93/100</description>
     </item>
     <item>
       <title>vscode-antigravity-cockpit (IDE Extensions &amp; Cockpits)</title>
@@ -118,7 +118,7 @@
       <link>https://github.com/acking-you/liftgate</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=liftgate</guid>
       <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Run Antigravity as a local OpenAI Responses and Anthropic Messages gateway via official `agy acp` over stdio with native GPUI desktop and TUI controls. | Exclusivity: Built natively on Google Antigravity's official `agy acp` stdio Agent Client Protocol. | Stars: 43 | Health: 84/100</description>
+      <description>Run Antigravity as a local OpenAI Responses and Anthropic Messages gateway via official `agy acp` over stdio with native GPUI desktop and TUI controls. | Exclusivity: Built natively on Google Antigravity's official `agy acp` stdio Agent Client Protocol. | Stars: 46 | Health: 84/100</description>
     </item>
     <item>
       <title>antigravity-skill-porter (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
