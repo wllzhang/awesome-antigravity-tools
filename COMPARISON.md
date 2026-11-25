@@ -11,7 +11,7 @@
 | Tool | Status | Score | Stars | Language | License | Release | Platforms |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | [antigravity-sdk-python](https://github.com/google-antigravity/antigravity-sdk-python) | `HEALTHY` | **100** | 4,206 | Python | Apache-2.0 | - | Cross-Platform |
-| [antigravity-cli](https://github.com/google-antigravity/antigravity-cli) | `HEALTHY` | **84** | 3,102 | - | - | `1.5.17` | Windows, macOS, Linux |
+| [antigravity-cli](https://github.com/google-antigravity/antigravity-cli) | `HEALTHY` | **84** | 3,103 | - | - | `1.5.17` | Windows, macOS, Linux |
 
 ## 🖥️ IDE Extensions & Cockpits
 
@@ -20,15 +20,15 @@
 | [Antigravity-Manager](https://github.com/lbjlaq/Antigravity-Manager) | `HEALTHY` | **93** | 34,013 | Rust | NOASSERTION | `v5.0.4` | Windows, macOS, Linux |
 | [vscode-antigravity-cockpit](https://github.com/jlcodes99/vscode-antigravity-cockpit) | `HEALTHY` | **93** | 4,856 | TypeScript | MIT | `v2.1.53` | VS Code, Antigravity IDE |
 | [AntigravityManager](https://github.com/Draculabo/AntigravityManager) | `HEALTHY` | **90** | 2,586 | TypeScript | NOASSERTION | `v0.33.1` | Windows, macOS, Linux |
-| [antigravity-panel](https://github.com/n2ns/antigravity-panel) | `HEALTHY` | **94** | 899 | TypeScript | Apache-2.0 | `v2.8.5` | VS Code, Antigravity IDE |
+| [antigravity-panel](https://github.com/n2ns/antigravity-panel) | `HEALTHY` | **94** | 900 | TypeScript | Apache-2.0 | `v2.8.5` | VS Code, Antigravity IDE |
 | [agy-meme](https://github.com/jiangnanquan/agy-meme) | `HEALTHY` | **83** | 2 | JavaScript | MIT | `v1.3.0` | Windows, macOS, Linux |
 
 ## 🔧 Platform Fixes & Runtime Patches
 
 | Tool | Status | Score | Stars | Language | License | Release | Platforms |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| [antigravity-proxy](https://github.com/yuaotian/antigravity-proxy) | `HEALTHY` | **93** | 5,706 | C++ | NOASSERTION | `v2.6.6` | Windows, Antigravity IDE |
-| [Antigravity-Chinese-Localization](https://github.com/antigravity-cn-community/Antigravity-Chinese-Localization) | `HEALTHY` | **93** | 2,302 | JavaScript | MIT | `v2.35.1` | Windows, macOS, Linux, Antigravity IDE |
+| [antigravity-proxy](https://github.com/yuaotian/antigravity-proxy) | `HEALTHY` | **93** | 5,708 | C++ | NOASSERTION | `v2.6.6` | Windows, Antigravity IDE |
+| [Antigravity-Chinese-Localization](https://github.com/antigravity-cn-community/Antigravity-Chinese-Localization) | `HEALTHY` | **93** | 2,305 | JavaScript | MIT | `v2.35.1` | Windows, macOS, Linux, Antigravity IDE |
 | [vscode-antigravity-backend-fix](https://github.com/HeshamNoaman/vscode-antigravity-backend-fix) | `HEALTHY` | **75** | 4 | JavaScript | MIT | - | Windows, VS Code |
 | [antigravity-junction-skill-fix](https://github.com/wllzhang/antigravity-junction-skill-fix) | `HEALTHY` | **79** | 0 | PowerShell | MIT | `v1.0.1` | Windows, Antigravity IDE |
 | [agy-desktop-exo](https://github.com/jiangnanquan/agy-desktop-exo) | `HEALTHY` | **63** | 0 | JavaScript | NOASSERTION | - | Windows, macOS, Linux |

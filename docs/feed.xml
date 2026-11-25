@@ -6,7 +6,7 @@
     <atom:link href="https://wllzhang.github.io/awesome-antigravity-tools/feed.xml" rel="self" type="application/rss+xml" />
     <description>Strictly 100% Google Antigravity-exclusive engineering tools, IDE extensions, runtime hotfixes, and ACP gateways.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 25 Nov 2026 14:44:43 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 25 Nov 2026 14:52:45 +0000</lastBuildDate>
     <docs>https://github.com/wllzhang/awesome-antigravity-tools</docs>
     <item>
       <title>agy-remote-wecom (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
@@ -41,7 +41,7 @@
       <link>https://github.com/yuaotian/antigravity-proxy</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-proxy</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Transparent Windows DLL-injection proxy utility that routes Antigravity process traffic through SOCKS5/HTTP proxies without requiring TUN mode. | Exclusivity: Targets Antigravity's Windows child processes (including language server binaries) that ignore system proxy settings. | Stars: 5,706 | Health: 93/100</description>
+      <description>Transparent Windows DLL-injection proxy utility that routes Antigravity process traffic through SOCKS5/HTTP proxies without requiring TUN mode. | Exclusivity: Targets Antigravity's Windows child processes (including language server binaries) that ignore system proxy settings. | Stars: 5,708 | Health: 93/100</description>
     </item>
     <item>
       <title>antigravity-sdk-python (Official CLI &amp; SDKs)</title>
@@ -55,7 +55,7 @@
       <link>https://github.com/google-antigravity/antigravity-cli</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-cli</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Official Antigravity CLI (`agy`) bringing the reasoning, execution, and orchestration capabilities of the Antigravity agent harness directly into the terminal. | Exclusivity: First-party official CLI harness for Google Antigravity (`agy` and `agy acp`). | Stars: 3,102 | Health: 84/100</description>
+      <description>Official Antigravity CLI (`agy`) bringing the reasoning, execution, and orchestration capabilities of the Antigravity agent harness directly into the terminal. | Exclusivity: First-party official CLI harness for Google Antigravity (`agy` and `agy acp`). | Stars: 3,103 | Health: 84/100</description>
     </item>
     <item>
       <title>AntigravityManager (IDE Extensions &amp; Cockpits)</title>
@@ -69,14 +69,14 @@
       <link>https://github.com/antigravity-cn-community/Antigravity-Chinese-Localization</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-chinese-localization</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>MIT-licensed one-click Chinese localization toolkit and UI translation patch tailored for Google Antigravity IDE. | Exclusivity: Targets Antigravity IDE's bundled UI string tables and resource packages exclusively. | Stars: 2,302 | Health: 93/100</description>
+      <description>MIT-licensed one-click Chinese localization toolkit and UI translation patch tailored for Google Antigravity IDE. | Exclusivity: Targets Antigravity IDE's bundled UI string tables and resource packages exclusively. | Stars: 2,305 | Health: 93/100</description>
     </item>
     <item>
       <title>antigravity-panel (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/n2ns/antigravity-panel</link>
       <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-panel</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Quota monitor and cache manager for Google Antigravity IDE tracking Gemini, Claude, and GPT limits with usage trend analytics. | Exclusivity: Reads Google Antigravity IDE local quota telemetry and cache directories directly. | Stars: 899 | Health: 94/100</description>
+      <description>Quota monitor and cache manager for Google Antigravity IDE tracking Gemini, Claude, and GPT limits with usage trend analytics. | Exclusivity: Reads Google Antigravity IDE local quota telemetry and cache directories directly. | Stars: 900 | Health: 94/100</description>
     </item>
     <item>
       <title>ACP-Ant (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>

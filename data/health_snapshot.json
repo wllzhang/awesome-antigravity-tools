@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0.0",
-  "generated_at": "2026-11-25T14:44:43Z",
+  "generated_at": "2026-11-25T14:52:45Z",
   "summary": {
     "total": 19,
     "healthy": 19,
@@ -10,7 +10,7 @@
     "dead": 0,
     "error": 0,
     "health_ratio_pct": 100.0,
-    "total_stars": 61138,
+    "total_stars": 61145,
     "total_forks": 7270,
     "average_health_score": 86.4
   },
@@ -28,9 +28,9 @@
       "status": "HEALTHY",
       "code": 200,
       "health_score": 84,
-      "stars": 3102,
+      "stars": 3103,
       "forks": 294,
-      "open_issues": 1187,
+      "open_issues": 1188,
       "language": null,
       "license": null,
       "default_branch": "main",
@@ -40,7 +40,7 @@
       "topics": [],
       "archived": false,
       "days_inactive": 0,
-      "message": "Active (0d ago, 3102 stars)"
+      "message": "Active (0d ago, 3103 stars)"
     },
     {
       "id": "antigravity-sdk-python",
@@ -162,7 +162,7 @@
       "status": "HEALTHY",
       "code": 200,
       "health_score": 94,
-      "stars": 899,
+      "stars": 900,
       "forks": 46,
       "open_issues": 7,
       "language": "TypeScript",
@@ -188,7 +188,7 @@
       ],
       "archived": false,
       "days_inactive": 9,
-      "message": "Active (9d ago, 899 stars)"
+      "message": "Active (9d ago, 900 stars)"
     },
     {
       "id": "draculabo-antigravity-manager",
@@ -295,7 +295,7 @@
       "status": "HEALTHY",
       "code": 200,
       "health_score": 93,
-      "stars": 2302,
+      "stars": 2305,
       "forks": 63,
       "open_issues": 1,
       "language": "JavaScript",
@@ -307,7 +307,7 @@
       "topics": [],
       "archived": false,
       "days_inactive": 0,
-      "message": "Active (0d ago, 2302 stars)"
+      "message": "Active (0d ago, 2305 stars)"
     },
     {
       "id": "antigravity-junction-skill-fix",
@@ -358,7 +358,7 @@
       "status": "HEALTHY",
       "code": 200,
       "health_score": 93,
-      "stars": 5706,
+      "stars": 5708,
       "forks": 372,
       "open_issues": 9,
       "language": "C++",
@@ -381,7 +381,7 @@
       ],
       "archived": false,
       "days_inactive": 4,
-      "message": "Active (4d ago, 5706 stars)"
+      "message": "Active (4d ago, 5708 stars)"
     },
     {
       "id": "vscode-antigravity-backend-fix",
