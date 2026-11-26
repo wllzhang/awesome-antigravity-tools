@@ -13,13 +13,17 @@ Prefer the local plugin catalog if `scripts/aat_cli.py` is available alongside t
 
 - **Local CLI (offline & fastest)**:
   ```bash
+  python "<plugin-root>/scripts/aat_cli.py" recommend "<goal or bug>" --lang zh
+  python "<plugin-root>/scripts/aat_cli.py" doctor
+  python "<plugin-root>/scripts/aat_cli.py" compare <tool1> <tool2> --markdown
   python "<plugin-root>/scripts/aat_cli.py" search "<keywords>" --sort stars
   python "<plugin-root>/scripts/aat_cli.py" list --category <cat> --platform <plat> --sort score
   python "<plugin-root>/scripts/aat_cli.py" info "<tool-id>"
   python "<plugin-root>/scripts/aat_cli.py" stats
   ```
-- **Remote Live JSON Bundle (if running outside the cloned repo)**:
-  `https://wllzhang.github.io/awesome-antigravity-tools/catalog-bundle.json`
+- **Remote Live Indexes (if running outside the cloned repo)**:
+  - Compact AI index: `https://wllzhang.github.io/awesome-antigravity-tools/llms.txt`
+  - Full JSON telemetry bundle: `https://wllzhang.github.io/awesome-antigravity-tools/catalog-bundle.json`
 
 ## Problem-to-Tool Routing Guide
 

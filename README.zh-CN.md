@@ -11,7 +11,7 @@
 
 > 纯粹且极致：由 Schema 严格校验的精选目录，只收录 **100% 专为 Google Antigravity 设计研发** 的原生 IDE 扩展、底层系统补丁、运行时热修补与专用工程网关。
 
-[🌐 交互式网页目录](https://wllzhang.github.io/awesome-antigravity-tools/?lang=zh) · [📊 横向对比矩阵](COMPARISON.md) · [English Documentation](README.md) · [贡献指南](CONTRIBUTING.zh-CN.md) · [每日健康与清退报告](health_report.zh-CN.md) · [提交新工具](https://github.com/wllzhang/awesome-antigravity-tools/issues/new/choose)
+[🌐 交互式网页目录](https://wllzhang.github.io/awesome-antigravity-tools/?lang=zh) · [📊 横向对比矩阵](COMPARISON.md) · [🤖 LLMs.txt](https://wllzhang.github.io/awesome-antigravity-tools/llms.txt) · [English Documentation](README.md) · [贡献指南](CONTRIBUTING.zh-CN.md) · [每日健康与清退报告](health_report.zh-CN.md) · [提交新工具](https://github.com/wllzhang/awesome-antigravity-tools/issues/new/choose)
 
 ---
 
@@ -122,6 +122,6 @@
 
 欢迎提交您的专有工具！所有收录条目统一维护于 [`data/tools.json`](data/tools.json)，通过 `python scripts/generate_docs.py` 自动同步生成中英文文档。
 
-> **提示**：本仓库本身亦遵循 Antigravity 原生插件规范（[`plugin.json`](plugin.json) + `antigravity-tools-advisor` 技能），同时内置零依赖 CLI（`python scripts/aat_cli.py search <关键词>`）。
+> **提示**：本仓库本身亦遵循 Antigravity 原生插件规范（[`plugin.json`](plugin.json) + `antigravity-tools-advisor` 技能），同时内置零依赖 CLI（`python scripts/aat_cli.py recommend "<意图>"`、`doctor`、`search <关键词>`）。
 
 在提交前请阅读我们的 [贡献指南](CONTRIBUTING.zh-CN.md) 与 [行为准则](CODE_OF_CONDUCT.md)。
