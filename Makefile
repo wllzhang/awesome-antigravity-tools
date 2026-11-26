@@ -1,4 +1,4 @@
-.PHONY: all validate generate export build-site test audit discover serve
+.PHONY: all validate generate export build-site test audit discover doctor serve
 
 all: generate validate test
 
@@ -27,6 +27,9 @@ audit:
 
 discover:
 	python3 scripts/discover_candidates.py --use-gh-cli --limit 15
+
+doctor:
+	python3 scripts/aat_cli.py doctor
 
 serve:
 	python3 -m http.server 8765 --directory docs
