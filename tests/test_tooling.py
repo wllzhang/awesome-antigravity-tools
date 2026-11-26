@@ -423,6 +423,43 @@ CLI, Hooks
         _, dup_errors = parse_submission.build_candidate_entry(parse_submission.parse_issue_form(dup_body), cat)
         self.assertTrue(any("Duplicate submission" in e for e in dup_errors))
 
+    def test_cli_recommend_and_compare(self):
+        real_cat = REPO_ROOT / "data" / "tools.json"
+        real_snap = REPO_ROOT / "data" / "health_snapshot.json"
+
+        buf_en = io.StringIO()
+        with redirect_stdout(buf_en):
+            rc_en = aat_cli.main(
+                ["--catalog", str(real_cat), "--snapshot", str(real_snap), "recommend", "windows proxy", "--json"]
+            )
+        self.assertEqual(rc_en, 0)
+        recs_en = json.loads(buf_en.getvalue())
+        self.assertGreaterEqual(len(recs_en), 1)
+        self.assertEqual(recs_en[0]["id"], "antigravity-proxy")
+        self.assertGreater(recs_en[0]["match_score"], 0)
+
+        buf_zh = io.StringIO()
+        with redirect_stdout(buf_zh):
+            rc_zh = aat_cli.main(
+                ["--catalog", str(real_cat), "--snapshot", str(real_snap), "recommend", "硬链接", "--lang", "zh", "--json"]
+            )
+        self.assertEqual(rc_zh, 0)
+        recs_zh = json.loads(buf_zh.getvalue())
+        self.assertEqual(recs_zh[0]["id"], "antigravity-junction-skill-fix")
+
+        buf_cmp = io.StringIO()
+        with redirect_stdout(buf_cmp):
+            rc_cmp = aat_cli.main(
+                ["--catalog", str(real_cat), "--snapshot", str(real_snap), "compare", "liftgate", "agy-gyro", "--markdown"]
+            )
+        self.assertEqual(rc_cmp, 0)
+        md_out = buf_cmp.getvalue()
+        self.assertIn("liftgate", md_out)
+        self.assertIn("agy-gyro", md_out)
+
+        rc_bad = aat_cli.main(["--catalog", str(real_cat), "--snapshot", str(real_snap), "compare", "liftgate"])
+        self.assertEqual(rc_bad, 1)
+
 
 if __name__ == "__main__":
     unittest.main()
