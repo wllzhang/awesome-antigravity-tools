@@ -19,6 +19,7 @@ const I18N = {
     statScore: "Avg Health Score",
     allCategories: "All",
     allPlatforms: "All Platforms",
+    allLanguages: "All Languages",
     allStatuses: "All Statuses",
     statusHealthy: "Healthy & Active",
     statusStale: "Stale (>180d)",
@@ -28,6 +29,7 @@ const I18N = {
     sortName: "Alphabetical (A-Z)",
     searchLabel: "Search tools",
     platformLabel: "Filter by platform",
+    languageLabel: "Filter by programming language",
     statusLabel: "Filter by health status",
     sortLabel: "Sort tools",
     searchPlaceholder: "Search tools, tags, languages, ACP, quota... (Press /)",
@@ -46,6 +48,7 @@ const I18N = {
     exclusivityHeading: "Why 100% Antigravity-Exclusive",
     installHeading: "Quick Install / Usage",
     copyCmd: "Copy",
+    copyInstall: "Install",
     compareHeading: "Side-by-Side Tool Comparison",
     detailStatus: "Status",
     detailScore: "Health Score",
@@ -59,6 +62,14 @@ const I18N = {
     contribute: "Contribute",
     auditReport: "Health Report",
     langToggle: "中文",
+    shortcutsBtn: "?",
+    shortcutsHeading: "Keyboard Shortcuts",
+    shortcutSearch: "Focus search box",
+    shortcutNavigate: "Move focus across tool cards",
+    shortcutOpen: "Open focused tool details",
+    shortcutLang: "Switch English / 中文",
+    shortcutEsc: "Clear search or close dialog",
+    shortcutHelp: "Toggle this shortcuts help",
   },
   zh: {
     title: "Awesome Antigravity Tools",
@@ -70,6 +81,7 @@ const I18N = {
     statScore: "平均健康分",
     allCategories: "全部",
     allPlatforms: "全部平台",
+    allLanguages: "全部语言",
     allStatuses: "全部状态",
     statusHealthy: "活跃健康",
     statusStale: "观察 (>180天)",
@@ -79,6 +91,7 @@ const I18N = {
     sortName: "按名称 A-Z",
     searchLabel: "搜索工具",
     platformLabel: "按平台筛选",
+    languageLabel: "按编程语言筛选",
     statusLabel: "按健康状态筛选",
     sortLabel: "工具排序",
     searchPlaceholder: "搜索工具名、标签、语言、ACP、配额... (按 / 聚焦)",
@@ -97,6 +110,7 @@ const I18N = {
     exclusivityHeading: "为什么 100% 专属于 Antigravity",
     installHeading: "快速安装 / 使用提示",
     copyCmd: "复制",
+    copyInstall: "安装",
     compareHeading: "工具横向对比",
     detailStatus: "健康状态",
     detailScore: "健康评分",
@@ -110,6 +124,14 @@ const I18N = {
     contribute: "参与贡献",
     auditReport: "巡检报告",
     langToggle: "EN",
+    shortcutsBtn: "?",
+    shortcutsHeading: "键盘快捷键",
+    shortcutSearch: "聚焦搜索框",
+    shortcutNavigate: "切换工具卡片焦点",
+    shortcutOpen: "打开当前焦点工具详情",
+    shortcutLang: "切换中英文界面",
+    shortcutEsc: "清空搜索或关闭弹窗",
+    shortcutHelp: "打开/关闭快捷键帮助",
   },
 };
 
@@ -122,6 +144,7 @@ const state = {
 const els = {
   searchInput: document.getElementById("searchInput"),
   platformFilter: document.getElementById("platformFilter"),
+  languageFilter: document.getElementById("languageFilter"),
   statusFilter: document.getElementById("statusFilter"),
   sortSelect: document.getElementById("sortSelect"),
   categoryPills: document.getElementById("categoryPills"),
@@ -134,6 +157,7 @@ const els = {
   emptyState: document.getElementById("emptyState"),
   langToggle: document.getElementById("langToggle"),
   themeToggle: document.getElementById("themeToggle"),
+  shortcutsBtn: document.getElementById("shortcutsBtn"),
   toolDialog: document.getElementById("toolDialog"),
   dialogTitle: document.getElementById("dialogTitle"),
   dialogRepo: document.getElementById("dialogRepo"),
@@ -146,6 +170,8 @@ const els = {
   compareBody: document.getElementById("compareBody"),
   compareCloseBtn: document.getElementById("compareCloseBtn"),
   compareCopyUrlBtn: document.getElementById("compareCopyUrlBtn"),
+  shortcutsDialog: document.getElementById("shortcutsDialog"),
+  shortcutsCloseBtn: document.getElementById("shortcutsCloseBtn"),
   insightsMount: document.getElementById("insightsMount"),
   statTotalTools: document.getElementById("statTotalTools"),
   statTotalStars: document.getElementById("statTotalStars"),
@@ -237,6 +263,14 @@ function applyI18n() {
   }
   els.searchInput.placeholder = t("searchPlaceholder");
   els.langToggle.textContent = t("langToggle");
+  if (els.languageFilter) {
+    els.languageFilter.setAttribute("aria-label", t("languageLabel"));
+  }
+  if (els.shortcutsBtn) {
+    const scLabel = t("shortcutsHeading");
+    els.shortcutsBtn.setAttribute("aria-label", scLabel);
+    els.shortcutsBtn.setAttribute("title", scLabel);
+  }
   if (els.tagFilterBar) {
     els.tagFilterBar.setAttribute("aria-label", state.lang === "zh" ? "热门标签" : "Popular tags");
   }
@@ -282,6 +316,25 @@ function populatePlatformSelect() {
     els.platformFilter.append(opt);
   }
   els.platformFilter.value = state.platform;
+}
+
+function populateLanguageSelect() {
+  if (!els.languageFilter) return;
+  const languages = state.bundle.summary.by_language || [];
+  if (state.language && state.language !== "all") {
+    const match = languages.find((item) => item.name.toLowerCase() === state.language.toLowerCase());
+    state.language = match ? match.name : "all";
+  }
+  while (els.languageFilter.options.length > 1) {
+    els.languageFilter.remove(1);
+  }
+  for (const langItem of languages) {
+    const opt = document.createElement("option");
+    opt.value = langItem.name;
+    opt.textContent = `${langItem.name} (${langItem.count})`;
+    els.languageFilter.append(opt);
+  }
+  els.languageFilter.value = state.language;
 }
 
 function renderTagFilterBar() {
@@ -426,6 +479,7 @@ function renderToolsGrid() {
     Boolean(state.query) ||
     state.category !== "all" ||
     state.platform !== "all" ||
+    state.language !== "all" ||
     (Boolean(state.tag) && state.tag !== "all") ||
     Boolean(state.featuredOnly) ||
     state.status !== "all";
@@ -490,6 +544,20 @@ function renderToolsGrid() {
     footer.append(el("span", "", metaText));
 
     const actions = el("div", "card-actions");
+    if (tool.install_hint) {
+      const installBtn = el("button", "btn btn-ghost btn-sm", t("copyInstall"));
+      installBtn.type = "button";
+      installBtn.title = tool.install_hint;
+      installBtn.setAttribute("aria-label", `${t("copyInstall")}: ${tool.install_hint}`);
+      installBtn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(tool.install_hint);
+          installBtn.textContent = t("copied");
+          setTimeout(() => (installBtn.textContent = t("copyInstall")), 1500);
+        } catch {}
+      });
+      actions.append(installBtn);
+    }
     const isCompared = state.compareIds.includes(tool.id);
     const cmpBtn = el("button", "btn btn-ghost btn-sm", isCompared ? t("comparing") : t("compare"));
     cmpBtn.type = "button";
@@ -540,12 +608,14 @@ function resetFilters() {
   state.query = "";
   state.category = "all";
   state.platform = "all";
+  state.language = "all";
   state.tag = "all";
   state.featuredOnly = false;
   state.status = "all";
   state.sort = "stars";
   els.searchInput.value = "";
   els.platformFilter.value = "all";
+  if (els.languageFilter) els.languageFilter.value = "all";
   els.statusFilter.value = "all";
   els.sortSelect.value = "stars";
   renderAll();
@@ -555,6 +625,7 @@ function renderAll() {
   applyI18n();
   renderSummary();
   populatePlatformSelect();
+  populateLanguageSelect();
   renderCategoryPills();
   renderTagFilterBar();
   renderInsightsPanel(els.insightsMount, state.bundle, state.lang);
@@ -580,6 +651,14 @@ function bindEvents() {
     renderToolsGrid();
     syncUrl();
   });
+
+  if (els.languageFilter) {
+    els.languageFilter.addEventListener("change", () => {
+      state.language = els.languageFilter.value;
+      renderToolsGrid();
+      syncUrl();
+    });
+  }
 
   els.statusFilter.addEventListener("change", () => {
     state.status = els.statusFilter.value;
@@ -610,6 +689,14 @@ function bindEvents() {
 
   els.dialogCloseBtn.addEventListener("click", () => els.toolDialog.close());
   els.compareCloseBtn.addEventListener("click", () => els.compareDialog.close());
+  if (els.shortcutsBtn && els.shortcutsDialog) {
+    els.shortcutsBtn.addEventListener("click", () => {
+      if (!els.shortcutsDialog.open) els.shortcutsDialog.showModal();
+    });
+  }
+  if (els.shortcutsCloseBtn && els.shortcutsDialog) {
+    els.shortcutsCloseBtn.addEventListener("click", () => els.shortcutsDialog.close());
+  }
 
   if (els.compareCopyUrlBtn) {
     els.compareCopyUrlBtn.addEventListener("click", async () => {
@@ -636,12 +723,28 @@ function bindEvents() {
 
   attachDialogLightDismissFallback(els.toolDialog);
   attachDialogLightDismissFallback(els.compareDialog);
+  if (els.shortcutsDialog) attachDialogLightDismissFallback(els.shortcutsDialog);
 
   // Keyboard-first navigation shortcuts
   document.addEventListener("keydown", (event) => {
+    if (els.shortcutsDialog?.open) {
+      if (event.key === "?") {
+        event.preventDefault();
+        els.shortcutsDialog.close();
+      }
+      return;
+    }
     if (els.toolDialog.open || els.compareDialog.open) return;
     const activeTag = (document.activeElement?.tagName || "").toUpperCase();
     const isTyping = activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT";
+
+    if (event.key === "?" && !isTyping && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      if (els.shortcutsDialog) {
+        event.preventDefault();
+        els.shortcutsDialog.showModal();
+      }
+      return;
+    }
 
     if (event.key === "/" && !isTyping && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();

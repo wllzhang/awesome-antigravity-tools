@@ -78,13 +78,28 @@ test("category, platform, tag, featured, and status filters compose accurately",
   for (const t of featuredTools) {
     assert.equal(Boolean(t.featured), true);
   }
+
+  const rustTools = filterAndSortTools(bundle.tools, { language: "Rust" });
+  const rustToolsLower = filterAndSortTools(bundle.tools, { language: "rust" });
+  assert.ok(rustTools.length >= 4);
+  assert.deepEqual(rustTools.map((t) => t.id), rustToolsLower.map((t) => t.id));
+  for (const t of rustTools) {
+    assert.equal(t.telemetry.language, "Rust");
+  }
+
+  const unspecifiedLang = filterAndSortTools(bundle.tools, { language: "Unspecified" });
+  assert.ok(unspecifiedLang.length >= 1);
+  for (const t of unspecifiedLang) {
+    assert.ok(!t.telemetry.language);
+  }
 });
 
-test("URL state serialization round-trips cleanly with tag, featured, and compare capping", () => {
+test("URL state serialization round-trips cleanly with language, tag, featured, and compare capping", () => {
   const original = {
     query: "acp rust",
     category: "dedicated-gateways-migration",
     platform: "Linux",
+    language: "Rust",
     tag: "Gateway",
     featuredOnly: true,
     status: "HEALTHY",
@@ -97,15 +112,20 @@ test("URL state serialization round-trips cleanly with tag, featured, and compar
   const parsed = parseParamsToState(`?${qs}`);
   assert.deepEqual(parsed, original);
 
-  const capped = parseParamsToState("?compare=a,b,a,c,d&featured=true&tag=%20&status=healthy");
+  const capped = parseParamsToState("?compare=a,b,a,c,d&featured=true&tag=%20&code=%20&status=healthy");
   assert.deepEqual(capped.compareIds, ["a", "b", "c"]);
   assert.equal(capped.featuredOnly, true);
+  assert.equal(capped.language, "all");
   assert.equal(capped.tag, "all");
   assert.equal(capped.status, "HEALTHY");
 
-  const normalizedAll = parseParamsToState("?tag=ALL&status=BOGUS");
+  const normalizedAll = parseParamsToState("?tag=ALL&code=ALL&status=BOGUS");
+  assert.equal(normalizedAll.language, "all");
   assert.equal(normalizedAll.tag, "all");
   assert.equal(normalizedAll.status, "all");
+
+  const cppRoundTrip = parseParamsToState(`?${serializeStateToParams({ language: "C++" }).toString()}`);
+  assert.equal(cppRoundTrip.language, "C++");
 });
 
 test("computeHistoryTrendSummary computes polylines and deltas deterministically", () => {

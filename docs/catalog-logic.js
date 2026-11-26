@@ -15,6 +15,8 @@ export function filterAndSortTools(tools, state) {
   const tokens = query ? query.split(/\s+/).filter(Boolean) : [];
   const category = state.category || "all";
   const platform = state.platform || "all";
+  const language = (state.language || "all").trim();
+  const languageLower = language.toLowerCase();
   const tag = (state.tag || "all").trim();
   const tagLower = tag.toLowerCase();
   const featuredOnly = Boolean(state.featuredOnly);
@@ -24,6 +26,10 @@ export function filterAndSortTools(tools, state) {
   const filtered = tools.filter((tool) => {
     if (category !== "all" && tool.category !== category) return false;
     if (platform !== "all" && !(tool.platforms || []).includes(platform)) return false;
+    if (languageLower && languageLower !== "all") {
+      const toolLang = String(tool.telemetry?.language || "Unspecified").toLowerCase();
+      if (toolLang !== languageLower) return false;
+    }
     if (tagLower && tagLower !== "all") {
       const hasTag = (tool.tags || []).some((tg) => String(tg).toLowerCase() === tagLower);
       if (!hasTag) return false;
@@ -128,6 +134,7 @@ export function serializeStateToParams(state) {
   if (state.query) params.set("q", state.query);
   if (state.category && state.category !== "all") params.set("cat", state.category);
   if (state.platform && state.platform !== "all") params.set("platform", state.platform);
+  if (state.language && state.language !== "all") params.set("code", state.language);
   if (state.tag && state.tag !== "all") params.set("tag", state.tag);
   if (state.featuredOnly) params.set("featured", "1");
   if (state.status && state.status !== "all") params.set("status", state.status);
@@ -143,6 +150,8 @@ export function parseParamsToState(searchString) {
   const params = new URLSearchParams(searchString || "");
   const rawCmp = params.get("compare") || "";
   const compareIds = normalizeCompareIds(rawCmp ? rawCmp.split(",") : []);
+  const rawCode = (params.get("code") || "").trim();
+  const language = !rawCode || rawCode.toLowerCase() === "all" ? "all" : rawCode;
   const rawTag = (params.get("tag") || "").trim();
   const tag = !rawTag || rawTag.toLowerCase() === "all" ? "all" : rawTag;
   const rawStatus = (params.get("status") || "all").trim().toUpperCase();
@@ -151,6 +160,7 @@ export function parseParamsToState(searchString) {
     query: params.get("q") || "",
     category: params.get("cat") || "all",
     platform: params.get("platform") || "all",
+    language,
     tag,
     featuredOnly: params.get("featured") === "1" || params.get("featured") === "true",
     status,
