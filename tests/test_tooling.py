@@ -835,6 +835,163 @@ ACP, CLI
             )
         self.assertIn("本地环境体检 (Windows)", buf_doc.getvalue())
 
+    def test_wave2_review_regressions_and_guards(self):
+        legitimate_cases = [
+            ("antigravity-hud", "Dependency-free statusline for agy showing Gemini and Claude model limits."),
+            ("antigravity-meter", "Free, open-source Antigravity HUD for Gemini and Claude quotas."),
+            ("agy-acp-gateway", "Official agy acp gateway exposing Claude models behind an HTTP proxy."),
+            ("antigravity-webui", "Self-hosted Antigravity web UI behind a reverse proxy with OAuth."),
+            ("antigravity-auth-hud", "OAuth account switcher and rate limit monitor for Google Antigravity."),
+        ]
+        for name, desc in legitimate_cases:
+            score, reasons = discover_candidates.score_candidate(
+                {
+                    "name": name,
+                    "description": desc,
+                    "language": "TypeScript",
+                    "stargazers_count": 600,
+                    "license": {"spdx_id": "MIT"},
+                }
+            )
+            self.assertNotIn("penalty:tos-proxy-risk", reasons, f"False positive on {desc}")
+            self.assertGreaterEqual(score, 75, f"Unexpected low score for {desc}: {score} {reasons}")
+
+        for name, desc in (
+            ("antigravity-cleaner", "Region eligibility and HTTP 403 restriction bypass patcher."),
+            ("Antigravity", "Google account geo-restriction bypass launcher."),
+        ):
+            b_score, b_reasons = discover_candidates.score_candidate(
+                {
+                    "name": name,
+                    "description": desc,
+                    "language": "Go",
+                    "stargazers_count": 400,
+                    "license": {"spdx_id": "Apache-2.0"},
+                }
+            )
+            self.assertIn("penalty:region-bypass", b_reasons)
+            self.assertLess(b_score, 55)
+
+        long_pipe_desc = ("A" * 119) + "|tail|more"
+        md = discover_candidates.render_markdown_table(
+            [
+                {
+                    "full_name": "acme/antigravity-md",
+                    "url": "https://github.com/acme/antigravity-md",
+                    "stars": 100,
+                    "language": "Python",
+                    "license": "MIT",
+                    "pushed_at": "2026-11-26",
+                    "signals": ["dedicated-name"],
+                    "score": 85,
+                    "description": long_pipe_desc,
+                }
+            ]
+        )
+        self.assertNotIn("\\ |", md)
+
+        malformed = {
+            "schema_version": "1.0.0",
+            "repository": "wllzhang/awesome-antigravity-tools",
+            "exclusions": [
+                {
+                    "repo": "acme/bad.git",
+                    "category": ["bad"],
+                    "reason_en": "Invalid repo suffix and non-string category.",
+                    "reason_zh": "无效仓库后缀与非字符串分类。",
+                    "excluded_at": "2026-11-26",
+                },
+                {
+                    "repo": "../evil",
+                    "category": "pruned-stale",
+                    "reason_en": "Traversal path should be rejected.",
+                    "reason_zh": "应拒绝路径穿越格式。",
+                    "excluded_at": "2026-11-26",
+                },
+            ],
+        }
+        errs = validate_catalog.validate_exclusions_data(malformed, catalog_data={"tools": None})
+        self.assertTrue(any("acme/bad.git" in e for e in errs))
+        self.assertTrue(any("../evil" in e for e in errs))
+        self.assertTrue(any("invalid exclusion category" in e for e in errs))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cat_path = Path(tmp) / "tools.json"
+            cat_path.write_text(json.dumps(make_sample_catalog()), encoding="utf-8")
+            snap_path = Path(tmp) / "snapshot.json"
+            snap_path.write_text(json.dumps({"tools": {}}), encoding="utf-8")
+            rc_excl = aat_cli.main(
+                [
+                    "--catalog",
+                    str(cat_path),
+                    "--snapshot",
+                    str(snap_path),
+                    "add",
+                    "--repo",
+                    "NoeFabris/opencode-antigravity-auth",
+                    "--category",
+                    "ide-extensions-cockpits",
+                    "--desc-en",
+                    "Excluded OAuth plugin for testing CLI gate.",
+                    "--desc-zh",
+                    "用于测试 CLI 剔除门禁的排除仓库。",
+                    "--reason-en",
+                    "Should be rejected by exclusions ledger gate.",
+                    "--reason-zh",
+                    "应被剔除清单门禁拦截。",
+                    "--platforms",
+                    "Cross-Platform",
+                    "--tags",
+                    "Test",
+                ]
+            )
+            self.assertEqual(rc_excl, 1)
+
+            out_md = Path(tmp) / "nested" / "radar.md"
+            out_sh = Path(tmp) / "nested" / "commands.sh"
+            orig_search = discover_candidates.search_github_repos
+            orig_argv = sys.argv
+            try:
+                def fail_search(*args, **kwargs):
+                    raise RuntimeError("API rate limit")
+
+                discover_candidates.search_github_repos = fail_search
+                sys.argv = ["discover_candidates.py", "--catalog", str(cat_path), "--out", str(out_md)]
+                self.assertEqual(discover_candidates.main(), 1)
+
+                def ok_search(query, per_page=25, token="", *, raise_on_error=False):
+                    if "agy in:name" in query:
+                        return [
+                            {
+                                "full_name": "acme/agy-widget",
+                                "name": "agy-widget",
+                                "html_url": "https://github.com/acme/agy-widget",
+                                "description": "Compact agy cockpit HUD for Antigravity.",
+                                "language": "Rust",
+                                "stargazers_count": 120,
+                                "license": {"spdx_id": "MIT"},
+                                "pushed_at": "2026-11-25T00:00:00Z",
+                            }
+                        ]
+                    return []
+
+                discover_candidates.search_github_repos = ok_search
+                sys.argv = [
+                    "discover_candidates.py",
+                    "--catalog",
+                    str(cat_path),
+                    "--out",
+                    str(out_md),
+                    "--out-aat-cmd",
+                    str(out_sh),
+                ]
+                self.assertEqual(discover_candidates.main(), 0)
+                self.assertIn("acme/agy-widget", out_md.read_text(encoding="utf-8"))
+                self.assertIn("aat_cli.py add", out_sh.read_text(encoding="utf-8"))
+            finally:
+                discover_candidates.search_github_repos = orig_search
+                sys.argv = orig_argv
+
 
 if __name__ == "__main__":
     unittest.main()

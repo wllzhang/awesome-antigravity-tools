@@ -139,9 +139,12 @@ def load_exclusions_map(exclusions_path: Path = DEFAULT_EXCLUSIONS) -> dict[str,
     if not exclusions_path.exists():
         return {}
     data = json.loads(exclusions_path.read_text(encoding="utf-8"))
+    entries = data.get("exclusions") or []
+    if not isinstance(entries, list):
+        return {}
     return {
         str(item["repo"]).lower(): item
-        for item in data.get("exclusions", [])
+        for item in entries
         if isinstance(item, dict) and item.get("repo")
     }
 
@@ -297,6 +300,9 @@ def main() -> int:
 
     body = args.input.read_text(encoding="utf-8") if args.input else sys.stdin.read()
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
+    if args.exclusions != DEFAULT_EXCLUSIONS and not args.exclusions.exists():
+        print(f"[ERROR] Exclusions file not found: {args.exclusions}", file=sys.stderr)
+        return 1
     exclusions = load_exclusions_map(args.exclusions)
 
     sections = parse_issue_form(body)

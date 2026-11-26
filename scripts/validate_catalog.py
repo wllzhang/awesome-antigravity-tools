@@ -251,6 +251,15 @@ def validate_catalog_data(data: Any) -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
+def _is_valid_repo_slug(repo: Any) -> bool:
+    if not isinstance(repo, str) or not REPO_RE.match(repo):
+        return False
+    if repo.lower().endswith(".git"):
+        return False
+    owner, name = repo.split("/", 1)
+    return owner not in (".", "..") and name not in (".", "..")
+
+
 def validate_exclusions_data(exclusions_data: Any, catalog_data: Any = None) -> list[str]:
     """Validate data/exclusions.json structure and verify zero overlap with active catalog tools."""
     errors: list[str] = []
@@ -269,7 +278,7 @@ def validate_exclusions_data(exclusions_data: Any, catalog_data: Any = None) -> 
         errors.append(f"Exclusions invalid schema_version: {schema_ver!r}")
 
     self_repo = exclusions_data.get("repository", "")
-    if not isinstance(self_repo, str) or not REPO_RE.match(self_repo):
+    if not _is_valid_repo_slug(self_repo):
         errors.append(f"Exclusions invalid repository slug: {self_repo!r}")
 
     entries = exclusions_data.get("exclusions")
@@ -279,11 +288,13 @@ def validate_exclusions_data(exclusions_data: Any, catalog_data: Any = None) -> 
 
     active_repos: set[str] = set()
     if isinstance(catalog_data, dict):
-        active_repos = {
-            str(t.get("repo", "")).lower()
-            for t in catalog_data.get("tools", [])
-            if isinstance(t, dict) and t.get("repo")
-        }
+        tools_list = catalog_data.get("tools")
+        if isinstance(tools_list, list):
+            active_repos = {
+                str(t.get("repo", "")).lower()
+                for t in tools_list
+                if isinstance(t, dict) and t.get("repo")
+            }
 
     seen_repos: set[str] = set()
     for idx, entry in enumerate(entries):
@@ -300,7 +311,7 @@ def validate_exclusions_data(exclusions_data: Any, catalog_data: Any = None) -> 
             errors.append(f"{prefix} unexpected keys: {sorted(extra_e)}")
 
         repo = entry.get("repo", "")
-        if not isinstance(repo, str) or not REPO_RE.match(repo):
+        if not _is_valid_repo_slug(repo):
             errors.append(f"{prefix}: invalid GitHub repo slug {repo!r}")
         else:
             repo_l = repo.lower()
@@ -313,7 +324,7 @@ def validate_exclusions_data(exclusions_data: Any, catalog_data: Any = None) -> 
             seen_repos.add(repo_l)
 
         cat = entry.get("category", "")
-        if cat not in ALLOWED_EXCLUSION_CATEGORIES:
+        if not isinstance(cat, str) or cat not in ALLOWED_EXCLUSION_CATEGORIES:
             errors.append(
                 f"{prefix}: invalid exclusion category {cat!r}; allowed: {sorted(ALLOWED_EXCLUSION_CATEGORIES)}"
             )

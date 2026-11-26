@@ -77,12 +77,12 @@ PROMPT_DUMP_RE = re.compile(
 )
 
 REGION_BYPASS_RE = re.compile(
-    r"(bypass.*region|region.?lock|sanctions|без\s+vpn|обход\s+ошибки|регион-блок)",
+    r"(?:\b(?:region|geo(?:graphic)?|eligibility|restriction|403)\b[^.\n]{0,30}\bbypass\b|\bbypass\b[^.\n]{0,30}\b(?:region|geo(?:graphic)?|restriction|sanctions?)\b|\bregion[-_\s]?lock(?:ed)?\b|\bsanctions?\b|без\s+vpn|обход\s+ошибки|регион-блок)",
     re.IGNORECASE,
 )
 
 TOS_PROXY_RE = re.compile(
-    r"(oauth.*rate\s*limit|free.*claude|claude.*proxy|reverse.*oauth|impersonat)",
+    r"(?:\b(?:free|unlimited)\s+(?:claude|anthropic|api)\b|\b(?:extract|harvest|pool|bypass|share|rotat)\w*[^.\n]{0,30}\brate\s*limits?\b|\breverse[- ]engineered\s+oauth\b|\boauth\s+(?:extraction|relay|bridge)\b|\boauth\s+(?:credential|token)\s+extraction\b|\bclaude[-_\s]proxy\b|\bimpersonat)",
     re.IGNORECASE,
 )
 
@@ -100,7 +100,9 @@ def get_token(use_gh_cli: bool = False) -> str:
     return ""
 
 
-def search_github_repos(query: str, per_page: int = 25, token: str = "") -> list[dict[str, Any]]:
+def search_github_repos(
+    query: str, per_page: int = 25, token: str = "", *, raise_on_error: bool = False
+) -> list[dict[str, Any]]:
     encoded = urllib.parse.quote(query, safe="")
     url = f"https://api.github.com/search/repositories?q={encoded}&sort=stars&order=desc&per_page={per_page}"
     headers = {
@@ -117,9 +119,13 @@ def search_github_repos(query: str, per_page: int = 25, token: str = "") -> list
             return payload.get("items", [])
     except urllib.error.HTTPError as e:
         print(f"[WARN] Search query failed ({e.code}): {query}", file=sys.stderr)
+        if raise_on_error:
+            raise
         return []
     except Exception as e:
         print(f"[WARN] Search error ({e}): {query}", file=sys.stderr)
+        if raise_on_error:
+            raise
         return []
 
 
@@ -205,9 +211,12 @@ def load_excluded_slugs(exclusions_path: Path = DEFAULT_EXCLUSIONS) -> set[str]:
     if not exclusions_path.exists():
         return set()
     data = json.loads(exclusions_path.read_text(encoding="utf-8"))
+    entries = data.get("exclusions") or []
+    if not isinstance(entries, list):
+        return set()
     return {
         str(item["repo"]).lower()
-        for item in data.get("exclusions", [])
+        for item in entries
         if isinstance(item, dict) and item.get("repo")
     }
 
@@ -231,7 +240,8 @@ def render_markdown_table(candidates: list[dict[str, Any]]) -> str:
         "| :---: | :--- | :---: | :---: | :---: | :---: | :--- | :--- |",
     ]
     for c in candidates:
-        desc = re.sub(r"\s+", " ", c["description"] or "").strip().replace("|", "\\|")[:120]
+        raw_desc = re.sub(r"\s+", " ", c["description"] or "").strip()[:120].rstrip("\\")
+        desc = raw_desc.replace("|", "\\|")
         signals = ", ".join(c["signals"])
         lines.append(
             f"| **{c['score']}** | [{c['full_name']}]({c['url']}) | {c['stars']:,} | "
@@ -361,17 +371,46 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--format", choices=["md", "json", "aat-cmd"], default="md")
     parser.add_argument("--out", type=Path, default=None, help="Optional output file path")
+    parser.add_argument(
+        "--out-aat-cmd",
+        type=Path,
+        default=None,
+        help="Optional secondary file path to write aat_cli add commands from the same search pass",
+    )
     parser.add_argument("--use-gh-cli", action="store_true")
     args = parser.parse_args()
+
+    if args.min_stars < 0:
+        print(f"[ERROR] --min-stars must be >= 0 (got {args.min_stars}).", file=sys.stderr)
+        return 1
+    if not (0 <= args.min_score <= 100):
+        print(f"[ERROR] --min-score must be between 0 and 100 (got {args.min_score}).", file=sys.stderr)
+        return 1
+    if args.limit < 1:
+        print(f"[ERROR] --limit must be >= 1 (got {args.limit}).", file=sys.stderr)
+        return 1
 
     token = get_token(use_gh_cli=args.use_gh_cli)
     existing = load_existing_slugs(args.catalog)
     if not args.include_excluded:
+        if args.exclusions != DEFAULT_EXCLUSIONS and not args.exclusions.exists():
+            print(f"[ERROR] Exclusions file not found: {args.exclusions}", file=sys.stderr)
+            return 1
         existing |= load_excluded_slugs(args.exclusions)
 
     raw_items: list[dict[str, Any]] = []
+    failed_queries = 0
     for query in DEFAULT_QUERIES:
-        raw_items.extend(search_github_repos(query, per_page=25, token=token))
+        try:
+            raw_items.extend(search_github_repos(query, per_page=25, token=token, raise_on_error=True))
+        except TypeError:
+            raw_items.extend(search_github_repos(query, per_page=25, token=token))
+        except Exception:
+            failed_queries += 1
+
+    if failed_queries == len(DEFAULT_QUERIES):
+        print("[ERROR] All GitHub search queries failed; aborting discovery radar.", file=sys.stderr)
+        return 1
 
     ranked = filter_and_rank_candidates(
         raw_items,
@@ -390,10 +429,16 @@ def main() -> int:
         output = render_markdown_table(ranked)
 
     if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(output, encoding="utf-8", newline="\n")
         print(f"[+] Wrote {len(ranked)} candidates to {args.out}")
     else:
         sys.stdout.write(output)
+
+    if args.out_aat_cmd:
+        args.out_aat_cmd.parent.mkdir(parents=True, exist_ok=True)
+        args.out_aat_cmd.write_text(render_aat_commands(ranked), encoding="utf-8", newline="\n")
+        print(f"[+] Wrote {len(ranked)} command suggestion(s) to {args.out_aat_cmd}")
     return 0
 
 

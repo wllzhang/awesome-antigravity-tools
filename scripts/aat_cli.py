@@ -35,6 +35,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
 DEFAULT_SNAPSHOT = REPO_ROOT / "data" / "health_snapshot.json"
+DEFAULT_EXCLUSIONS = REPO_ROOT / "data" / "exclusions.json"
 
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -562,10 +563,22 @@ def _save_validated_catalog(
 
 def cmd_add(args: argparse.Namespace) -> int:
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
-    repo = args.repo.strip().removeprefix("https://github.com/").strip("/")
+    repo = args.repo.strip().removeprefix("https://github.com/").strip("/").removesuffix(".git")
     if "/" not in repo:
         print(f"[ERROR] Invalid repo slug: {repo}", file=sys.stderr)
         return 1
+
+    exclusions_path = getattr(args, "exclusions", DEFAULT_EXCLUSIONS)
+    if exclusions_path.exists():
+        excl_data = json.loads(exclusions_path.read_text(encoding="utf-8"))
+        for item in excl_data.get("exclusions") or []:
+            if isinstance(item, dict) and str(item.get("repo", "")).lower() == repo.lower():
+                reason = item.get("reason_en") or item.get("category") or "excluded policy"
+                print(
+                    f"[ERROR] Excluded repository ({item.get('category', 'excluded')}): '{repo}' is listed in {exclusions_path} — {reason}",
+                    file=sys.stderr,
+                )
+                return 1
 
     name = args.name.strip() if args.name else repo.split("/", 1)[1]
     tid = args.id.strip() if args.id else re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")

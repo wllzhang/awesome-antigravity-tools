@@ -17,7 +17,7 @@ on:
         default: '55'
         type: string
       limit:
-        description: 'Maximum candidates per report'
+        description: 'Maximum candidates per report (1-100)'
         required: false
         default: '25'
         type: string
@@ -52,6 +52,18 @@ jobs:
           MIN_SCORE: ${{ inputs.min_score || '55' }}
           LIMIT: ${{ inputs.limit || '25' }}
         run: |
+          if [[ ! "$MIN_STARS" =~ ^[0-9]+$ ]]; then
+            echo "[ERROR] Invalid min_stars: $MIN_STARS" >&2
+            exit 1
+          fi
+          if [[ ! "$MIN_SCORE" =~ ^[0-9]+$ ]] || (( MIN_SCORE > 100 )); then
+            echo "[ERROR] Invalid min_score (0-100): $MIN_SCORE" >&2
+            exit 1
+          fi
+          if [[ ! "$LIMIT" =~ ^[0-9]+$ ]] || (( LIMIT < 1 || LIMIT > 100 )); then
+            echo "[ERROR] Invalid limit (1-100): $LIMIT" >&2
+            exit 1
+          fi
           mkdir -p radar_out
           python scripts/discover_candidates.py \
             --min-stars "$MIN_STARS" \
@@ -59,14 +71,8 @@ jobs:
             --limit "$LIMIT" \
             --sort score \
             --format md \
-            --out radar_out/discovery_radar.md
-          python scripts/discover_candidates.py \
-            --min-stars "$MIN_STARS" \
-            --min-score "$MIN_SCORE" \
-            --limit "$LIMIT" \
-            --sort score \
-            --format aat-cmd \
-            --out radar_out/discovery_commands.sh
+            --out radar_out/discovery_radar.md \
+            --out-aat-cmd radar_out/discovery_commands.sh
           {
             echo "## Weekly Antigravity Discovery Radar"
             echo ""

@@ -178,6 +178,7 @@ class TestSiteArtifacts(unittest.TestCase):
         self.assertNotIn("pull-requests: write", wf_text)
         for expected in (
             "scripts/discover_candidates.py",
+            "--out-aat-cmd",
             "discovery_radar.md",
             "discovery_commands.sh",
             "GITHUB_STEP_SUMMARY",
@@ -185,6 +186,7 @@ class TestSiteArtifacts(unittest.TestCase):
             "retention-days: 14",
         ):
             self.assertIn(expected, wf_text)
+        self.assertEqual(wf_text.count("scripts/discover_candidates.py"), 1)
         for line in wf_text.splitlines():
             if "${{ inputs." in line:
                 self.assertRegex(line, r"^\s*[A-Z0-9_]+:\s*\$\{\{\s*inputs\.")
