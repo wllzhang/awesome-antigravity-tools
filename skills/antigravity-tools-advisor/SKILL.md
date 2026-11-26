@@ -9,8 +9,11 @@ Recommend **strictly Antigravity-exclusive, health-audited engineering tools** b
 
 ## Locating the Catalog
 
-Prefer the local plugin catalog if `scripts/aat_cli.py` is available alongside this skill (two levels up from `skills/antigravity-tools-advisor/`), otherwise fetch the live JSON bundle published on GitHub Pages:
+Prefer the native MCP server tools (`mcp_config.json` -> `scripts/mcp_server.py`) when available, otherwise run the local CLI or fetch the live remote index:
 
+- **Native MCP Tools & Resources (Preferred when loaded)**:
+  - Tools: `aat_recommend`, `aat_search`, `aat_compare`, `aat_info`, `aat_stats`, `aat_doctor`
+  - Resources: `aat://catalog` (canonical `data/tools.json`), `aat://llms.txt` (compact AI index)
 - **Local CLI (offline & fastest)**:
   ```bash
   python "<plugin-root>/scripts/aat_cli.py" recommend "<goal or bug>" --lang zh

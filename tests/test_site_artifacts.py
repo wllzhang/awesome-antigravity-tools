@@ -127,6 +127,12 @@ class TestSiteArtifacts(unittest.TestCase):
         self.assertTrue((REPO_ROOT / manifest["logo"]).exists())
         self.assertTrue((REPO_ROOT / "skills" / "antigravity-tools-advisor" / "SKILL.md").exists())
 
+        mcp_cfg = json.loads((REPO_ROOT / "mcp_config.json").read_text(encoding="utf-8"))
+        srv = mcp_cfg.get("mcpServers", {}).get("awesome-antigravity-tools")
+        self.assertIsInstance(srv, dict)
+        self.assertEqual(srv.get("args"), ["scripts/mcp_server.py"])
+        self.assertTrue((REPO_ROOT / "scripts" / "mcp_server.py").exists())
+
     def test_llms_txt_and_logo_svg_integrity(self):
         llms_path = DOCS_DIR / "llms.txt"
         self.assertTrue(llms_path.exists())

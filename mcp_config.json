@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "awesome-antigravity-tools": {
+      "command": "python",
+      "args": ["scripts/mcp_server.py"]
+    }
+  }
+}
