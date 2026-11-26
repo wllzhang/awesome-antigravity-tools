@@ -31,6 +31,9 @@ const I18N = {
     statusLabel: "Filter by health status",
     sortLabel: "Sort tools",
     searchPlaceholder: "Search tools, tags, languages, ACP, quota... (Press /)",
+    featuredOnly: "Featured Only",
+    featuredBadge: "★ Featured",
+    popularTags: "Tags:",
     resetFilters: "Reset filters",
     emptyMessage: "No Antigravity-exclusive tools matched your current filters.",
     details: "Details",
@@ -38,11 +41,20 @@ const I18N = {
     comparing: "Selected ✓",
     openRepo: "Open on GitHub ↗",
     copyLink: "Copy Share Link",
+    copyCompareLink: "Copy Comparison Link",
     copied: "Copied ✓",
     exclusivityHeading: "Why 100% Antigravity-Exclusive",
     installHeading: "Quick Install / Usage",
     copyCmd: "Copy",
     compareHeading: "Side-by-Side Tool Comparison",
+    detailStatus: "Status",
+    detailScore: "Health Score",
+    detailStars: "Stars",
+    detailLang: "Language",
+    detailLicense: "License",
+    detailRelease: "Latest Release",
+    detailPush: "Last Push",
+    detailAdded: "Added",
     footerNote: "Backed by single-source-of-truth",
     contribute: "Contribute",
     auditReport: "Health Report",
@@ -70,6 +82,9 @@ const I18N = {
     statusLabel: "按健康状态筛选",
     sortLabel: "工具排序",
     searchPlaceholder: "搜索工具名、标签、语言、ACP、配额... (按 / 聚焦)",
+    featuredOnly: "仅看精选",
+    featuredBadge: "★ 精选",
+    popularTags: "热门标签:",
     resetFilters: "重置筛选",
     emptyMessage: "当前筛选条件下未找到匹配的 Antigravity 专有工具。",
     details: "查看详情",
@@ -77,11 +92,20 @@ const I18N = {
     comparing: "已选 ✓",
     openRepo: "访问 GitHub ↗",
     copyLink: "复制分享链接",
+    copyCompareLink: "复制对比链接",
     copied: "已复制 ✓",
     exclusivityHeading: "为什么 100% 专属于 Antigravity",
     installHeading: "快速安装 / 使用提示",
     copyCmd: "复制",
     compareHeading: "工具横向对比",
+    detailStatus: "健康状态",
+    detailScore: "健康评分",
+    detailStars: "Stars",
+    detailLang: "主语言",
+    detailLicense: "开源协议",
+    detailRelease: "最新版本",
+    detailPush: "最近推送",
+    detailAdded: "收录日期",
     footerNote: "由单一数据源驱动",
     contribute: "参与贡献",
     auditReport: "巡检报告",
@@ -92,7 +116,6 @@ const I18N = {
 const state = {
   ...parseParamsToState(window.location.search),
   bundle: null,
-  compareIds: [],
   focusedIndex: -1,
 };
 
@@ -102,7 +125,9 @@ const els = {
   statusFilter: document.getElementById("statusFilter"),
   sortSelect: document.getElementById("sortSelect"),
   categoryPills: document.getElementById("categoryPills"),
+  tagFilterBar: document.getElementById("tagFilterBar"),
   resultsCount: document.getElementById("resultsCount"),
+  featuredToggleBtn: document.getElementById("featuredToggleBtn"),
   resetFiltersBtn: document.getElementById("resetFiltersBtn"),
   emptyResetBtn: document.getElementById("emptyResetBtn"),
   toolsGrid: document.getElementById("toolsGrid"),
@@ -120,6 +145,7 @@ const els = {
   compareDialog: document.getElementById("compareDialog"),
   compareBody: document.getElementById("compareBody"),
   compareCloseBtn: document.getElementById("compareCloseBtn"),
+  compareCopyUrlBtn: document.getElementById("compareCopyUrlBtn"),
   insightsMount: document.getElementById("insightsMount"),
   statTotalTools: document.getElementById("statTotalTools"),
   statTotalStars: document.getElementById("statTotalStars"),
@@ -238,18 +264,50 @@ function renderSummary() {
 }
 
 function populatePlatformSelect() {
-  const current = state.platform;
+  const platforms = state.bundle.summary.by_platform || [];
+  const validNames = new Set(platforms.map((p) => p.name));
+  if (state.platform !== "all" && !validNames.has(state.platform)) {
+    state.platform = "all";
+  }
   while (els.platformFilter.options.length > 1) {
     els.platformFilter.remove(1);
   }
-  const platforms = state.bundle.summary.by_platform || [];
   for (const p of platforms) {
     const opt = document.createElement("option");
     opt.value = p.name;
     opt.textContent = `${p.name} (${p.count})`;
     els.platformFilter.append(opt);
   }
-  els.platformFilter.value = current;
+  els.platformFilter.value = state.platform;
+}
+
+function renderTagFilterBar() {
+  if (!els.tagFilterBar) return;
+  els.tagFilterBar.textContent = "";
+  const topTags = (state.bundle.summary.top_tags || []).slice(0, 12);
+  const tagList = [...topTags];
+  if (
+    state.tag &&
+    state.tag !== "all" &&
+    !tagList.some((item) => item.name.toLowerCase() === state.tag.toLowerCase())
+  ) {
+    tagList.unshift({ name: state.tag, count: "" });
+  }
+  if (tagList.length === 0) return;
+
+  els.tagFilterBar.append(el("span", "tag-bar-label", t("popularTags")));
+  for (const item of tagList) {
+    const isActive = state.tag.toLowerCase() === item.name.toLowerCase();
+    const label = item.count ? `${item.name} (${item.count})` : item.name;
+    const btn = el("button", "tag tag-btn", label);
+    btn.type = "button";
+    btn.setAttribute("aria-pressed", String(isActive));
+    btn.addEventListener("click", () => {
+      state.tag = isActive ? "all" : item.name;
+      renderAll();
+    });
+    els.tagFilterBar.append(btn);
+  }
 }
 
 function renderCategoryPills() {
@@ -304,15 +362,21 @@ function openToolDialog(tool) {
   els.dialogBody.append(callout);
 
   const grid = el("div", "detail-grid");
+  const lastPushVal =
+    tel.days_inactive != null
+      ? state.lang === "zh"
+        ? `${tel.days_inactive} 天前`
+        : `${tel.days_inactive}d ago`
+      : "—";
   const kvs = [
-    ["Status", getStatusLabel(tel.status, state.lang)],
-    ["Health Score", tel.health_score != null ? `${tel.health_score}/100` : "—"],
-    ["Stars", (tel.stars || 0).toLocaleString()],
-    ["Language", tel.language || "—"],
-    ["License", tel.license || "—"],
-    ["Latest Release", tel.latest_release || "—"],
-    ["Last Push", tel.days_inactive != null ? `${tel.days_inactive}d ago` : "—"],
-    ["Added", tool.added_at || "—"],
+    [t("detailStatus"), getStatusLabel(tel.status, state.lang)],
+    [t("detailScore"), tel.health_score != null ? `${tel.health_score}/100` : "—"],
+    [t("detailStars"), (tel.stars || 0).toLocaleString()],
+    [t("detailLang"), tel.language || "—"],
+    [t("detailLicense"), tel.license || "—"],
+    [t("detailRelease"), tel.latest_release || "—"],
+    [t("detailPush"), lastPushVal],
+    [t("detailAdded"), tool.added_at || "—"],
   ];
   for (const [k, v] of kvs) {
     const box = el("div", "detail-kv");
@@ -356,8 +420,16 @@ function renderToolsGrid() {
   els.toolsGrid.textContent = "";
 
   const isFiltered =
-    Boolean(state.query) || state.category !== "all" || state.platform !== "all" || state.status !== "all";
+    Boolean(state.query) ||
+    state.category !== "all" ||
+    state.platform !== "all" ||
+    (Boolean(state.tag) && state.tag !== "all") ||
+    Boolean(state.featuredOnly) ||
+    state.status !== "all";
   els.resetFiltersBtn.hidden = !isFiltered;
+  if (els.featuredToggleBtn) {
+    els.featuredToggleBtn.setAttribute("aria-pressed", String(Boolean(state.featuredOnly)));
+  }
 
   els.resultsCount.textContent =
     state.lang === "zh"
@@ -384,6 +456,9 @@ function renderToolsGrid() {
     titleWrap.append(h3, el("p", "card-repo", tool.repo));
 
     const metrics = el("div", "card-metrics");
+    if (tool.featured) {
+      metrics.append(el("span", "badge badge-featured", t("featuredBadge")));
+    }
     metrics.append(el("span", "badge badge-star", `★ ${formatCompactNumber(tel.stars || 0)}`));
     const tier = getScoreTier(tel.health_score);
     const scoreText = tel.health_score != null ? `${tel.health_score}` : "—";
@@ -394,7 +469,17 @@ function renderToolsGrid() {
     const desc = el("p", "card-desc", state.lang === "zh" ? tool.description_zh : tool.description_en);
 
     const tagRow = el("div", "tag-row");
-    for (const tg of tool.tags || []) tagRow.append(el("span", "tag", tg));
+    for (const tg of tool.tags || []) {
+      const isTagActive = state.tag && state.tag.toLowerCase() === tg.toLowerCase();
+      const tagBtn = el("button", "tag tag-btn", tg);
+      tagBtn.type = "button";
+      tagBtn.setAttribute("aria-pressed", String(Boolean(isTagActive)));
+      tagBtn.addEventListener("click", () => {
+        state.tag = isTagActive ? "all" : tg;
+        renderAll();
+      });
+      tagRow.append(tagBtn);
+    }
     if (tel.language) tagRow.append(el("span", "tag tag-muted", tel.language));
 
     const footer = el("div", "card-footer");
@@ -431,6 +516,7 @@ function syncCompareTray() {
       state.compareIds = [];
       syncCompareTray();
       renderToolsGrid();
+      syncUrl();
     }
   );
 }
@@ -443,12 +529,15 @@ function toggleCompare(toolId) {
   }
   syncCompareTray();
   renderToolsGrid();
+  syncUrl();
 }
 
 function resetFilters() {
   state.query = "";
   state.category = "all";
   state.platform = "all";
+  state.tag = "all";
+  state.featuredOnly = false;
   state.status = "all";
   state.sort = "stars";
   els.searchInput.value = "";
@@ -463,6 +552,7 @@ function renderAll() {
   renderSummary();
   populatePlatformSelect();
   renderCategoryPills();
+  renderTagFilterBar();
   renderInsightsPanel(els.insightsMount, state.bundle, state.lang);
   syncCompareTray();
   renderToolsGrid();
@@ -507,8 +597,25 @@ function bindEvents() {
   els.resetFiltersBtn.addEventListener("click", resetFilters);
   els.emptyResetBtn.addEventListener("click", resetFilters);
 
+  if (els.featuredToggleBtn) {
+    els.featuredToggleBtn.addEventListener("click", () => {
+      state.featuredOnly = !state.featuredOnly;
+      renderAll();
+    });
+  }
+
   els.dialogCloseBtn.addEventListener("click", () => els.toolDialog.close());
   els.compareCloseBtn.addEventListener("click", () => els.compareDialog.close());
+
+  if (els.compareCopyUrlBtn) {
+    els.compareCopyUrlBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        els.compareCopyUrlBtn.textContent = t("copied");
+        setTimeout(() => (els.compareCopyUrlBtn.textContent = t("copyCompareLink")), 1500);
+      } catch {}
+    });
+  }
 
   els.toolDialog.addEventListener("close", () => {
     state.openToolId = "";
@@ -589,6 +696,8 @@ async function boot() {
     const resp = await fetch("./catalog-bundle.json", { cache: "no-store" });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     state.bundle = await resp.json();
+    const validIds = new Set(state.bundle.tools.map((tool) => tool.id));
+    state.compareIds = (state.compareIds || []).filter((id) => validIds.has(id)).slice(0, 3);
     window.__AAT_STATE__ = state;
     renderAll();
 
