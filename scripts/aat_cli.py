@@ -7,9 +7,11 @@ Usage:
   python scripts/aat_cli.py search <query> [--lang en|zh] [--json]
   python scripts/aat_cli.py recommend <intent> [--platform ...] [--limit 5]
   python scripts/aat_cli.py compare <tool1> <tool2> [tool3] [tool4] [--markdown]
+  python scripts/aat_cli.py doctor [--os windows|macos|linux] [--json]
   python scripts/aat_cli.py info <id-or-name>
   python scripts/aat_cli.py stats [--json]
   python scripts/aat_cli.py add --repo owner/name --category ... [fields...]
+  python scripts/aat_cli.py remove <id-or-name> [--sync-docs]
   python scripts/aat_cli.py verify [--check-sync]
 """
 
@@ -18,7 +20,10 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import platform as py_platform
 import re
+import shutil
 import sys
 from collections import Counter
 from datetime import date
@@ -575,6 +580,288 @@ def cmd_add(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_remove(args: argparse.Namespace) -> int:
+    import validate_catalog
+
+    catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
+    target = args.tool.strip().lower()
+    tools = catalog.get("tools", [])
+    idx_to_remove = None
+    for idx, t in enumerate(tools):
+        if target in (t["id"].lower(), t["name"].lower(), t["repo"].lower()):
+            idx_to_remove = idx
+            break
+
+    if idx_to_remove is None:
+        print(f"[ERROR] Tool not found: {args.tool}", file=sys.stderr)
+        return 1
+
+    removed = tools.pop(idx_to_remove)
+    catalog = validate_catalog.sort_catalog_tools(catalog)
+    errors, warnings = validate_catalog.validate_catalog_data(catalog)
+    if errors:
+        for e in errors:
+            print(f"[ERROR] {e}", file=sys.stderr)
+        return 1
+    for w in warnings:
+        print(f"[WARN] {w}")
+
+    args.catalog.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    print(f"[+] Removed '{removed['name']}' ({removed['repo']}) from {args.catalog}")
+
+    if args.sync_docs:
+        return sync_all_derived_artifacts(args.catalog, args.snapshot)
+    return 0
+
+
+def _normalize_os_name(raw_os: str = "") -> str:
+    val = (raw_os or py_platform.system()).strip().lower()
+    if val in ("windows", "win32", "win"):
+        return "Windows"
+    if val in ("darwin", "macos", "mac", "osx"):
+        return "macOS"
+    if val in ("linux",):
+        return "Linux"
+    return "Cross-Platform"
+
+
+def _is_reparse_or_symlink(path: Path) -> bool:
+    try:
+        if path.is_symlink():
+            return True
+        is_junc = getattr(path, "is_junction", None)
+        if callable(is_junc) and is_junc():
+            return True
+        st = os.lstat(path)
+        attrs = getattr(st, "st_file_attributes", 0)
+        return bool(attrs & 0x0400)
+    except OSError:
+        return False
+
+
+def default_env_probe(os_override: str = "") -> dict[str, Any]:
+    os_name = _normalize_os_name(os_override)
+    agy_in_path = bool(shutil.which("agy"))
+    proxy_vars = [
+        k for k in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")
+        if os.environ.get(k)
+    ]
+    junction_paths: list[str] = []
+    if os_name == "Windows":
+        candidate_roots = [
+            Path.home() / ".gemini" / "config" / "skills",
+            Path.home() / ".gemini" / "antigravity" / "skills",
+        ]
+        for root in candidate_roots:
+            if not root.exists():
+                continue
+            if _is_reparse_or_symlink(root):
+                junction_paths.append(str(root))
+                continue
+            try:
+                for child in root.iterdir():
+                    if _is_reparse_or_symlink(child):
+                        junction_paths.append(str(child))
+            except OSError:
+                pass
+    return {
+        "os": os_name,
+        "agy_in_path": agy_in_path,
+        "proxy_configured": bool(proxy_vars),
+        "proxy_vars": proxy_vars,
+        "windows_junction_risk": bool(junction_paths),
+        "junction_paths": junction_paths,
+    }
+
+
+def run_doctor(
+    tools: list[dict[str, Any]],
+    *,
+    env_probe: dict[str, Any] | None = None,
+    os_override: str = "",
+) -> dict[str, Any]:
+    probe = dict(env_probe) if env_probe is not None else default_env_probe(os_override)
+    if os_override:
+        probe["os"] = _normalize_os_name(os_override)
+    os_name = probe.get("os", "Cross-Platform")
+
+    by_id = {t["id"]: t for t in tools}
+
+    def pick(*ids: str) -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
+        for tid in ids:
+            t = by_id.get(tid)
+            if t:
+                items.append(
+                    {
+                        "id": t["id"],
+                        "name": t["name"],
+                        "repo": t["repo"],
+                        "url": t["url"],
+                        "status": t.get("status", "UNAUDITED"),
+                        "health_score": t.get("health_score"),
+                        "install_hint": t.get("install_hint", ""),
+                    }
+                )
+        return items
+
+    checks: list[dict[str, Any]] = []
+
+    if os_name == "Windows":
+        if probe.get("windows_junction_risk"):
+            checks.append(
+                {
+                    "id": "windows-skill-junctions",
+                    "severity": "warn",
+                    "title_en": "Windows NTFS junction/symlink skills detected",
+                    "title_zh": "检测到 Windows NTFS 联接/符号链接技能目录",
+                    "detail_en": f"Detected {len(probe.get('junction_paths', []))} reparse-point skill path(s); Antigravity Go language server skips junctions.",
+                    "detail_zh": f"检测到 {len(probe.get('junction_paths', []))} 个重解析点技能路径；Antigravity Go 语言服务器会跳过此类目录。",
+                    "tools": pick("antigravity-junction-skill-fix"),
+                }
+            )
+        else:
+            checks.append(
+                {
+                    "id": "windows-skill-junctions",
+                    "severity": "ok",
+                    "title_en": "No NTFS junction/symlink skills detected in user skill roots",
+                    "title_zh": "未在用户技能目录检测到 NTFS 联接/符号链接风险",
+                    "detail_en": "If you later link external skills with mklink /J or Skills Manager, bridge them with antigravity-junction-skill-fix.",
+                    "detail_zh": "若后续通过 mklink /J 或 Skills Manager 联接外部技能，可使用 antigravity-junction-skill-fix 桥接。",
+                    "tools": pick("antigravity-junction-skill-fix"),
+                }
+            )
+
+        if probe.get("proxy_configured"):
+            vars_str = ", ".join(probe.get("proxy_vars", []))
+            checks.append(
+                {
+                    "id": "windows-network-and-defender",
+                    "severity": "info",
+                    "title_en": f"Proxy environment detected ({vars_str})",
+                    "title_zh": f"检测到代理环境变量（{vars_str}）",
+                    "detail_en": "Use antigravity-proxy for non-TUN DLL process forwarding, and vscode-antigravity-backend-fix if Defender triggers agy.exe re-downloads.",
+                    "detail_zh": "若未开 TUN 模式，可用 antigravity-proxy 进行进程级转发；若遇 Defender 超时重复下载 agy.exe，可用 vscode-antigravity-backend-fix。",
+                    "tools": pick("antigravity-proxy", "vscode-antigravity-backend-fix"),
+                }
+            )
+        else:
+            checks.append(
+                {
+                    "id": "windows-network-and-defender",
+                    "severity": "info",
+                    "title_en": "Windows runtime safeguards",
+                    "title_zh": "Windows 运行时常见问题防护",
+                    "detail_en": "For non-TUN SOCKS5/HTTP proxying or VS Code Defender agy.exe download loops, use these targeted patches.",
+                    "detail_zh": "针对免 TUN 代理转发或 VS Code 扩展因 Defender 超时重复下载 agy.exe 的问题，可按需选用以下补丁。",
+                    "tools": pick("antigravity-proxy", "vscode-antigravity-backend-fix"),
+                }
+            )
+
+    if probe.get("agy_in_path"):
+        checks.append(
+            {
+                "id": "agy-cli-toolchain",
+                "severity": "ok",
+                "title_en": "Official `agy` CLI detected on PATH",
+                "title_zh": "已在 PATH 中检测到官方 `agy` CLI",
+                "detail_en": "Enhance terminal workflows with statusline HUDs, MCP turn acceleration, and local ACP / Enterprise Gateways.",
+                "detail_zh": "可搭配终端状态栏 HUD、MCP 回合加速插件及本地 ACP / Enterprise Gateway 网关工具。",
+                "tools": pick("agy-hud", "agy-powerline", "agy-fast", "liftgate", "agy-gyro"),
+            }
+        )
+    else:
+        checks.append(
+            {
+                "id": "agy-cli-toolchain",
+                "severity": "info",
+                "title_en": "Official `agy` CLI not detected on PATH",
+                "title_zh": "未在 PATH 中检测到官方 `agy` CLI",
+                "detail_en": "Install the official CLI harness (`agy`) to unlock terminal orchestration and ACP gateway integrations.",
+                "detail_zh": "安装官方命令行本体（`agy`）后即可解锁终端编排与 ACP 网关生态工具。",
+                "tools": pick("antigravity-cli"),
+            }
+        )
+
+    if os_name == "macOS":
+        checks.append(
+            {
+                "id": "macos-remote-control",
+                "severity": "info",
+                "title_en": "macOS remote & mobile session control",
+                "title_zh": "macOS 远程与移动端遥控",
+                "detail_en": "Control local `agy` & `agy acp` sessions from WeCom or a self-hosted mobile PWA.",
+                "detail_zh": "可通过企业微信机器人或自托管移动端 PWA 远程监控并操控本机 Antigravity 会话。",
+                "tools": pick("agy-remote-wecom", "porta"),
+            }
+        )
+
+    checks.append(
+        {
+            "id": "desktop-cockpit-telemetry",
+            "severity": "info",
+            "title_en": "Desktop & IDE telemetry, localization, and quota cockpits",
+            "title_zh": "桌面端与 IDE 遥测看板、汉化与配额监控",
+            "detail_en": "Monitor real-time context windows, 5h/weekly quotas, and customize UI/localization safely.",
+            "detail_zh": "实时监控上下文窗口、5 小时与周配额，并按需启用 2.0 工作台增强与中文汉化。",
+            "tools": pick(
+                "antigravity-context-viewer",
+                "agy-powertools",
+                "vscode-antigravity-cockpit",
+                "antigravity2-cn",
+            ),
+        }
+    )
+
+    seen_rec: set[str] = set()
+    recommended_tools: list[dict[str, Any]] = []
+    for chk in checks:
+        for item in chk["tools"]:
+            if item["id"] not in seen_rec:
+                seen_rec.add(item["id"])
+                recommended_tools.append(item)
+
+    return {
+        "environment": probe,
+        "checks": checks,
+        "recommended_tools": recommended_tools,
+    }
+
+
+def cmd_doctor(args: argparse.Namespace) -> int:
+    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
+    cat_map = {c["id"]: c for c in catalog.get("categories", [])}
+    enriched = [enrich_tool(t, health_map, cat_map) for t in catalog.get("tools", [])]
+    report = run_doctor(enriched, os_override=args.os)
+
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+        return 0
+
+    env = report["environment"]
+    print(f"=== Awesome Antigravity Tools — Environment Doctor ({env['os']}) ===")
+    print(f"agy CLI in PATH:    {'Yes' if env.get('agy_in_path') else 'No'}")
+    print(f"Proxy env vars:     {', '.join(env.get('proxy_vars') or []) or 'None'}")
+    if env.get("os") == "Windows":
+        print(f"Junction skills:    {len(env.get('junction_paths') or [])} detected")
+    print()
+
+    for chk in report["checks"]:
+        badge = {"ok": "[OK]", "warn": "[WARN]", "info": "[INFO]"}.get(chk["severity"], "[INFO]")
+        title = chk["title_zh"] if args.lang == "zh" else chk["title_en"]
+        detail = chk["detail_zh"] if args.lang == "zh" else chk["detail_en"]
+        print(f"{badge} {title}")
+        print(f"       {detail}")
+        for tool in chk["tools"]:
+            sc = f"{tool['health_score']}/100" if tool.get("health_score") is not None else "N/A"
+            print(f"       -> {tool['name']} ({tool['status']} {sc}) | {tool['url']}")
+            if tool.get("install_hint"):
+                print(f"          Install: {tool['install_hint']}")
+        print()
+    return 0
+
+
 def sync_all_derived_artifacts(catalog_path: Path, snapshot_path: Path) -> int:
     import build_site
     import export_catalog
@@ -715,6 +1002,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_add.add_argument("--featured", action="store_true")
     p_add.add_argument("--sync-docs", action="store_true", help="Regenerate READMEs, badges, exports, and web bundle")
 
+    p_rm = sub.add_parser("remove", help="Remove a tool from data/tools.json by id, name, or repo")
+    p_rm.add_argument("tool", help="Tool id, name, or owner/repo")
+    p_rm.add_argument("--sync-docs", action="store_true", help="Regenerate READMEs, badges, exports, and web bundle")
+
+    p_doc = sub.add_parser("doctor", help="Diagnose local Antigravity environment and suggest matching catalog tools")
+    p_doc.add_argument("--os", choices=["windows", "macos", "linux"], default="", help="Override detected OS for inspection")
+    p_doc.add_argument("--lang", choices=["en", "zh"], default="en")
+    p_doc.add_argument("--json", action="store_true")
+
     sub.add_parser("sync", help="Canonicalize catalog order and regenerate all derived docs, badges, exports, and site bundle")
 
     p_verify = sub.add_parser("verify", help="Validate catalog schema and optional full artifact sync")
@@ -741,6 +1037,10 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_stats(args)
     if args.command == "add":
         return cmd_add(args)
+    if args.command == "remove":
+        return cmd_remove(args)
+    if args.command == "doctor":
+        return cmd_doctor(args)
     if args.command == "sync":
         return sync_all_derived_artifacts(args.catalog, args.snapshot)
     if args.command == "verify":

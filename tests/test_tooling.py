@@ -460,6 +460,75 @@ CLI, Hooks
         rc_bad = aat_cli.main(["--catalog", str(real_cat), "--snapshot", str(real_snap), "compare", "liftgate"])
         self.assertEqual(rc_bad, 1)
 
+    def test_cli_remove_and_doctor(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cat_path = Path(tmp) / "tools.json"
+            cat_path.write_text(json.dumps(make_sample_catalog()), encoding="utf-8")
+
+            rc_missing = aat_cli.main(["--catalog", str(cat_path), "remove", "non-existent-tool"])
+            self.assertEqual(rc_missing, 1)
+
+            rc_rm = aat_cli.main(["--catalog", str(cat_path), "remove", "beta-tool"])
+            self.assertEqual(rc_rm, 0)
+            after = json.loads(cat_path.read_text(encoding="utf-8"))
+            self.assertEqual([t["id"] for t in after["tools"]], ["alpha-tool"])
+
+        real_cat = json.loads((REPO_ROOT / "data" / "tools.json").read_text(encoding="utf-8"))
+        snap = json.loads((REPO_ROOT / "data" / "health_snapshot.json").read_text(encoding="utf-8"))
+        health_map = {r["full_name"].lower(): r for r in snap.get("repositories", [])}
+        cat_map = {c["id"]: c for c in real_cat.get("categories", [])}
+        enriched = [aat_cli.enrich_tool(t, health_map, cat_map) for t in real_cat["tools"]]
+
+        win_report = aat_cli.run_doctor(
+            enriched,
+            env_probe={
+                "os": "Windows",
+                "agy_in_path": True,
+                "proxy_configured": True,
+                "proxy_vars": ["HTTPS_PROXY"],
+                "windows_junction_risk": True,
+                "junction_paths": [r"C:\Users\demo\.gemini\config\skills\my-skill"],
+            },
+        )
+        win_ids = {t["id"] for t in win_report["recommended_tools"]}
+        self.assertIn("antigravity-junction-skill-fix", win_ids)
+        self.assertIn("antigravity-proxy", win_ids)
+        self.assertIn("agy-hud", win_ids)
+        self.assertEqual(win_report["checks"][0]["severity"], "warn")
+
+        mac_report = aat_cli.run_doctor(
+            enriched,
+            env_probe={
+                "os": "macOS",
+                "agy_in_path": False,
+                "proxy_configured": False,
+                "proxy_vars": [],
+                "windows_junction_risk": False,
+                "junction_paths": [],
+            },
+        )
+        mac_ids = {t["id"] for t in mac_report["recommended_tools"]}
+        self.assertIn("agy-remote-wecom", mac_ids)
+        self.assertIn("antigravity-cli", mac_ids)
+
+        buf_doc = io.StringIO()
+        with redirect_stdout(buf_doc):
+            rc_doc = aat_cli.main(
+                [
+                    "--catalog",
+                    str(REPO_ROOT / "data" / "tools.json"),
+                    "--snapshot",
+                    str(REPO_ROOT / "data" / "health_snapshot.json"),
+                    "doctor",
+                    "--os",
+                    "linux",
+                    "--json",
+                ]
+            )
+        self.assertEqual(rc_doc, 0)
+        parsed = json.loads(buf_doc.getvalue())
+        self.assertEqual(parsed["environment"]["os"], "Linux")
+
 
 if __name__ == "__main__":
     unittest.main()
