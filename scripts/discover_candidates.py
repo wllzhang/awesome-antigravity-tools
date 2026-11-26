@@ -18,6 +18,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -200,13 +201,115 @@ def render_markdown_table(candidates: list[dict[str, Any]]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def render_aat_commands(candidates: list[dict[str, Any]]) -> str:
+    if not candidates:
+        return "# No candidates matched the current thresholds.\n"
+    blocks: list[str] = []
+    for c in candidates:
+        desc_en = (c.get("description") or "Antigravity-exclusive engineering tool.").replace('"', '\\"').rstrip(".") + "."
+        lang_tag = c.get("language") or "CLI"
+        blocks.append(
+            "\n".join(
+                [
+                    f"# {c['full_name']} (score={c['score']}, stars={c['stars']}, pushed={c['pushed_at']})",
+                    "python scripts/aat_cli.py add \\",
+                    f"  --repo \"{c['full_name']}\" \\",
+                    "  --category \"ide-extensions-cockpits\" \\",
+                    f"  --desc-en \"{desc_en}\" \\",
+                    "  --desc-zh \"专为 Google Antigravity 打造的工程工具。\" \\",
+                    "  --reason-en \"Built exclusively for Google Antigravity runtime workflows.\" \\",
+                    "  --reason-zh \"专为 Google Antigravity 运行时工作流构建。\" \\",
+                    "  --platforms \"Cross-Platform\" \\",
+                    f"  --tags \"{lang_tag},Antigravity\" \\",
+                    "  --sync-docs",
+                ]
+            )
+        )
+    return "\n\n".join(blocks) + "\n"
+
+
+def filter_and_rank_candidates(
+    items: list[dict[str, Any]],
+    existing_slugs: set[str],
+    *,
+    min_stars: int = 5,
+    min_score: int = 55,
+    max_days_inactive: int = 180,
+    sort_by: str = "score",
+    limit: int = 20,
+    now_dt: datetime | None = None,
+) -> list[dict[str, Any]]:
+    now = now_dt or datetime.now(timezone.utc)
+    dedup: dict[str, dict[str, Any]] = {}
+    for item in items:
+        full_name = item.get("full_name", "")
+        if not full_name:
+            continue
+        key = full_name.lower()
+        if key in existing_slugs or key in dedup:
+            continue
+        if item.get("archived") or item.get("fork") or item.get("disabled"):
+            continue
+        stars = int(item.get("stargazers_count", 0))
+        if stars < min_stars:
+            continue
+
+        pushed_raw = item.get("pushed_at") or ""
+        days_inactive: int | None = None
+        if pushed_raw:
+            try:
+                pushed_dt = datetime.fromisoformat(pushed_raw.replace("Z", "+00:00"))
+                if pushed_dt.tzinfo is None:
+                    pushed_dt = pushed_dt.replace(tzinfo=timezone.utc)
+                days_inactive = max(0, (now - pushed_dt).days)
+            except ValueError:
+                days_inactive = None
+
+        if max_days_inactive > 0 and days_inactive is not None and days_inactive > max_days_inactive:
+            continue
+
+        score, signals = score_candidate(item)
+        if score < min_score:
+            continue
+        lic_obj = item.get("license")
+        dedup[key] = {
+            "full_name": full_name,
+            "url": item.get("html_url", f"https://github.com/{full_name}"),
+            "stars": stars,
+            "language": item.get("language"),
+            "license": lic_obj.get("spdx_id") if isinstance(lic_obj, dict) else None,
+            "pushed_at": pushed_raw[:10],
+            "days_inactive": days_inactive,
+            "description": (item.get("description") or "").strip(),
+            "score": score,
+            "signals": signals,
+        }
+
+    values = list(dedup.values())
+    if sort_by == "stars":
+        values.sort(key=lambda x: (x["stars"], x["score"]), reverse=True)
+    elif sort_by == "recent":
+        values.sort(
+            key=lambda x: (
+                x["days_inactive"] if x["days_inactive"] is not None else 99999,
+                -x["score"],
+                -x["stars"],
+            )
+        )
+    else:
+        values.sort(key=lambda x: (x["score"], x["stars"]), reverse=True)
+    return values[: max(1, limit)]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Discover emerging Antigravity-exclusive tools on GitHub.")
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     parser.add_argument("--min-stars", type=int, default=5)
     parser.add_argument("--min-score", type=int, default=55)
+    parser.add_argument("--max-days-inactive", type=int, default=180, help="Exclude repos inactive >N days (0 disables)")
+    parser.add_argument("--sort", choices=["score", "stars", "recent"], default="score")
     parser.add_argument("--limit", type=int, default=20)
-    parser.add_argument("--format", choices=["md", "json"], default="md")
+    parser.add_argument("--format", choices=["md", "json", "aat-cmd"], default="md")
     parser.add_argument("--out", type=Path, default=None, help="Optional output file path")
     parser.add_argument("--use-gh-cli", action="store_true")
     args = parser.parse_args()
@@ -214,41 +317,25 @@ def main() -> int:
     token = get_token(use_gh_cli=args.use_gh_cli)
     existing = load_existing_slugs(args.catalog)
 
-    dedup: dict[str, dict[str, Any]] = {}
+    raw_items: list[dict[str, Any]] = []
     for query in DEFAULT_QUERIES:
-        for item in search_github_repos(query, per_page=25, token=token):
-            full_name = item.get("full_name", "")
-            if not full_name:
-                continue
-            key = full_name.lower()
-            if key in existing or key in dedup:
-                continue
-            if item.get("archived") or item.get("fork") or item.get("disabled"):
-                continue
-            if int(item.get("stargazers_count", 0)) < args.min_stars:
-                continue
-            score, signals = score_candidate(item)
-            if score < args.min_score:
-                continue
-            lic_obj = item.get("license")
-            dedup[key] = {
-                "full_name": full_name,
-                "url": item.get("html_url", f"https://github.com/{full_name}"),
-                "stars": int(item.get("stargazers_count", 0)),
-                "language": item.get("language"),
-                "license": lic_obj.get("spdx_id") if isinstance(lic_obj, dict) else None,
-                "pushed_at": (item.get("pushed_at") or "")[:10],
-                "description": (item.get("description") or "").strip(),
-                "score": score,
-                "signals": signals,
-            }
+        raw_items.extend(search_github_repos(query, per_page=25, token=token))
 
-    ranked = sorted(dedup.values(), key=lambda x: (x["score"], x["stars"]), reverse=True)[: args.limit]
-    output = (
-        json.dumps(ranked, indent=2, ensure_ascii=False) + "\n"
-        if args.format == "json"
-        else render_markdown_table(ranked)
+    ranked = filter_and_rank_candidates(
+        raw_items,
+        existing,
+        min_stars=args.min_stars,
+        min_score=args.min_score,
+        max_days_inactive=args.max_days_inactive,
+        sort_by=args.sort,
+        limit=args.limit,
     )
+    if args.format == "json":
+        output = json.dumps(ranked, indent=2, ensure_ascii=False) + "\n"
+    elif args.format == "aat-cmd":
+        output = render_aat_commands(ranked)
+    else:
+        output = render_markdown_table(ranked)
 
     if args.out:
         args.out.write_text(output, encoding="utf-8", newline="\n")

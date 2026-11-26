@@ -339,6 +339,62 @@ class TestBadgesAndDiscovery(unittest.TestCase):
         self.assertGreaterEqual(native_score, 80)
         self.assertLess(generic_score, 30)
 
+        agy_native = {
+            "name": "agy-statusline",
+            "description": "Statusline sidecar for Google Antigravity CLI.",
+            "language": "TypeScript",
+            "stargazers_count": 40,
+            "license": {"spdx_id": "MIT"},
+        }
+        agy_score, _ = discover_candidates.score_candidate(agy_native)
+        self.assertGreaterEqual(agy_score, 90)
+
+    def test_discovery_freshness_filter_sort_and_aat_cmd(self):
+        now = datetime(2026, 11, 27, tzinfo=timezone.utc)
+        items = [
+            {
+                "full_name": "acme/agy-fresh",
+                "name": "agy-fresh",
+                "description": "Google Antigravity sidecar HUD plugin.",
+                "language": "TypeScript",
+                "stargazers_count": 30,
+                "license": {"spdx_id": "MIT"},
+                "pushed_at": "2026-11-25T10:00:00Z",
+            },
+            {
+                "full_name": "acme/antigravity-stale",
+                "name": "antigravity-stale",
+                "description": "Antigravity quota HUD extension.",
+                "language": "TypeScript",
+                "stargazers_count": 900,
+                "license": {"spdx_id": "MIT"},
+                "pushed_at": "2025-12-01T10:00:00Z",
+            },
+            {
+                "full_name": "acme/alpha-tool",
+                "name": "alpha-tool",
+                "description": "Already cataloged Antigravity tool.",
+                "language": "Rust",
+                "stargazers_count": 500,
+                "license": {"spdx_id": "MIT"},
+                "pushed_at": "2026-11-26T10:00:00Z",
+            },
+        ]
+        ranked = discover_candidates.filter_and_rank_candidates(
+            items,
+            {"acme/alpha-tool"},
+            min_stars=5,
+            min_score=55,
+            max_days_inactive=180,
+            sort_by="recent",
+            limit=10,
+            now_dt=now,
+        )
+        self.assertEqual([c["full_name"] for c in ranked], ["acme/agy-fresh"])
+        cmd_out = discover_candidates.render_aat_commands(ranked)
+        self.assertIn('python scripts/aat_cli.py add \\', cmd_out)
+        self.assertIn('--repo "acme/agy-fresh"', cmd_out)
+
 
 class TestCliAndSubmissionParser(unittest.TestCase):
     def test_cli_search_stats_and_add(self):
@@ -528,6 +584,55 @@ CLI, Hooks
         self.assertEqual(rc_doc, 0)
         parsed = json.loads(buf_doc.getvalue())
         self.assertEqual(parsed["environment"]["os"], "Linux")
+
+    def test_submission_parser_normalization_and_url_edge_cases(self):
+        self.assertEqual(
+            parse_submission.extract_github_slug("https://github.com/acme/agy-tool.git/?tab=readme#top"),
+            "acme/agy-tool",
+        )
+        self.assertEqual(
+            parse_submission.normalize_platforms("macos, win, vs code, windows, antigravity"),
+            ["macOS", "Windows", "VS Code", "Antigravity IDE"],
+        )
+        cat = make_sample_catalog()
+        body = """
+### Tool Name
+
+GammaEdge
+
+### Repository / Project URL
+
+https://github.com/acme/gamma-edge.git?ref=main#install
+
+### Category
+
+IDE Extensions & HUDs
+
+### One-line Description (English)
+
+Bridges Antigravity agy acp streams with low-latency buffering.
+
+### Antigravity Exclusivity Rationale
+
+Built directly around Google Antigravity agy acp stdio transport.
+
+### Antigravity Exclusivity Rationale (Chinese, Optional)
+
+专为 Google Antigravity agy acp 标准传输构建。
+
+### Platforms
+
+macos, win32, vscode
+
+### Tags
+
+ACP, CLI
+"""
+        entry, errors = parse_submission.build_candidate_entry(parse_submission.parse_issue_form(body), cat)
+        self.assertEqual(errors, [])
+        self.assertEqual(entry["repo"], "acme/gamma-edge")
+        self.assertEqual(entry["platforms"], ["macOS", "Windows", "VS Code"])
+        self.assertEqual(entry["exclusivity_reason_zh"], "专为 Google Antigravity agy acp 标准传输构建。")
 
 
 if __name__ == "__main__":

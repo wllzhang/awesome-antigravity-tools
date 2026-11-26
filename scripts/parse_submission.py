@@ -40,6 +40,32 @@ CATEGORY_ALIASES = {
     "dedicated gateways & migration tooling": "dedicated-gateways-migration",
 }
 
+PLATFORM_ALIASES = {
+    "windows": "Windows",
+    "win": "Windows",
+    "win32": "Windows",
+    "win64": "Windows",
+    "macos": "macOS",
+    "mac": "macOS",
+    "darwin": "macOS",
+    "osx": "macOS",
+    "linux": "Linux",
+    "cross-platform": "Cross-Platform",
+    "cross platform": "Cross-Platform",
+    "all": "Cross-Platform",
+    "vscode": "VS Code",
+    "vs code": "VS Code",
+    "visual studio code": "VS Code",
+    "antigravity": "Antigravity IDE",
+    "antigravity ide": "Antigravity IDE",
+    "ide": "Antigravity IDE",
+    "mobile": "Mobile",
+    "ios": "Mobile",
+    "android": "Mobile",
+    "web": "Web",
+    "pwa": "Web",
+}
+
 
 def parse_issue_form(body: str) -> dict[str, str]:
     """Parse GitHub Issue Form markdown (`### Heading\\n\\nValue`) into a dict."""
@@ -66,12 +92,33 @@ def parse_issue_form(body: str) -> dict[str, str]:
 
 
 def extract_github_slug(url_text: str) -> str | None:
-    match = GITHUB_URL_RE.search(url_text.strip())
+    cleaned = re.split(r"[?#]", url_text.strip(), maxsplit=1)[0].rstrip("/")
+    match = GITHUB_URL_RE.search(cleaned)
     if not match:
         return None
     owner, repo = match.group(1), match.group(2)
-    repo = repo.removesuffix(".git")
+    repo = repo.removesuffix(".git").rstrip(".")
+    if not owner or not repo:
+        return None
     return f"{owner}/{repo}"
+
+
+def normalize_platforms(raw_platforms: str) -> list[str]:
+    import validate_catalog
+
+    allowed_lower = {p.lower(): p for p in validate_catalog.ALLOWED_PLATFORMS}
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for token in re.split(r"[,;\n]+", raw_platforms or ""):
+        cleaned = token.strip(" `")
+        if not cleaned:
+            continue
+        key = cleaned.lower()
+        canonical = PLATFORM_ALIASES.get(key) or allowed_lower.get(key)
+        if canonical and canonical not in seen:
+            seen.add(canonical)
+            normalized.append(canonical)
+    return normalized or ["Cross-Platform"]
 
 
 def resolve_category_id(raw_category: str, catalog: dict[str, Any]) -> str | None:
@@ -120,11 +167,14 @@ def build_candidate_entry(sections: dict[str, str], catalog: dict[str, Any]) -> 
         or sections.get("exclusivity rationale")
         or ""
     ).strip()
-    reason_zh = f"专为 Google Antigravity 生态构建：{reason_en[:80]}" if reason_en else ""
+    reason_zh = (
+        sections.get("antigravity exclusivity rationale (chinese, optional)")
+        or sections.get("exclusivity rationale (chinese, optional)")
+        or ""
+    ).strip() or (f"专为 Google Antigravity 生态构建：{reason_en[:80]}" if reason_en else "")
 
     raw_platforms = sections.get("platforms", "Cross-Platform")
-    platforms = [p.strip() for p in re.split(r"[,;\n]+", raw_platforms) if p.strip()]
-    platforms = [p for p in platforms if p in validate_catalog.ALLOWED_PLATFORMS] or ["Cross-Platform"]
+    platforms = normalize_platforms(raw_platforms)
 
     raw_tags = sections.get("tags", "CLI")
     tags = [t.strip(" `") for t in re.split(r"[,;\n]+", raw_tags) if t.strip(" `")][:5] or ["Antigravity"]

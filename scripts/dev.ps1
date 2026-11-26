@@ -7,7 +7,7 @@
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('all', 'validate', 'generate', 'export', 'build-site', 'test', 'audit', 'discover', 'serve')]
+    [ValidateSet('all', 'validate', 'generate', 'export', 'build-site', 'test', 'audit', 'discover', 'doctor', 'serve')]
     [string]$Task = 'all',
     [int]$Port = 8765
 )
@@ -39,13 +39,13 @@ try {
         }
         'audit' {
             python scripts/health-check.py --use-gh-cli
-            python scripts/generate_badges.py
-            python scripts/generate_docs.py
-            python scripts/export_catalog.py
-            python scripts/build_site.py
+            python scripts/aat_cli.py sync
         }
         'discover' {
             python scripts/discover_candidates.py --use-gh-cli --limit 15
+        }
+        'doctor' {
+            python scripts/aat_cli.py doctor
         }
         'serve' {
             Write-Host "Serving docs/ at http://127.0.0.1:$Port/ (Ctrl+C to stop)" -ForegroundColor Cyan
