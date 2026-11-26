@@ -276,11 +276,13 @@ class McpCatalogServer:
                 status=status,
                 sort_by=sort_by,
             )[:limit]
-            lines = [
-                f"{idx}. {t['name']} ({t['repo']}) | ★{t.get('stars', 0):,} | "
-                f"{t.get('status')} ({t.get('health_score')}/100) | {t['url']}\n   {t['description_en']}"
-                for idx, t in enumerate(matched, 1)
-            ]
+            lines: list[str] = []
+            for idx, t in enumerate(matched, 1):
+                score_s = f"{t['health_score']}/100" if t.get("health_score") is not None else "N/A"
+                lines.append(
+                    f"{idx}. {t['name']} ({t['repo']}) | ★{t.get('stars', 0):,} | "
+                    f"{t.get('status')} ({score_s}) | {t['url']}\n   {t['description_en']}"
+                )
             return self._tool_ok(
                 "\n".join(lines) if lines else "No matching tools found.",
                 {"tools": matched, "count": len(matched)},

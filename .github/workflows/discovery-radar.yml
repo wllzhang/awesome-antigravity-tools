@@ -56,11 +56,11 @@ jobs:
             echo "[ERROR] Invalid min_stars: $MIN_STARS" >&2
             exit 1
           fi
-          if [[ ! "$MIN_SCORE" =~ ^[0-9]+$ ]] || (( MIN_SCORE > 100 )); then
+          if [[ ! "$MIN_SCORE" =~ ^[0-9]+$ ]] || (( 10#$MIN_SCORE > 100 )); then
             echo "[ERROR] Invalid min_score (0-100): $MIN_SCORE" >&2
             exit 1
           fi
-          if [[ ! "$LIMIT" =~ ^[0-9]+$ ]] || (( LIMIT < 1 || LIMIT > 100 )); then
+          if [[ ! "$LIMIT" =~ ^[0-9]+$ ]] || (( 10#$LIMIT < 1 || 10#$LIMIT > 100 )); then
             echo "[ERROR] Invalid limit (1-100): $LIMIT" >&2
             exit 1
           fi
