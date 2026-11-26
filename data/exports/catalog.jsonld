@@ -4,7 +4,7 @@
   "name": "Awesome Antigravity Tools",
   "description": "Strictly curated directory of 100% Google Antigravity-exclusive engineering tools, IDE extensions, runtime hotfixes, and ACP gateways.",
   "url": "https://github.com/wllzhang/awesome-antigravity-tools",
-  "numberOfItems": 19,
+  "numberOfItems": 37,
   "itemListElement": [
     {
       "@type": "ListItem",
@@ -37,6 +37,58 @@
       "position": 3,
       "item": {
         "@type": "SoftwareApplication",
+        "name": "robotics-antigravity-plugin",
+        "url": "https://github.com/google-deepmind/robotics-antigravity-plugin",
+        "applicationCategory": "Official CLI & SDKs",
+        "operatingSystem": "Linux, macOS, Cross-Platform",
+        "description": "Official Google DeepMind Antigravity plugin suite providing Python tooling and workflows for MuJoCo simulation and real-world agentic robotics.",
+        "keywords": "Official, DeepMind, Python, Robotics, Plugin"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "agy-auth",
+        "url": "https://github.com/fikrilal/agy-auth",
+        "applicationCategory": "IDE Extensions & Cockpits",
+        "operatingSystem": "Windows, macOS, Linux",
+        "description": "Lightweight Go CLI utility for fast multi-account profile management and credential switching across Google Antigravity CLI (`agy`) and Desktop.",
+        "keywords": "Go, CLI, Multi-Account"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 5,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "agy-capsule",
+        "url": "https://github.com/Lumidarin/agy-capsule",
+        "applicationCategory": "IDE Extensions & Cockpits",
+        "operatingSystem": "Windows, macOS, Linux, Antigravity IDE",
+        "description": "Inline composer capsule HUD for Google Antigravity Desktop and Antigravity IDE displaying live context usage, model quotas, cache hit status, and generation speed.",
+        "keywords": "Desktop, HUD, Quota, Context, JavaScript"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 6,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "agy-hud",
+        "url": "https://github.com/franksde/agy-hud",
+        "applicationCategory": "IDE Extensions & Cockpits",
+        "operatingSystem": "Windows, macOS, Linux",
+        "description": "Native terminal statusline HUD plugin for Google Antigravity CLI (`agy`) displaying real-time context consumption, model quota usage, active model info, and agent status.",
+        "keywords": "TypeScript, CLI, HUD, Quota, Plugin"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 7,
+      "item": {
+        "@type": "SoftwareApplication",
         "name": "agy-meme",
         "url": "https://github.com/jiangnanquan/agy-meme",
         "applicationCategory": "IDE Extensions & Cockpits",
@@ -47,7 +99,59 @@
     },
     {
       "@type": "ListItem",
-      "position": 4,
+      "position": 8,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "agy-powerline",
+        "url": "https://github.com/wassim-azi/agy-powerline",
+        "applicationCategory": "IDE Extensions & Cockpits",
+        "operatingSystem": "Windows, macOS, Linux",
+        "description": "Zero-dependency Powerline statusline plugin for Antigravity CLI (`agy`) featuring Gemini and Claude quota pacing, context meters, Git widgets, and 22 terminal themes.",
+        "keywords": "JavaScript, CLI, Statusline, Quota, Plugin"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 9,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "agy-powertools",
+        "url": "https://github.com/WhiteBr1ck/agy-powertools",
+        "applicationCategory": "IDE Extensions & Cockpits",
+        "operatingSystem": "Windows, macOS, Linux",
+        "description": "Native workbench enhancement plugin for Antigravity 2.0 adding compact layout typography, phase summaries, context and cache telemetry, session branching, and zh-CN UI.",
+        "keywords": "Desktop, Plugin, UX, Telemetry, JavaScript"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 10,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "agy-switch",
+        "url": "https://github.com/anglee0323/agy-switch",
+        "applicationCategory": "IDE Extensions & Cockpits",
+        "operatingSystem": "Windows, macOS, Linux, VS Code, Antigravity IDE",
+        "description": "Cross-platform Tauri desktop app, tray widget, and CLI synchronizing Antigravity accounts, quota-based smart switching, and token analytics across Desktop, CLI, and IDE.",
+        "keywords": "Rust, Tauri, CLI, Multi-Account, Quota"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 11,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "antigravity-context-viewer",
+        "url": "https://github.com/elviscjn-cjn/antigravity-context-viewer",
+        "applicationCategory": "IDE Extensions & Cockpits",
+        "operatingSystem": "Windows, macOS, Linux",
+        "description": "Context window and token usage dashboard for Google Antigravity 2.x tracking real-time context budgets, 5h/weekly model quotas, generation speed, and CLI history.",
+        "keywords": "Desktop, CLI, Context, Quota, JavaScript"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 12,
       "item": {
         "@type": "SoftwareApplication",
         "name": "Antigravity-Manager",
@@ -60,7 +164,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 5,
+      "position": 13,
       "item": {
         "@type": "SoftwareApplication",
         "name": "antigravity-panel",
@@ -73,7 +177,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 6,
+      "position": 14,
       "item": {
         "@type": "SoftwareApplication",
         "name": "AntigravityManager",
@@ -86,7 +190,33 @@
     },
     {
       "@type": "ListItem",
-      "position": 7,
+      "position": 15,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "obsidian-prism",
+        "url": "https://github.com/RMvdesi/obsidian-prism",
+        "applicationCategory": "IDE Extensions & Cockpits",
+        "operatingSystem": "Windows, macOS",
+        "description": "Optical UI suite for Google Antigravity Desktop featuring WebGL2 prism themes, damped-spring motion, a 512K context vial, reasoning slider, and pixel mascots.",
+        "keywords": "Desktop, UI, WebGL2, Plugin, JavaScript"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 16,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "paragravity",
+        "url": "https://github.com/edison-land/paragravity",
+        "applicationCategory": "IDE Extensions & Cockpits",
+        "operatingSystem": "Windows, macOS, Linux",
+        "description": "Non-invasive parallel multi-account and isolated sandbox instance manager for Google Antigravity with CLI controls and local dashboard.",
+        "keywords": "Python, CLI, Multi-Account, Sandbox"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 17,
       "item": {
         "@type": "SoftwareApplication",
         "name": "vscode-antigravity-cockpit",
@@ -99,7 +229,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 8,
+      "position": 18,
       "item": {
         "@type": "SoftwareApplication",
         "name": "agy-desktop-exo",
@@ -112,7 +242,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 9,
+      "position": 19,
       "item": {
         "@type": "SoftwareApplication",
         "name": "Antigravity-Chinese-Localization",
@@ -125,7 +255,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 10,
+      "position": 20,
       "item": {
         "@type": "SoftwareApplication",
         "name": "antigravity-junction-skill-fix",
@@ -138,7 +268,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 11,
+      "position": 21,
       "item": {
         "@type": "SoftwareApplication",
         "name": "antigravity-proxy",
@@ -151,7 +281,33 @@
     },
     {
       "@type": "ListItem",
-      "position": 12,
+      "position": 22,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "antigravity-rtl",
+        "url": "https://github.com/mmnaderi/antigravity-rtl",
+        "applicationCategory": "Platform Fixes & Runtime Patches",
+        "operatingSystem": "Windows, macOS, Linux, Antigravity IDE",
+        "description": "Smart Right-to-Left (RTL) layout and bidirectional typography patcher for Google Antigravity Desktop and Antigravity IDE supporting Persian, Arabic, and Hebrew.",
+        "keywords": "Localization, RTL, JavaScript, Patch"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 23,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "antigravity2-cn",
+        "url": "https://github.com/qqxpee/antigravity2-cn",
+        "applicationCategory": "Platform Fixes & Runtime Patches",
+        "operatingSystem": "Windows, macOS, Linux",
+        "description": "Zero-dependency Simplified and Traditional Chinese localization injector for Antigravity 2.0 Desktop using syntax-verified atomic ASAR patching and Shadow DOM code isolation.",
+        "keywords": "Desktop, Localization, Node.js, Patch"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 24,
       "item": {
         "@type": "SoftwareApplication",
         "name": "vscode-antigravity-backend-fix",
@@ -164,7 +320,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 13,
+      "position": 25,
       "item": {
         "@type": "SoftwareApplication",
         "name": "ACP-Ant",
@@ -177,7 +333,33 @@
     },
     {
       "@type": "ListItem",
-      "position": 14,
+      "position": 26,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "agy-fast",
+        "url": "https://github.com/INK-Q/agy-fast",
+        "applicationCategory": "Dedicated Gateways, ACP Adapters & Migration Tooling",
+        "operatingSystem": "Windows, macOS, Linux, Antigravity IDE",
+        "description": "Zero-dependency, policy-compliant local MCP accelerator plugin for Google Antigravity (CLI, Desktop, and IDE) cutting agent turns, billable token quota, and upload traffic.",
+        "keywords": "TypeScript, MCP, Plugin, Performance"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 27,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "agy-gyro",
+        "url": "https://github.com/topjohnwu/agy-gyro",
+        "applicationCategory": "Dedicated Gateways, ACP Adapters & Migration Tooling",
+        "operatingSystem": "Windows, macOS, Linux",
+        "description": "High-performance Rust local Antigravity Enterprise Gateway (`genai` wire protocol), transient HTTP 429/5xx retry proxy, and live token usage monitor.",
+        "keywords": "Rust, Gateway, Proxy, Telemetry"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 28,
       "item": {
         "@type": "SoftwareApplication",
         "name": "agy-remote-wecom",
@@ -190,7 +372,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 15,
+      "position": 29,
       "item": {
         "@type": "SoftwareApplication",
         "name": "antigravity-acp",
@@ -203,7 +385,20 @@
     },
     {
       "@type": "ListItem",
-      "position": 16,
+      "position": 30,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "Antigravity-agy-dart",
+        "url": "https://github.com/zou172866/Antigravity-agy-dart",
+        "applicationCategory": "Dedicated Gateways, ACP Adapters & Migration Tooling",
+        "operatingSystem": "Windows, macOS, Linux, Antigravity IDE",
+        "description": "Native Google Antigravity plugin combining automatic KV prompt-cache warm-up, SQLite FTS5 context compression, live context metering, and crashed session recovery.",
+        "keywords": "JavaScript, Plugin, MCP, Cache, Context"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 31,
       "item": {
         "@type": "SoftwareApplication",
         "name": "antigravity-skill-porter",
@@ -216,7 +411,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 17,
+      "position": 32,
       "item": {
         "@type": "SoftwareApplication",
         "name": "flow2api",
@@ -229,7 +424,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 18,
+      "position": 33,
       "item": {
         "@type": "SoftwareApplication",
         "name": "liftgate",
@@ -242,7 +437,46 @@
     },
     {
       "@type": "ListItem",
-      "position": 19,
+      "position": 34,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "paseo-agy-acp",
+        "url": "https://github.com/tiezbro/paseo-agy-acp",
+        "applicationCategory": "Dedicated Gateways, ACP Adapters & Migration Tooling",
+        "operatingSystem": "Cross-Platform",
+        "description": "Apache-2.0 Paseo provider powered by the official `agy acp` kernel enabling dual Antigravity Pro account coexistence, mode mapping, admission queuing, and skill discovery.",
+        "keywords": "TypeScript, ACP, Provider, Multi-Account"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 35,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "pi-antigravity-acp-provider",
+        "url": "https://github.com/zacbemis/pi-antigravity-acp-provider",
+        "applicationCategory": "Dedicated Gateways, ACP Adapters & Migration Tooling",
+        "operatingSystem": "Cross-Platform",
+        "description": "First-class Agent Client Protocol (`agy acp`) provider extension bridging Google Antigravity CLI sessions and models natively into the Pi coding agent.",
+        "keywords": "TypeScript, ACP, Provider"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 36,
+      "item": {
+        "@type": "SoftwareApplication",
+        "name": "porta",
+        "url": "https://github.com/L1M80/porta",
+        "applicationCategory": "Dedicated Gateways, ACP Adapters & Migration Tooling",
+        "operatingSystem": "Cross-Platform, Mobile, Web",
+        "description": "Self-hosted lightweight remote web interface and mobile PWA companion for controlling and monitoring local Google Antigravity sessions over WebSocket.",
+        "keywords": "TypeScript, Web, Mobile, PWA"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 37,
       "item": {
         "@type": "SoftwareApplication",
         "name": "refined-antigravity-acp",

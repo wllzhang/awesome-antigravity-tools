@@ -27,6 +27,8 @@ DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
 
 DEFAULT_QUERIES = [
     "antigravity in:name archived:false fork:false",
+    "agy in:name archived:false fork:false",
+    '"google antigravity" in:description archived:false fork:false',
     "antigravity acp in:name,description archived:false fork:false",
     "agy acp in:name,description archived:false fork:false",
 ]
@@ -49,7 +51,7 @@ CODE_LANGUAGES = {
 }
 
 NATIVE_ENGINEERING_RE = re.compile(
-    r"\b(agy|acp|quota|cockpit|language server|plugin\.json|vsix|extension|patch|fix|bridge|proxy|sdk|gateway|cli|hud|tauri|electron)\b",
+    r"\b(agy|acp|quota|cockpit|language server|plugin\.json|vsix|extension|patch|fix|bridge|proxy|sdk|gateway|cli|hud|tauri|electron|sidecar|asar|statusline|mcp|context)\b",
     re.IGNORECASE,
 )
 
@@ -63,6 +65,8 @@ OTHER_AGENTS = [
     "kiro",
     "cline",
     "gemini cli",
+    "deepseek harness",
+    "openclaw",
 ]
 
 PROMPT_DUMP_RE = re.compile(
