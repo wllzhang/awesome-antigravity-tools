@@ -168,6 +168,27 @@ class TestSiteArtifacts(unittest.TestCase):
         ):
             self.assertIn(expected, wf_text)
 
+    def test_discovery_radar_workflow_is_read_only_and_safe(self):
+        wf_path = REPO_ROOT / ".github" / "workflows" / "discovery-radar.yml"
+        self.assertTrue(wf_path.exists())
+        wf_text = wf_path.read_text(encoding="utf-8")
+        self.assertIn("contents: read", wf_text)
+        self.assertNotIn("contents: write", wf_text)
+        self.assertNotIn("issues: write", wf_text)
+        self.assertNotIn("pull-requests: write", wf_text)
+        for expected in (
+            "scripts/discover_candidates.py",
+            "discovery_radar.md",
+            "discovery_commands.sh",
+            "GITHUB_STEP_SUMMARY",
+            "actions/upload-artifact@v4",
+            "retention-days: 14",
+        ):
+            self.assertIn(expected, wf_text)
+        for line in wf_text.splitlines():
+            if "${{ inputs." in line:
+                self.assertRegex(line, r"^\s*[A-Z0-9_]+:\s*\$\{\{\s*inputs\.")
+
 
 if __name__ == "__main__":
     unittest.main()
