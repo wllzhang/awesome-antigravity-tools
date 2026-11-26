@@ -7,7 +7,7 @@
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('all', 'validate', 'generate', 'export', 'build-site', 'test', 'audit', 'discover', 'doctor', 'serve')]
+    [ValidateSet('all', 'validate', 'generate', 'export', 'build-site', 'test', 'mcp-test', 'audit', 'discover', 'doctor', 'serve')]
     [string]$Task = 'all',
     [int]$Port = 8765
 )
@@ -45,6 +45,9 @@ try {
             Invoke-Step { node --check docs/app.js }
             Invoke-Step { node --test tests/test_web.mjs }
         }
+        'mcp-test' {
+            Invoke-Step { python scripts/mcp_server.py --self-test }
+        }
         'audit' {
             Invoke-Step { python scripts/health-check.py --use-gh-cli }
             Invoke-Step { python scripts/aat_cli.py sync }
@@ -64,6 +67,7 @@ try {
             Invoke-Step { python scripts/aat_cli.py verify --check-sync --strict-warnings }
             Invoke-Step { python -m unittest discover -s tests -v }
             Invoke-Step { node --test tests/test_web.mjs }
+            Invoke-Step { python scripts/mcp_server.py --self-test }
         }
     }
 } finally {
