@@ -130,6 +130,37 @@ class TestCatalogValidator(unittest.TestCase):
         errors2, _ = validate_catalog.validate_catalog_data(cat2)
         self.assertTrue(any("must not reference itself" in e for e in errors2))
 
+    def test_real_exclusions_and_overlap_checks(self):
+        real_cat = json.loads((REPO_ROOT / "data" / "tools.json").read_text(encoding="utf-8"))
+        real_excl = json.loads((REPO_ROOT / "data" / "exclusions.json").read_text(encoding="utf-8"))
+        self.assertEqual(validate_catalog.validate_exclusions_data(real_excl, real_cat), [])
+
+        bad_excl = {
+            "schema_version": "1.0.0",
+            "repository": "wllzhang/awesome-antigravity-tools",
+            "exclusions": [
+                {
+                    "repo": "acme/alpha-tool",
+                    "category": "invalid-cat",
+                    "reason_en": "Overlaps and bad category.",
+                    "reason_zh": "冲突且非法分类。",
+                    "excluded_at": "2026-02-30",
+                },
+                {
+                    "repo": "acme/alpha-tool",
+                    "category": "cross-agent",
+                    "reason_en": "Duplicate entry.",
+                    "reason_zh": "重复条目。",
+                    "excluded_at": "2026-11-27",
+                },
+            ],
+        }
+        errs = validate_catalog.validate_exclusions_data(bad_excl, make_sample_catalog())
+        self.assertTrue(any("overlaps with active catalog tools" in e for e in errs))
+        self.assertTrue(any("invalid exclusion category" in e for e in errs))
+        self.assertTrue(any("duplicate excluded repository" in e for e in errs))
+        self.assertTrue(any("not a valid calendar date" in e for e in errs))
+
     def test_rejects_bad_punctuation_and_invalid_platform(self):
         cat = make_sample_catalog()
         cat["tools"][0]["description_en"] = "lowercase description without period"

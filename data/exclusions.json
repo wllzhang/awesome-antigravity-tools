@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "wllzhang/awesome-antigravity-tools",
+  "exclusions": [
+    {
+      "repo": "NoeFabris/opencode-antigravity-auth",
+      "category": "tos-risk-proxy",
+      "reason_en": "OAuth credential extraction plugin bridging Antigravity rate limits into OpenCode rather than using official agy CLI/ACP.",
+      "reason_zh": "通过提取 OAuth 凭据将 Antigravity 配额桥接至 OpenCode 的非官方反代认证插件，存在账号风控风险。",
+      "excluded_at": "2026-11-27"
+    },
+    {
+      "repo": "badrisnarayanan/antigravity-claude-proxy",
+      "category": "tos-risk-proxy",
+      "reason_en": "Multi-harness API proxy exposing Antigravity Claude/Gemini models to Claude Code and OpenClaw with reverse-engineered endpoints.",
+      "reason_zh": "面向 Claude Code 与 OpenClaw 的多平台反代网关，未通过官方 agy acp 协议驱动。",
+      "excluded_at": "2026-11-27"
+    },
+    {
+      "repo": "loysger/Antigravity",
+      "category": "region-bypass",
+      "reason_en": "Region-lock and network sanction circumvention wrapper outside normal engineering tooling scope.",
+      "reason_zh": "聚焦区域封锁与账号合规绕过的旁路工具，超出常规工程工具收录边界。",
+      "excluded_at": "2026-11-27"
+    },
+    {
+      "repo": "confeden/Antigravity",
+      "category": "region-bypass",
+      "reason_en": "Region-lock and Google account geo-restriction bypass launcher.",
+      "reason_zh": "聚焦区域限制与账号地区封锁绕过的旁路启动器。",
+      "excluded_at": "2026-11-27"
+    },
+    {
+      "repo": "dalroot/antigravity-cleaner",
+      "category": "region-bypass",
+      "reason_en": "Region eligibility and HTTP 403 restriction bypass patcher.",
+      "reason_zh": "用于绕过地区准入与 HTTP 403 限制的旁路补丁。",
+      "excluded_at": "2026-11-27"
+    },
+    {
+      "repo": "jlcodes99/cockpit-tools",
+      "category": "cross-agent",
+      "reason_en": "Universal multi-IDE account manager covering Codex, Copilot, Windsurf, Kiro, Cursor, and others rather than 100% Antigravity-exclusive.",
+      "reason_zh": "面向多款 AI IDE（Codex/Copilot/Windsurf/Cursor 等）的通用多平台账号工具，不符合 100% 专有原则。",
+      "excluded_at": "2026-11-27"
+    },
+    {
+      "repo": "keli-wen/agy-staff",
+      "category": "cross-agent",
+      "reason_en": "Cross-agent wrapper invoking agy from Claude Code, OpenAI Codex, and DeepSeek Harness.",
+      "reason_zh": "同时面向 Claude Code、Codex 与 DeepSeek Harness 的跨平台包装工具。",
+      "excluded_at": "2026-11-27"
+    },
+    {
+      "repo": "rmyndharis/antigravity-skills",
+      "category": "prompt-pack",
+      "reason_en": "Portable SKILL.md markdown prompt collection without dedicated executable Antigravity engineering tooling.",
+      "reason_zh": "纯 Markdown SKILL.md 提示词合集，无专属可执行工程封装。",
+      "excluded_at": "2026-11-27"
+    },
+    {
+      "repo": "wusimpl/AntigravityQuotaWatcher",
+      "category": "pruned-stale",
+      "reason_en": "Pruned during catalog maintenance after prolonged inactivity (>260 days) in favor of actively maintained quota cockpits.",
+      "reason_zh": "因长期停更（超过 260 天未更新）在目录巡检中清退。",
+      "excluded_at": "2026-11-19"
+    },
+    {
+      "repo": "FutureisinPast/antigravity-conversation-fix",
+      "category": "pruned-stale",
+      "reason_en": "Pruned during catalog maintenance after becoming stale/superseded by newer Antigravity 2.x recovery tooling.",
+      "reason_zh": "因长期未更新并已被新版恢复机制替代而在巡检中清退。",
+      "excluded_at": "2026-11-19"
+    },
+    {
+      "repo": "cafeTechne/antigravity-link-extension",
+      "category": "pruned-stale",
+      "reason_en": "Pruned during catalog maintenance due to extended inactivity.",
+      "reason_zh": "因长期未维护更新而在目录巡检中清退。",
+      "excluded_at": "2026-11-19"
+    },
+    {
+      "repo": "shindgew/agy-acp",
+      "category": "pruned-stale",
+      "reason_en": "Pruned during catalog maintenance after prolonged inactivity while newer agy acp adapters remain active.",
+      "reason_zh": "因长期停更且已有更活跃的同类 agy acp 适配器而在巡检中清退。",
+      "excluded_at": "2026-11-19"
+    },
+    {
+      "repo": "Futureppo/antigravity_bypass",
+      "category": "pruned-stale",
+      "reason_en": "Pruned during catalog maintenance due to inactivity and legacy client target.",
+      "reason_zh": "因长期停更及仅面向旧版客户端而在巡检中清退。",
+      "excluded_at": "2026-11-19"
+    },
+    {
+      "repo": "fulldiagnose/antigravity-fixer",
+      "category": "pruned-dead",
+      "reason_en": "Pruned immediately after GitHub repository returned 404 (deleted, renamed, or made private).",
+      "reason_zh": "因 GitHub 仓库返回 404（已删除、改名或转为私有）而被立即清退。",
+      "excluded_at": "2026-11-23"
+    }
+  ]
+}

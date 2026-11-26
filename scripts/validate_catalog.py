@@ -19,8 +19,20 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
+DEFAULT_EXCLUSIONS = REPO_ROOT / "data" / "exclusions.json"
 DEFAULT_SCHEMA = REPO_ROOT / "data" / "catalog.schema.json"
 DEFAULT_ISSUE_TEMPLATE = REPO_ROOT / ".github" / "ISSUE_TEMPLATE" / "submit_tool.yml"
+
+ALLOWED_EXCLUSION_CATEGORIES = {
+    "tos-risk-proxy",
+    "region-bypass",
+    "cross-agent",
+    "prompt-pack",
+    "pruned-stale",
+    "pruned-dead",
+}
+ALLOWED_EXCLUSION_TOP_KEYS = {"schema_version", "repository", "exclusions"}
+REQUIRED_EXCLUSION_KEYS = {"repo", "category", "reason_en", "reason_zh", "excluded_at"}
 
 ALLOWED_PLATFORMS = {
     "Windows",
@@ -239,6 +251,90 @@ def validate_catalog_data(data: Any) -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
+def validate_exclusions_data(exclusions_data: Any, catalog_data: Any = None) -> list[str]:
+    """Validate data/exclusions.json structure and verify zero overlap with active catalog tools."""
+    errors: list[str] = []
+    if not isinstance(exclusions_data, dict):
+        return ["Exclusions root must be a JSON object."]
+
+    missing_top = ALLOWED_EXCLUSION_TOP_KEYS - set(exclusions_data.keys())
+    extra_top = set(exclusions_data.keys()) - ALLOWED_EXCLUSION_TOP_KEYS
+    if missing_top:
+        errors.append(f"Exclusions missing top-level keys: {sorted(missing_top)}")
+    if extra_top:
+        errors.append(f"Exclusions unexpected top-level keys: {sorted(extra_top)}")
+
+    schema_ver = exclusions_data.get("schema_version")
+    if not isinstance(schema_ver, str) or not SEMVER_RE.match(schema_ver):
+        errors.append(f"Exclusions invalid schema_version: {schema_ver!r}")
+
+    self_repo = exclusions_data.get("repository", "")
+    if not isinstance(self_repo, str) or not REPO_RE.match(self_repo):
+        errors.append(f"Exclusions invalid repository slug: {self_repo!r}")
+
+    entries = exclusions_data.get("exclusions")
+    if not isinstance(entries, list):
+        errors.append("`exclusions` must be an array.")
+        return errors
+
+    active_repos: set[str] = set()
+    if isinstance(catalog_data, dict):
+        active_repos = {
+            str(t.get("repo", "")).lower()
+            for t in catalog_data.get("tools", [])
+            if isinstance(t, dict) and t.get("repo")
+        }
+
+    seen_repos: set[str] = set()
+    for idx, entry in enumerate(entries):
+        prefix = f"exclusions[{idx}]"
+        if not isinstance(entry, dict):
+            errors.append(f"{prefix} must be an object.")
+            continue
+        keys = set(entry.keys())
+        missing_e = REQUIRED_EXCLUSION_KEYS - keys
+        extra_e = keys - REQUIRED_EXCLUSION_KEYS
+        if missing_e:
+            errors.append(f"{prefix} missing keys: {sorted(missing_e)}")
+        if extra_e:
+            errors.append(f"{prefix} unexpected keys: {sorted(extra_e)}")
+
+        repo = entry.get("repo", "")
+        if not isinstance(repo, str) or not REPO_RE.match(repo):
+            errors.append(f"{prefix}: invalid GitHub repo slug {repo!r}")
+        else:
+            repo_l = repo.lower()
+            if repo_l == str(self_repo).lower():
+                errors.append(f"{prefix}: exclusions must not reference itself ({repo}).")
+            if repo_l in seen_repos:
+                errors.append(f"{prefix}: duplicate excluded repository {repo!r}")
+            if repo_l in active_repos:
+                errors.append(f"{prefix}: repository {repo!r} overlaps with active catalog tools")
+            seen_repos.add(repo_l)
+
+        cat = entry.get("category", "")
+        if cat not in ALLOWED_EXCLUSION_CATEGORIES:
+            errors.append(
+                f"{prefix}: invalid exclusion category {cat!r}; allowed: {sorted(ALLOWED_EXCLUSION_CATEGORIES)}"
+            )
+
+        for rkey in ("reason_en", "reason_zh"):
+            val = entry.get(rkey, "")
+            if not isinstance(val, str) or len(val.strip()) < 6:
+                errors.append(f"{prefix}: {rkey} must be a clear non-empty explanation.")
+
+        excl_at = entry.get("excluded_at", "")
+        if not isinstance(excl_at, str) or not DATE_RE.match(excl_at):
+            errors.append(f"{prefix}: excluded_at must be YYYY-MM-DD.")
+        else:
+            try:
+                date.fromisoformat(excl_at)
+            except ValueError:
+                errors.append(f"{prefix}: excluded_at is not a valid calendar date: {excl_at!r}")
+
+    return errors
+
+
 def sort_catalog_tools(data: dict[str, Any]) -> dict[str, Any]:
     cat_rank = {c["id"]: i for i, c in enumerate(data.get("categories", []))}
     data["tools"] = sorted(
@@ -296,6 +392,7 @@ def validate_issue_template_categories(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate awesome-antigravity-tools catalog.")
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG, help="Path to data/tools.json")
+    parser.add_argument("--exclusions", type=Path, default=None, help="Optional path to data/exclusions.json")
     parser.add_argument("--schema", type=Path, default=DEFAULT_SCHEMA, help="Path to data/catalog.schema.json")
     parser.add_argument("--check-sync", action="store_true", help="Also verify README.md and README.zh-CN.md are in sync")
     parser.add_argument("--fix-order", action="store_true", help="Sort tools canonically in data/tools.json")
@@ -325,6 +422,19 @@ def main() -> int:
         print(f"[+] Canonicalized tool order in {args.catalog}")
 
     errors, warnings = validate_catalog_data(catalog)
+
+    exclusions_path = args.exclusions
+    if exclusions_path is None and args.catalog.resolve() == DEFAULT_CATALOG.resolve() and DEFAULT_EXCLUSIONS.exists():
+        exclusions_path = DEFAULT_EXCLUSIONS
+    if exclusions_path is not None:
+        if not exclusions_path.exists():
+            errors.append(f"Exclusions file not found: {exclusions_path}")
+        else:
+            try:
+                exclusions_obj = json.loads(exclusions_path.read_text(encoding="utf-8"))
+                errors.extend(validate_exclusions_data(exclusions_obj, catalog))
+            except json.JSONDecodeError as exc:
+                errors.append(f"Invalid JSON in {exclusions_path}: {exc}")
 
     for w in warnings:
         print(f"[WARN] {w}")
