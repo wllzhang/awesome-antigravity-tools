@@ -25,6 +25,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
+DEFAULT_EXCLUSIONS = REPO_ROOT / "data" / "exclusions.json"
 
 DEFAULT_QUERIES = [
     "antigravity in:name archived:false fork:false",
@@ -72,6 +73,16 @@ OTHER_AGENTS = [
 
 PROMPT_DUMP_RE = re.compile(
     r"(awesome-|prompt\s*(pack|collection|library|dump)|skill\s*pack|agent\s*skills|cheatsheet|system\s*prompts)",
+    re.IGNORECASE,
+)
+
+REGION_BYPASS_RE = re.compile(
+    r"(bypass.*region|region.?lock|sanctions|без\s+vpn|обход\s+ошибки|регион-блок)",
+    re.IGNORECASE,
+)
+
+TOS_PROXY_RE = re.compile(
+    r"(oauth.*rate\s*limit|free.*claude|claude.*proxy|reverse.*oauth|impersonat)",
     re.IGNORECASE,
 )
 
@@ -165,6 +176,14 @@ def score_candidate(repo_obj: dict[str, Any]) -> tuple[int, list[str]]:
         score -= 35
         reasons.append("penalty:prompt-or-list")
 
+    if REGION_BYPASS_RE.search(f"{name} {desc}"):
+        score -= 45
+        reasons.append("penalty:region-bypass")
+
+    if TOS_PROXY_RE.search(f"{name} {desc}"):
+        score -= 50
+        reasons.append("penalty:tos-proxy-risk")
+
     if not desc.strip():
         score -= 15
         reasons.append("penalty:no-description")
@@ -180,6 +199,17 @@ def load_existing_slugs(catalog_path: Path) -> set[str]:
     if data.get("repository"):
         slugs.add(data["repository"].lower())
     return slugs
+
+
+def load_excluded_slugs(exclusions_path: Path = DEFAULT_EXCLUSIONS) -> set[str]:
+    if not exclusions_path.exists():
+        return set()
+    data = json.loads(exclusions_path.read_text(encoding="utf-8"))
+    return {
+        str(item["repo"]).lower()
+        for item in data.get("exclusions", [])
+        if isinstance(item, dict) and item.get("repo")
+    }
 
 
 def _escape_double_quoted_sh(value: str) -> str:
@@ -322,6 +352,8 @@ def filter_and_rank_candidates(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Discover emerging Antigravity-exclusive tools on GitHub.")
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    parser.add_argument("--exclusions", type=Path, default=DEFAULT_EXCLUSIONS)
+    parser.add_argument("--include-excluded", action="store_true", help="Do not filter out repos listed in data/exclusions.json")
     parser.add_argument("--min-stars", type=int, default=5)
     parser.add_argument("--min-score", type=int, default=55)
     parser.add_argument("--max-days-inactive", type=int, default=180, help="Exclude repos inactive >N days (0 disables)")
@@ -334,6 +366,8 @@ def main() -> int:
 
     token = get_token(use_gh_cli=args.use_gh_cli)
     existing = load_existing_slugs(args.catalog)
+    if not args.include_excluded:
+        existing |= load_excluded_slugs(args.exclusions)
 
     raw_items: list[dict[str, Any]] = []
     for query in DEFAULT_QUERIES:

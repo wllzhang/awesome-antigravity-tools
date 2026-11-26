@@ -467,6 +467,48 @@ class TestBadgesAndDiscovery(unittest.TestCase):
         self.assertIn('"google antigravity"', joined)
         self.assertIn("antigravity in:name", joined)
 
+    def test_discovery_policy_penalties_and_exclusions_ledger(self):
+        bypass = {
+            "name": "antigravity-cleaner",
+            "description": "Bypass Region Lock & Sanctions for Google Antigravity.",
+            "language": "Go",
+            "stargazers_count": 400,
+            "license": {"spdx_id": "Apache-2.0"},
+        }
+        tos_proxy = {
+            "name": "antigravity-claude-proxy",
+            "description": "Proxy exposing free Claude models over reverse OAuth limits.",
+            "language": "JavaScript",
+            "stargazers_count": 2000,
+            "license": {"spdx_id": "MIT"},
+        }
+        b_score, b_reasons = discover_candidates.score_candidate(bypass)
+        t_score, t_reasons = discover_candidates.score_candidate(tos_proxy)
+        self.assertIn("penalty:region-bypass", b_reasons)
+        self.assertLess(b_score, 55)
+        self.assertIn("penalty:tos-proxy-risk", t_reasons)
+        self.assertLess(t_score, 65)
+
+        excluded_slugs = discover_candidates.load_excluded_slugs(REPO_ROOT / "data" / "exclusions.json")
+        self.assertIn("noefabris/opencode-antigravity-auth", excluded_slugs)
+        filtered = discover_candidates.filter_and_rank_candidates(
+            [
+                {
+                    "full_name": "NoeFabris/opencode-antigravity-auth",
+                    "name": "opencode-antigravity-auth",
+                    "description": "Antigravity OAuth plugin.",
+                    "language": "TypeScript",
+                    "stargazers_count": 10000,
+                    "license": {"spdx_id": "MIT"},
+                    "pushed_at": "2026-11-26T00:00:00Z",
+                }
+            ],
+            excluded_slugs,
+            min_stars=5,
+            min_score=0,
+        )
+        self.assertEqual(filtered, [])
+
 
 class TestCliAndSubmissionParser(unittest.TestCase):
     def test_cli_search_stats_and_add(self):
@@ -550,6 +592,13 @@ CLI, Hooks
         dup_body = valid_body.replace("acme/gamma-bridge", "acme/alpha-tool")
         _, dup_errors = parse_submission.build_candidate_entry(parse_submission.parse_issue_form(dup_body), cat)
         self.assertTrue(any("Duplicate submission" in e for e in dup_errors))
+
+        excl_map = parse_submission.load_exclusions_map(REPO_ROOT / "data" / "exclusions.json")
+        excl_body = valid_body.replace("acme/gamma-bridge", "NoeFabris/opencode-antigravity-auth")
+        _, excl_errors = parse_submission.build_candidate_entry(
+            parse_submission.parse_issue_form(excl_body), cat, exclusions=excl_map
+        )
+        self.assertTrue(any("Excluded repository (`tos-risk-proxy`)" in e for e in excl_errors))
 
     def test_cli_recommend_and_compare(self):
         real_cat = REPO_ROOT / "data" / "tools.json"

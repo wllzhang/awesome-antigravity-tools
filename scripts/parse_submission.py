@@ -24,6 +24,7 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
+DEFAULT_EXCLUSIONS = REPO_ROOT / "data" / "exclusions.json"
 
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -134,7 +135,23 @@ def resolve_category_id(raw_category: str, catalog: dict[str, Any]) -> str | Non
     return None
 
 
-def build_candidate_entry(sections: dict[str, str], catalog: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
+def load_exclusions_map(exclusions_path: Path = DEFAULT_EXCLUSIONS) -> dict[str, dict[str, Any]]:
+    if not exclusions_path.exists():
+        return {}
+    data = json.loads(exclusions_path.read_text(encoding="utf-8"))
+    return {
+        str(item["repo"]).lower(): item
+        for item in data.get("exclusions", [])
+        if isinstance(item, dict) and item.get("repo")
+    }
+
+
+def build_candidate_entry(
+    sections: dict[str, str],
+    catalog: dict[str, Any],
+    *,
+    exclusions: dict[str, dict[str, Any]] | None = None,
+) -> tuple[dict[str, Any], list[str]]:
     import validate_catalog
 
     errors: list[str] = []
@@ -186,6 +203,11 @@ def build_candidate_entry(sections: dict[str, str], catalog: dict[str, Any]) -> 
         errors.append(f"Duplicate submission: `{slug}` is already listed in `data/tools.json`.")
     if slug.lower() == catalog.get("repository", "").lower():
         errors.append("Submission cannot reference `awesome-antigravity-tools` itself.")
+    if exclusions and slug.lower() in exclusions:
+        excl = exclusions[slug.lower()]
+        errors.append(
+            f"Excluded repository (`{excl.get('category', 'excluded')}`): `{slug}` is in `data/exclusions.json` — {excl.get('reason_en', '')}"
+        )
 
     tid = re.sub(r"[^a-z0-9]+", "-", tool_name.lower()).strip("-")
     entry: dict[str, Any] = {
@@ -266,6 +288,7 @@ def render_triage_comment(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Parse and validate a GitHub Issue tool submission.")
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    parser.add_argument("--exclusions", type=Path, default=DEFAULT_EXCLUSIONS)
     parser.add_argument("--input", type=Path, default=None, help="Path to markdown issue body (reads stdin if omitted)")
     parser.add_argument("--format", choices=["json", "comment"], default="comment")
     parser.add_argument("--verify-github", action="store_true", help="Verify live GitHub repo metadata via API")
@@ -274,9 +297,10 @@ def main() -> int:
 
     body = args.input.read_text(encoding="utf-8") if args.input else sys.stdin.read()
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
+    exclusions = load_exclusions_map(args.exclusions)
 
     sections = parse_issue_form(body)
-    entry, errors = build_candidate_entry(sections, catalog)
+    entry, errors = build_candidate_entry(sections, catalog, exclusions=exclusions)
     github_meta = None
 
     if args.verify_github and entry["repo"] != "owner/repo":
