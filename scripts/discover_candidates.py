@@ -182,6 +182,15 @@ def load_existing_slugs(catalog_path: Path) -> set[str]:
     return slugs
 
 
+def _escape_double_quoted_sh(value: str) -> str:
+    return (
+        value.replace("\\", "\\\\")
+        .replace('"', '\\"')
+        .replace("$", "\\$")
+        .replace("`", "\\`")
+    )
+
+
 def render_markdown_table(candidates: list[dict[str, Any]]) -> str:
     if not candidates:
         return "No new high-signal Antigravity-exclusive candidates matched the current thresholds.\n"
@@ -192,7 +201,7 @@ def render_markdown_table(candidates: list[dict[str, Any]]) -> str:
         "| :---: | :--- | :---: | :---: | :---: | :---: | :--- | :--- |",
     ]
     for c in candidates:
-        desc = (c["description"] or "").replace("|", "\\|").replace("\n", " ")[:120]
+        desc = re.sub(r"\s+", " ", c["description"] or "").strip().replace("|", "\\|")[:120]
         signals = ", ".join(c["signals"])
         lines.append(
             f"| **{c['score']}** | [{c['full_name']}]({c['url']}) | {c['stars']:,} | "
@@ -206,21 +215,25 @@ def render_aat_commands(candidates: list[dict[str, Any]]) -> str:
         return "# No candidates matched the current thresholds.\n"
     blocks: list[str] = []
     for c in candidates:
-        desc_en = (c.get("description") or "Antigravity-exclusive engineering tool.").replace('"', '\\"').rstrip(".") + "."
-        lang_tag = c.get("language") or "CLI"
+        raw_desc = re.sub(r"\s+", " ", c.get("description") or "").strip().rstrip(".")
+        desc_en = (raw_desc or "Antigravity-exclusive engineering tool") + "."
+        lang_tag = re.sub(r"\s+", " ", str(c.get("language") or "CLI")).strip()
+        repo_safe = _escape_double_quoted_sh(c["full_name"])
+        desc_safe = _escape_double_quoted_sh(desc_en)
+        tag_safe = _escape_double_quoted_sh(lang_tag)
         blocks.append(
             "\n".join(
                 [
                     f"# {c['full_name']} (score={c['score']}, stars={c['stars']}, pushed={c['pushed_at']})",
                     "python scripts/aat_cli.py add \\",
-                    f"  --repo \"{c['full_name']}\" \\",
+                    f"  --repo \"{repo_safe}\" \\",
                     "  --category \"ide-extensions-cockpits\" \\",
-                    f"  --desc-en \"{desc_en}\" \\",
+                    f"  --desc-en \"{desc_safe}\" \\",
                     "  --desc-zh \"专为 Google Antigravity 打造的工程工具。\" \\",
                     "  --reason-en \"Built exclusively for Google Antigravity runtime workflows.\" \\",
                     "  --reason-zh \"专为 Google Antigravity 运行时工作流构建。\" \\",
                     "  --platforms \"Cross-Platform\" \\",
-                    f"  --tags \"{lang_tag},Antigravity\" \\",
+                    f"  --tags \"{tag_safe},Antigravity\" \\",
                     "  --sync-docs",
                 ]
             )
@@ -239,14 +252,19 @@ def filter_and_rank_candidates(
     limit: int = 20,
     now_dt: datetime | None = None,
 ) -> list[dict[str, Any]]:
+    if limit <= 0:
+        return []
     now = now_dt or datetime.now(timezone.utc)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+    existing_l = {s.lower() for s in existing_slugs}
     dedup: dict[str, dict[str, Any]] = {}
     for item in items:
         full_name = item.get("full_name", "")
         if not full_name:
             continue
         key = full_name.lower()
-        if key in existing_slugs or key in dedup:
+        if key in existing_l or key in dedup:
             continue
         if item.get("archived") or item.get("fork") or item.get("disabled"):
             continue
@@ -298,7 +316,7 @@ def filter_and_rank_candidates(
         )
     else:
         values.sort(key=lambda x: (x["score"], x["stars"]), reverse=True)
-    return values[: max(1, limit)]
+    return values[:limit]
 
 
 def main() -> int:

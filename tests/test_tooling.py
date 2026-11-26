@@ -382,18 +382,53 @@ class TestBadgesAndDiscovery(unittest.TestCase):
         ]
         ranked = discover_candidates.filter_and_rank_candidates(
             items,
-            {"acme/alpha-tool"},
+            {"ACME/alpha-tool"},
             min_stars=5,
             min_score=55,
             max_days_inactive=180,
             sort_by="recent",
             limit=10,
-            now_dt=now,
+            now_dt=now.replace(tzinfo=None),
         )
         self.assertEqual([c["full_name"] for c in ranked], ["acme/agy-fresh"])
-        cmd_out = discover_candidates.render_aat_commands(ranked)
-        self.assertIn('python scripts/aat_cli.py add \\', cmd_out)
-        self.assertIn('--repo "acme/agy-fresh"', cmd_out)
+        self.assertEqual(
+            discover_candidates.filter_and_rank_candidates(items, set(), limit=0),
+            [],
+        )
+        # Escapes shell metacharacters, newlines, and collapses dot-only descriptions
+        cmd_out = discover_candidates.render_aat_commands(
+            [
+                {
+                    "full_name": "acme/agy-edge",
+                    "stars": 12,
+                    "score": 80,
+                    "pushed_at": "2026-11-26",
+                    "language": "TypeScript",
+                    "description": 'Fixes `agy` $PATH\nand "quotes" ...',
+                },
+                {
+                    "full_name": "acme/agy-dots",
+                    "stars": 8,
+                    "score": 70,
+                    "pushed_at": "2026-11-25",
+                    "language": "Go",
+                    "description": "...",
+                },
+            ]
+        )
+        self.assertIn(r'Fixes \`agy\` \$PATH and \"quotes\" .', cmd_out)
+        self.assertIn('--desc-en "Antigravity-exclusive engineering tool."', cmd_out)
+
+        all_ranked = discover_candidates.filter_and_rank_candidates(
+            items,
+            {"acme/alpha-tool"},
+            min_stars=5,
+            min_score=55,
+            max_days_inactive=0,
+            sort_by="stars",
+            limit=10,
+        )
+        self.assertEqual([c["full_name"] for c in all_ranked], ["acme/antigravity-stale", "acme/agy-fresh"])
 
 
 class TestCliAndSubmissionParser(unittest.TestCase):
@@ -515,6 +550,36 @@ CLI, Hooks
 
         rc_bad = aat_cli.main(["--catalog", str(real_cat), "--snapshot", str(real_snap), "compare", "liftgate"])
         self.assertEqual(rc_bad, 1)
+        rc_too_many = aat_cli.main(
+            ["--catalog", str(real_cat), "--snapshot", str(real_snap), "compare", "a", "b", "c", "d", "e"]
+        )
+        self.assertEqual(rc_too_many, 1)
+
+        # Stopword & substring guard: "i need a theme" should rank obsidian-prism, and "workflow" must not trigger "flow"
+        catalog_obj, health_map, cat_map, enriched = aat_cli.load_enriched_catalog(real_cat, real_snap)
+        _ = catalog_obj, health_map, cat_map
+        theme_recs = aat_cli.recommend_tools(enriched, "i need a theme", limit=3)
+        self.assertEqual(theme_recs[0]["id"], "obsidian-prism")
+        self.assertNotIn("tag:i", theme_recs[0]["match_reasons"])
+
+        wf_recs = aat_cli.recommend_tools(enriched, "workflow", limit=5)
+        self.assertTrue(all("syn-name:flow" not in r["match_reasons"] for r in wf_recs))
+
+        # Markdown pipe/newline escaping in compare
+        md_esc = aat_cli.render_comparison_markdown(
+            [
+                {
+                    **enriched[0],
+                    "name": "Tool|One",
+                    "tags": ["Tag|A\nLine2"],
+                    "exclusivity_reason_en": "Built | specifically\nfor agy",
+                },
+                enriched[1],
+            ]
+        )
+        self.assertIn(r"Tool\|One", md_esc)
+        self.assertIn(r"Tag\|A Line2", md_esc)
+        self.assertIn(r"Built \| specifically for agy", md_esc)
 
     def test_cli_remove_and_doctor(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -528,6 +593,19 @@ CLI, Hooks
             self.assertEqual(rc_rm, 0)
             after = json.loads(cat_path.read_text(encoding="utf-8"))
             self.assertEqual([t["id"] for t in after["tools"]], ["alpha-tool"])
+
+            # Removing the last remaining tool fails schema validation (tools must be non-empty)
+            rc_last = aat_cli.main(["--catalog", str(cat_path), "remove", "alpha-tool"])
+            self.assertEqual(rc_last, 1)
+            still_there = json.loads(cat_path.read_text(encoding="utf-8"))
+            self.assertEqual([t["id"] for t in still_there["tools"]], ["alpha-tool"])
+
+        with tempfile.TemporaryDirectory() as tmp:
+            j_dir = Path(tmp) / "fake_skill"
+            j_dir.mkdir()
+            self.assertFalse(aat_cli._is_reparse_or_symlink(j_dir))
+            with mock.patch("os.lstat", return_value=mock.Mock(st_file_attributes=0x0400)):
+                self.assertTrue(aat_cli._is_reparse_or_symlink(j_dir))
 
         real_cat = json.loads((REPO_ROOT / "data" / "tools.json").read_text(encoding="utf-8"))
         snap = json.loads((REPO_ROOT / "data" / "health_snapshot.json").read_text(encoding="utf-8"))
@@ -587,13 +665,15 @@ CLI, Hooks
 
     def test_submission_parser_normalization_and_url_edge_cases(self):
         self.assertEqual(
-            parse_submission.extract_github_slug("https://github.com/acme/agy-tool.git/?tab=readme#top"),
+            parse_submission.extract_github_slug("https://GITHUB.COM/acme/agy-tool.GIT/?tab=readme#top"),
             "acme/agy-tool",
         )
+        self.assertIsNone(parse_submission.extract_github_slug("https://github.com/../evil"))
         self.assertEqual(
-            parse_submission.normalize_platforms("macos, win, vs code, windows, antigravity"),
+            parse_submission.normalize_platforms("macos / win | vs code、windows, antigravity"),
             ["macOS", "Windows", "VS Code", "Antigravity IDE"],
         )
+        self.assertEqual(parse_submission.normalize_platforms("Solaris"), ["Cross-Platform"])
         cat = make_sample_catalog()
         body = """
 ### Tool Name

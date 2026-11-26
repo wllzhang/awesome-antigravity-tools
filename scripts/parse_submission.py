@@ -28,7 +28,7 @@ DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-GITHUB_URL_RE = re.compile(r"https?://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)")
+GITHUB_URL_RE = re.compile(r"https?://(?:www\.)?github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)", re.IGNORECASE)
 
 CATEGORY_ALIASES = {
     "official cli & sdks": "official-cli-sdks",
@@ -97,8 +97,8 @@ def extract_github_slug(url_text: str) -> str | None:
     if not match:
         return None
     owner, repo = match.group(1), match.group(2)
-    repo = repo.removesuffix(".git").rstrip(".")
-    if not owner or not repo:
+    repo = re.sub(r"\.git$", "", repo, flags=re.IGNORECASE).rstrip(".")
+    if not owner or not repo or owner in (".", "..") or repo in (".", ".."):
         return None
     return f"{owner}/{repo}"
 
@@ -109,7 +109,7 @@ def normalize_platforms(raw_platforms: str) -> list[str]:
     allowed_lower = {p.lower(): p for p in validate_catalog.ALLOWED_PLATFORMS}
     normalized: list[str] = []
     seen: set[str] = set()
-    for token in re.split(r"[,;\n]+", raw_platforms or ""):
+    for token in re.split(r"[,;\n/|、]+", raw_platforms or ""):
         cleaned = token.strip(" `")
         if not cleaned:
             continue

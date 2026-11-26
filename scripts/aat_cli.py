@@ -145,10 +145,17 @@ def print_tools_table(tools: list[dict[str, Any]], lang: str = "en") -> None:
         print(f"    URL: {t['url']}\n")
 
 
-def cmd_list_or_search(args: argparse.Namespace, query: str = "") -> int:
-    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
+def load_enriched_catalog(
+    catalog_path: Path = DEFAULT_CATALOG, snapshot_path: Path = DEFAULT_SNAPSHOT
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]], dict[str, dict[str, Any]], list[dict[str, Any]]]:
+    catalog, health_map = load_catalog_and_health(catalog_path, snapshot_path)
     cat_map = {c["id"]: c for c in catalog.get("categories", [])}
     enriched = [enrich_tool(t, health_map, cat_map) for t in catalog.get("tools", [])]
+    return catalog, health_map, cat_map, enriched
+
+
+def cmd_list_or_search(args: argparse.Namespace, query: str = "") -> int:
+    _catalog, _health_map, _cat_map, enriched = load_enriched_catalog(args.catalog, args.snapshot)
     filtered = filter_and_sort_tools(
         enriched,
         query=query,
@@ -179,46 +186,33 @@ def find_tool(
     return None
 
 
+_SYNONYM_CLUSTERS: list[tuple[tuple[str, ...], tuple[str, ...]]] = [
+    (("quota", "配额", "额度"), ("quota", "配额", "额度", "hud", "cockpit", "usage", "用量", "limit")),
+    (("proxy", "代理", "tun"), ("proxy", "代理", "tun", "socks5", "http", "retry", "重试", "enterprise gateway")),
+    (("chinese", "汉化", "中文", "localization"), ("chinese", "汉化", "中文", "localization", "zh-cn", "asar", "rtl", "语言包")),
+    (("acp", "gateway", "网关"), ("acp", "gateway", "网关", "adapter", "适配器", "stdio", "agy acp", "openai", "anthropic", "gemini")),
+    (("symlink", "junction", "硬链接", "符号链接"), ("junction", "symlink", "硬链接", "符号链接", "ntfs", "mklink", "reparse")),
+    (("statusline", "hud", "状态栏"), ("statusline", "hud", "状态栏", "powerline", "capsule", "胶囊", "cockpit", "telemetry")),
+    (("account", "账号", "多账号", "多开"), ("account", "accounts", "账号", "switch", "切换", "multi-account", "多账号", "多开", "sandbox")),
+    (("cache", "缓存", "加速"), ("cache", "缓存", "token", "加速", "accelerator", "fast", "kv", "fts5", "context", "上下文")),
+    (("mobile", "手机", "远程", "wecom"), ("mobile", "手机", "远程", "wecom", "企微", "企业微信", "pwa", "remote", "websocket")),
+    (("defender",), ("defender", "agy.exe", "202", "backend", "timeout")),
+    (("context", "上下文"), ("context", "上下文", "token", "用量", "usage", "vial")),
+    (("theme", "主题"), ("theme", "主题", "ui", "optical", "webgl2", "ux", "光学")),
+    (("flow",), ("flow", "google-flow", "veo", "nano banana", "omni")),
+    (("robotics",), ("robotics", "机器人", "mujoco", "deepmind")),
+]
+
 INTENT_SYNONYMS: dict[str, tuple[str, ...]] = {
-    "quota": ("quota", "配额", "额度", "hud", "cockpit", "usage", "用量", "limit"),
-    "配额": ("quota", "配额", "额度", "hud", "cockpit", "usage", "用量"),
-    "额度": ("quota", "配额", "额度", "hud", "cockpit", "usage", "用量"),
-    "proxy": ("proxy", "代理", "tun", "socks5", "http", "retry", "重试", "enterprise gateway"),
-    "代理": ("proxy", "代理", "tun", "socks5", "http", "retry", "重试"),
-    "tun": ("tun", "proxy", "代理", "dll"),
-    "chinese": ("chinese", "汉化", "中文", "localization", "zh-cn", "语言包"),
-    "汉化": ("chinese", "汉化", "中文", "localization", "zh-cn", "asar", "语言包"),
-    "中文": ("chinese", "汉化", "中文", "localization", "zh-cn", "asar"),
-    "localization": ("localization", "汉化", "中文", "chinese", "rtl", "排版"),
-    "acp": ("acp", "gateway", "网关", "adapter", "适配器", "stdio", "agy acp"),
-    "gateway": ("gateway", "网关", "acp", "openai", "anthropic", "gemini", "api"),
-    "网关": ("gateway", "网关", "acp", "openai", "anthropic", "gemini", "api"),
-    "symlink": ("symlink", "junction", "硬链接", "符号链接", "ntfs", "mklink", "reparse"),
-    "junction": ("junction", "symlink", "硬链接", "符号链接", "ntfs", "mklink", "reparse"),
-    "硬链接": ("junction", "symlink", "硬链接", "符号链接", "ntfs", "mklink"),
-    "符号链接": ("junction", "symlink", "硬链接", "符号链接", "ntfs", "mklink"),
-    "statusline": ("statusline", "hud", "状态栏", "powerline", "terminal"),
-    "hud": ("hud", "statusline", "状态栏", "capsule", "胶囊", "cockpit", "telemetry"),
-    "状态栏": ("statusline", "hud", "状态栏", "powerline"),
-    "account": ("account", "accounts", "账号", "switch", "切换", "multi-account", "多账号", "多开", "sandbox"),
-    "账号": ("account", "accounts", "账号", "switch", "切换", "multi-account", "多账号", "多开", "sandbox"),
-    "多账号": ("multi-account", "账号", "account", "switch", "切换", "多开", "sandbox"),
-    "多开": ("multi-account", "sandbox", "多开", "并行", "account", "账号"),
-    "cache": ("cache", "缓存", "token", "加速", "kv", "fts5", "context", "上下文"),
-    "缓存": ("cache", "缓存", "token", "加速", "kv", "fts5", "context", "上下文"),
-    "加速": ("accelerator", "加速", "fast", "cache", "缓存", "token"),
-    "mobile": ("mobile", "手机", "远程", "wecom", "pwa", "remote", "企微"),
-    "手机": ("mobile", "手机", "远程", "wecom", "pwa", "remote", "企微"),
-    "远程": ("remote", "远程", "mobile", "手机", "wecom", "pwa", "websocket"),
-    "wecom": ("wecom", "企微", "企业微信", "remote"),
-    "defender": ("defender", "agy.exe", "202", "backend", "timeout"),
-    "context": ("context", "上下文", "token", "用量", "usage", "vial"),
-    "上下文": ("context", "上下文", "token", "用量", "usage"),
-    "theme": ("theme", "主题", "ui", "optical", "webgl2", "ux", "光学"),
-    "主题": ("theme", "主题", "ui", "optical", "webgl2", "ux", "光学"),
-    "flow": ("flow", "google-flow", "veo", "nano banana", "omni"),
-    "robotics": ("robotics", "机器人", "mujoco", "deepmind"),
+    key: cluster for keys, cluster in _SYNONYM_CLUSTERS for key in keys
 }
+
+_STOPWORDS = {
+    "i", "a", "an", "the", "to", "for", "of", "in", "on", "is", "do", "how",
+    "my", "me", "we", "you", "it", "and", "or", "with", "need", "want", "fix",
+    "use", "best", "tool", "tools",
+}
+_CJK_RE = re.compile(r"[\u4e00-\u9fff]")
 
 
 def _extract_intent_tokens(intent: str) -> tuple[list[str], set[str]]:
@@ -233,19 +227,26 @@ def _extract_intent_tokens(intent: str) -> tuple[list[str], set[str]]:
             primary.append(tok)
 
     for tok in raw_tokens:
-        add_primary(tok)
-        if re.search(r"[\u4e00-\u9fff]", tok) and len(tok) > 2:
-            matched_sub = [k for k in INTENT_SYNONYMS if len(k) >= 2 and k in tok]
-            for sub in matched_sub:
-                add_primary(sub)
-            if not matched_sub:
-                for i in range(len(tok) - 1):
-                    add_primary(tok[i : i + 2])
+        is_cjk = bool(_CJK_RE.search(tok))
+        if not is_cjk:
+            if len(tok) <= 1 or tok in _STOPWORDS:
+                continue
+            add_primary(tok)
+        else:
+            add_primary(tok)
+            if len(tok) > 2:
+                matched_sub = [k for k in INTENT_SYNONYMS if _CJK_RE.search(k) and len(k) >= 2 and k in tok]
+                for sub in matched_sub:
+                    add_primary(sub)
+                if not matched_sub:
+                    for i in range(len(tok) - 1):
+                        add_primary(tok[i : i + 2])
 
     expanded: set[str] = set()
     for tok in list(primary):
+        is_cjk = bool(_CJK_RE.search(tok))
         for key, syns in INTENT_SYNONYMS.items():
-            if tok == key or (len(key) >= 2 and key in tok):
+            if tok == key or (is_cjk and _CJK_RE.search(key) and len(key) >= 2 and key in tok):
                 expanded.update(syns)
     return primary, expanded
 
@@ -258,7 +259,7 @@ def recommend_tools(
     limit: int = 5,
 ) -> list[dict[str, Any]]:
     intent_l = intent.strip().lower()
-    if not intent_l:
+    if not intent_l or limit <= 0:
         return []
     plat_f = platform.strip().lower()
     primary_tokens, expanded_tokens = _extract_intent_tokens(intent_l)
@@ -335,40 +336,48 @@ def recommend_tools(
         if isinstance(hs, (int, float)):
             relevance += hs * 0.15
 
-        stars = int(t.get("stars", 0))
+        stars = max(0, int(t.get("stars", 0)))
         relevance += min(6.0, math.log10(stars + 1) * 1.2)
+
+        final_score = round(max(0.0, relevance), 1)
+        if final_score <= 0.0:
+            continue
 
         dedup_reasons = list(dict.fromkeys(reasons))
         scored.append(
             {
                 **t,
-                "match_score": round(relevance, 1),
+                "match_score": final_score,
                 "match_reasons": dedup_reasons,
             }
         )
 
     scored.sort(key=lambda x: (x["match_score"], x.get("stars", 0), x["name"].lower()), reverse=True)
-    return scored[: max(1, limit)]
+    return scored[:limit]
+
+
+def _md_cell(value: Any) -> str:
+    return re.sub(r"\s+", " ", str(value or "-")).strip().replace("|", "\\|")
 
 
 def render_comparison_markdown(tools: list[dict[str, Any]], lang: str = "en") -> str:
     header_label = "维度" if lang == "zh" else "Metric"
-    headers = [header_label, *[f"[{t['name']}]({t['url']})" for t in tools]]
+    headers = [header_label, *[f"[{_md_cell(t['name'])}]({t['url']})" for t in tools]]
     aligns = [":---", *([":---"] * len(tools))]
     rows = [
-        ("仓库" if lang == "zh" else "Repository", lambda t: f"`{t['repo']}`"),
-        ("分类" if lang == "zh" else "Category", lambda t: t["category_zh"] if lang == "zh" else t["category_en"]),
-        ("健康状态" if lang == "zh" else "Status", lambda t: f"`{t['status']}`"),
+        ("仓库" if lang == "zh" else "Repository", lambda t: f"`{_md_cell(t['repo'])}`"),
+        ("分类" if lang == "zh" else "Category", lambda t: _md_cell(t["category_zh"] if lang == "zh" else t["category_en"])),
+        ("健康状态" if lang == "zh" else "Status", lambda t: f"`{_md_cell(t['status'])}`"),
         ("健康分" if lang == "zh" else "Health Score", lambda t: f"{t['health_score']}/100" if t.get("health_score") is not None else "-"),
-        ("Stars", lambda t: f"★{t.get('stars', 0):,}"),
-        ("主语言" if lang == "zh" else "Language", lambda t: t.get("language") or "-"),
-        ("开源协议" if lang == "zh" else "License", lambda t: t.get("license") or "-"),
-        ("最新版本" if lang == "zh" else "Latest Release", lambda t: f"`{t['latest_release']}`" if t.get("latest_release") else "-"),
-        ("最近推送" if lang == "zh" else "Last Push", lambda t: f"{t['days_inactive']}d ago" if t.get("days_inactive") is not None else "-"),
-        ("平台" if lang == "zh" else "Platforms", lambda t: ", ".join(t.get("platforms", []))),
-        ("标签" if lang == "zh" else "Tags", lambda t: ", ".join(t.get("tags", []))),
-        ("专有性依据" if lang == "zh" else "Exclusivity", lambda t: (t["exclusivity_reason_zh"] if lang == "zh" else t["exclusivity_reason_en"]).replace("|", "\\|")),
-        ("安装提示" if lang == "zh" else "Install Hint", lambda t: (t.get("install_hint") or "-").replace("|", "\\|")),
+        ("Stars", lambda t: f"★{max(0, int(t.get('stars', 0))):,}"),
+        ("主语言" if lang == "zh" else "Language", lambda t: _md_cell(t.get("language") or "-")),
+        ("开源协议" if lang == "zh" else "License", lambda t: _md_cell(t.get("license") or "-")),
+        ("最新版本" if lang == "zh" else "Latest Release", lambda t: f"`{_md_cell(t['latest_release'])}`" if t.get("latest_release") else "-"),
+        ("最近推送" if lang == "zh" else "Last Push", lambda t: f"{t['days_inactive']}天前" if (lang == "zh" and t.get("days_inactive") is not None) else (f"{t['days_inactive']}d ago" if t.get("days_inactive") is not None else "-")),
+        ("平台" if lang == "zh" else "Platforms", lambda t: _md_cell(", ".join(t.get("platforms", [])))),
+        ("标签" if lang == "zh" else "Tags", lambda t: _md_cell(", ".join(t.get("tags", [])))),
+        ("专有性依据" if lang == "zh" else "Exclusivity", lambda t: _md_cell(t["exclusivity_reason_zh"] if lang == "zh" else t["exclusivity_reason_en"])),
+        ("安装提示" if lang == "zh" else "Install Hint", lambda t: _md_cell(t.get("install_hint") or "-")),
     ]
     lines = [
         "| " + " | ".join(headers) + " |",
@@ -381,15 +390,13 @@ def render_comparison_markdown(tools: list[dict[str, Any]], lang: str = "en") ->
 
 
 def cmd_recommend(args: argparse.Namespace) -> int:
-    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
-    cat_map = {c["id"]: c for c in catalog.get("categories", [])}
-    enriched = [enrich_tool(t, health_map, cat_map) for t in catalog.get("tools", [])]
+    _catalog, _health_map, _cat_map, enriched = load_enriched_catalog(args.catalog, args.snapshot)
     recs = recommend_tools(enriched, args.intent, platform=args.platform, limit=args.limit)
     if args.json:
         print(json.dumps(recs, indent=2, ensure_ascii=False))
         return 0
     if not recs:
-        print("No matching Antigravity-exclusive tools found for that intent.")
+        print("未找到匹配的 Antigravity 专有工具。" if args.lang == "zh" else "No matching Antigravity-exclusive tools found for that intent.")
         return 0
     print(f"Top {len(recs)} recommended Antigravity-exclusive tool(s) for '{args.intent}':\n")
     for idx, t in enumerate(recs, 1):
@@ -408,8 +415,7 @@ def cmd_compare(args: argparse.Namespace) -> int:
     if not (2 <= len(args.tools) <= 4):
         print("[ERROR] `compare` requires between 2 and 4 tool identifiers.", file=sys.stderr)
         return 1
-    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
-    cat_map = {c["id"]: c for c in catalog.get("categories", [])}
+    catalog, health_map, cat_map, _enriched = load_enriched_catalog(args.catalog, args.snapshot)
 
     resolved: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
@@ -432,19 +438,20 @@ def cmd_compare(args: argparse.Namespace) -> int:
         return 0
 
     rows = [
-        ("Repository", lambda t: t["repo"]),
-        ("Category", lambda t: t["category_zh"] if args.lang == "zh" else t["category_en"]),
-        ("Status", lambda t: f"{t['status']} ({t['health_score']}/100)" if t.get("health_score") is not None else t["status"]),
+        ("仓库" if args.lang == "zh" else "Repository", lambda t: t["repo"]),
+        ("分类" if args.lang == "zh" else "Category", lambda t: t["category_zh"] if args.lang == "zh" else t["category_en"]),
+        ("状态" if args.lang == "zh" else "Status", lambda t: f"{t['status']} ({t['health_score']}/100)" if t.get("health_score") is not None else t["status"]),
         ("Stars", lambda t: f"★{t.get('stars', 0):,}"),
-        ("Language", lambda t: t.get("language") or "-"),
-        ("License", lambda t: t.get("license") or "-"),
-        ("Release", lambda t: t.get("latest_release") or "-"),
-        ("Platforms", lambda t: ", ".join(t.get("platforms", []))),
-        ("Tags", lambda t: ", ".join(t.get("tags", []))),
-        ("Install", lambda t: t.get("install_hint") or "-"),
+        ("主语言" if args.lang == "zh" else "Language", lambda t: t.get("language") or "-"),
+        ("开源协议" if args.lang == "zh" else "License", lambda t: t.get("license") or "-"),
+        ("版本" if args.lang == "zh" else "Release", lambda t: t.get("latest_release") or "-"),
+        ("平台" if args.lang == "zh" else "Platforms", lambda t: ", ".join(t.get("platforms", []))),
+        ("标签" if args.lang == "zh" else "Tags", lambda t: ", ".join(t.get("tags", []))),
+        ("安装" if args.lang == "zh" else "Install", lambda t: t.get("install_hint") or "-"),
     ]
     col_w = 28
-    print(" | ".join(["Metric".ljust(14), *[t["name"][:col_w].ljust(col_w) for t in resolved]]))
+    head_metric = "维度" if args.lang == "zh" else "Metric"
+    print(" | ".join([head_metric.ljust(14), *[t["name"][:col_w].ljust(col_w) for t in resolved]]))
     print("-+-".join(["-" * 14, *["-" * col_w for _ in resolved]]))
     for label, getter in rows:
         cells = [str(getter(t))[:col_w].ljust(col_w) for t in resolved]
@@ -453,8 +460,7 @@ def cmd_compare(args: argparse.Namespace) -> int:
 
 
 def cmd_info(args: argparse.Namespace) -> int:
-    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
-    cat_map = {c["id"]: c for c in catalog.get("categories", [])}
+    catalog, health_map, cat_map, _enriched = load_enriched_catalog(args.catalog, args.snapshot)
     found = find_tool(catalog, health_map, cat_map, args.tool)
     if not found:
         print(f"[ERROR] Tool not found: {args.tool}", file=sys.stderr)
@@ -482,9 +488,7 @@ def cmd_info(args: argparse.Namespace) -> int:
 
 
 def cmd_stats(args: argparse.Namespace) -> int:
-    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
-    cat_map = {c["id"]: c for c in catalog.get("categories", [])}
-    enriched = [enrich_tool(t, health_map, cat_map) for t in catalog.get("tools", [])]
+    catalog, _health_map, _cat_map, enriched = load_enriched_catalog(args.catalog, args.snapshot)
 
     by_cat = Counter(t["category"] for t in enriched)
     by_lang = Counter(t["language"] or "Unspecified" for t in enriched)
@@ -530,10 +534,33 @@ def cmd_stats(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_add(args: argparse.Namespace) -> int:
-    import generate_docs
+def _save_validated_catalog(
+    catalog: dict[str, Any],
+    catalog_path: Path,
+    snapshot_path: Path,
+    sync_docs: bool,
+    success_message: str,
+) -> int:
     import validate_catalog
 
+    catalog = validate_catalog.sort_catalog_tools(catalog)
+    errors, warnings = validate_catalog.validate_catalog_data(catalog)
+    if errors:
+        for e in errors:
+            print(f"[ERROR] {e}", file=sys.stderr)
+        return 1
+    for w in warnings:
+        print(f"[WARN] {w}")
+
+    catalog_path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    print(success_message)
+
+    if sync_docs:
+        return sync_all_derived_artifacts(catalog_path, snapshot_path)
+    return 0
+
+
+def cmd_add(args: argparse.Namespace) -> int:
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
     repo = args.repo.strip().removeprefix("https://github.com/").strip("/")
     if "/" not in repo:
@@ -563,55 +590,36 @@ def cmd_add(args: argparse.Namespace) -> int:
         entry["featured"] = True
 
     catalog["tools"].append(entry)
-    catalog = validate_catalog.sort_catalog_tools(catalog)
-    errors, warnings = validate_catalog.validate_catalog_data(catalog)
-    if errors:
-        for e in errors:
-            print(f"[ERROR] {e}", file=sys.stderr)
-        return 1
-    for w in warnings:
-        print(f"[WARN] {w}")
-
-    args.catalog.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
-    print(f"[+] Added '{name}' ({repo}) to {args.catalog}")
-
-    if args.sync_docs:
-        return sync_all_derived_artifacts(args.catalog, args.snapshot)
-    return 0
+    return _save_validated_catalog(
+        catalog, args.catalog, args.snapshot, args.sync_docs, f"[+] Added '{name}' ({repo}) to {args.catalog}"
+    )
 
 
 def cmd_remove(args: argparse.Namespace) -> int:
-    import validate_catalog
-
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
     target = args.tool.strip().lower()
     tools = catalog.get("tools", [])
-    idx_to_remove = None
-    for idx, t in enumerate(tools):
-        if target in (t["id"].lower(), t["name"].lower(), t["repo"].lower()):
-            idx_to_remove = idx
-            break
+    idx_to_remove = next(
+        (
+            idx
+            for idx, t in enumerate(tools)
+            if target in (t["id"].lower(), t["name"].lower(), t["repo"].lower())
+        ),
+        None,
+    )
 
     if idx_to_remove is None:
         print(f"[ERROR] Tool not found: {args.tool}", file=sys.stderr)
         return 1
 
     removed = tools.pop(idx_to_remove)
-    catalog = validate_catalog.sort_catalog_tools(catalog)
-    errors, warnings = validate_catalog.validate_catalog_data(catalog)
-    if errors:
-        for e in errors:
-            print(f"[ERROR] {e}", file=sys.stderr)
-        return 1
-    for w in warnings:
-        print(f"[WARN] {w}")
-
-    args.catalog.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
-    print(f"[+] Removed '{removed['name']}' ({removed['repo']}) from {args.catalog}")
-
-    if args.sync_docs:
-        return sync_all_derived_artifacts(args.catalog, args.snapshot)
-    return 0
+    return _save_validated_catalog(
+        catalog,
+        args.catalog,
+        args.snapshot,
+        args.sync_docs,
+        f"[+] Removed '{removed['name']}' ({removed['repo']}) from {args.catalog}",
+    )
 
 
 def _normalize_os_name(raw_os: str = "") -> str:
@@ -641,22 +649,23 @@ def _is_reparse_or_symlink(path: Path) -> bool:
 
 def default_env_probe(os_override: str = "") -> dict[str, Any]:
     os_name = _normalize_os_name(os_override)
+    host_os = _normalize_os_name("")
     agy_in_path = bool(shutil.which("agy"))
     proxy_vars = [
         k for k in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")
         if os.environ.get(k)
     ]
     junction_paths: list[str] = []
-    if os_name == "Windows":
+    if os_name == "Windows" and host_os == "Windows":
         candidate_roots = [
             Path.home() / ".gemini" / "config" / "skills",
             Path.home() / ".gemini" / "antigravity" / "skills",
         ]
         for root in candidate_roots:
-            if not root.exists():
-                continue
             if _is_reparse_or_symlink(root):
                 junction_paths.append(str(root))
+                continue
+            if not root.exists():
                 continue
             try:
                 for child in root.iterdir():
@@ -830,9 +839,7 @@ def run_doctor(
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
-    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
-    cat_map = {c["id"]: c for c in catalog.get("categories", [])}
-    enriched = [enrich_tool(t, health_map, cat_map) for t in catalog.get("tools", [])]
+    _catalog, _health_map, _cat_map, enriched = load_enriched_catalog(args.catalog, args.snapshot)
     report = run_doctor(enriched, os_override=args.os)
 
     if args.json:
@@ -840,11 +847,22 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         return 0
 
     env = report["environment"]
-    print(f"=== Awesome Antigravity Tools — Environment Doctor ({env['os']}) ===")
-    print(f"agy CLI in PATH:    {'Yes' if env.get('agy_in_path') else 'No'}")
-    print(f"Proxy env vars:     {', '.join(env.get('proxy_vars') or []) or 'None'}")
-    if env.get("os") == "Windows":
-        print(f"Junction skills:    {len(env.get('junction_paths') or [])} detected")
+    if args.lang == "zh":
+        print(f"=== Awesome Antigravity Tools — 本地环境体检 ({env['os']}) ===")
+        print(f"agy CLI 就绪:       {'是' if env.get('agy_in_path') else '否'}")
+        print(f"代理环境变量:       {', '.join(env.get('proxy_vars') or []) or '无'}")
+        if env.get("os") == "Windows":
+            print(f"重解析点技能目录:   检测到 {len(env.get('junction_paths') or [])} 个")
+            for jp in env.get("junction_paths") or []:
+                print(f"  - {jp}")
+    else:
+        print(f"=== Awesome Antigravity Tools — Environment Doctor ({env['os']}) ===")
+        print(f"agy CLI in PATH:    {'Yes' if env.get('agy_in_path') else 'No'}")
+        print(f"Proxy env vars:     {', '.join(env.get('proxy_vars') or []) or 'None'}")
+        if env.get("os") == "Windows":
+            print(f"Junction skills:    {len(env.get('junction_paths') or [])} detected")
+            for jp in env.get("junction_paths") or []:
+                print(f"  - {jp}")
     print()
 
     for chk in report["checks"]:
