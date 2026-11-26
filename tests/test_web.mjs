@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  computeHistoryTrendSummary,
   filterAndSortTools,
   formatCompactNumber,
   getScoreTier,
@@ -52,7 +53,7 @@ test("filterAndSortTools handles multi-token bilingual search and sorting", () =
   }
 });
 
-test("category, platform, and status filters compose accurately", () => {
+test("category, platform, tag, featured, and status filters compose accurately", () => {
   const winPatches = filterAndSortTools(bundle.tools, {
     category: "platform-fixes-runtime-patches",
     platform: "Windows",
@@ -64,21 +65,62 @@ test("category, platform, and status filters compose accurately", () => {
     assert.ok(t.platforms.includes("Windows"));
     assert.equal(t.telemetry.status, "HEALTHY");
   }
+
+  const acpTagged = filterAndSortTools(bundle.tools, { tag: "acp" });
+  assert.ok(acpTagged.length >= 4);
+  for (const t of acpTagged) {
+    assert.ok(t.tags.some((tg) => tg.toLowerCase() === "acp"));
+  }
+
+  const featuredTools = filterAndSortTools(bundle.tools, { featuredOnly: true });
+  assert.ok(featuredTools.length >= 5);
+  assert.ok(featuredTools.length < bundle.tools.length);
+  for (const t of featuredTools) {
+    assert.equal(Boolean(t.featured), true);
+  }
 });
 
-test("URL state serialization round-trips cleanly", () => {
+test("URL state serialization round-trips cleanly with tag, featured, and compare capping", () => {
   const original = {
     query: "acp rust",
     category: "dedicated-gateways-migration",
     platform: "Linux",
+    tag: "Gateway",
+    featuredOnly: true,
     status: "HEALTHY",
     sort: "score",
     lang: "zh",
+    compareIds: ["liftgate", "agy-gyro"],
     openToolId: "liftgate",
   };
   const qs = serializeStateToParams(original).toString();
   const parsed = parseParamsToState(`?${qs}`);
   assert.deepEqual(parsed, original);
+
+  const capped = parseParamsToState("?compare=a,b,a,c,d&featured=true");
+  assert.deepEqual(capped.compareIds, ["a", "b", "c"]);
+  assert.equal(capped.featuredOnly, true);
+});
+
+test("computeHistoryTrendSummary computes polylines and deltas deterministically", () => {
+  const empty = computeHistoryTrendSummary([]);
+  assert.equal(empty.points.length, 0);
+  assert.equal(empty.starPolyline, "");
+
+  const single = computeHistoryTrendSummary([{ date: "2026-11-26", total: 37, total_stars: 73000 }]);
+  assert.equal(single.starDelta, 0);
+  assert.equal(single.starPolyline, "120.0,32.0");
+
+  const multi = computeHistoryTrendSummary([
+    { date: "2026-11-25", total: 19, total_stars: 61145 },
+    { date: "2026-11-17", total: 21, total_stars: 59005 },
+    { date: "2026-11-26", total: 37, total_stars: 73088 },
+  ]);
+  assert.equal(multi.earliestDate, "2026-11-17");
+  assert.equal(multi.latestDate, "2026-11-26");
+  assert.equal(multi.starDelta, 73088 - 59005);
+  assert.equal(multi.toolDelta, 37 - 21);
+  assert.equal(multi.starPolyline.split(" ").length, 3);
 });
 
 test("formatting and tier helpers behave deterministically", () => {
