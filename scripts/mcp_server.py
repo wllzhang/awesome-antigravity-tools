@@ -18,15 +18,29 @@ from typing import Any, Callable, TextIO
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parent
+
+
+def _resolve_repo_root() -> Path:
+    candidate = SCRIPT_DIR.parent
+    if (candidate / "data" / "tools.json").exists():
+        return candidate
+    cwd_candidate = Path.cwd()
+    if (cwd_candidate / "data" / "tools.json").exists():
+        return cwd_candidate
+    return candidate
+
+
+REPO_ROOT = _resolve_repo_root()
 DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
 DEFAULT_SNAPSHOT = REPO_ROOT / "data" / "health_snapshot.json"
 DEFAULT_LLMS = REPO_ROOT / "docs" / "llms.txt"
 
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
-
-import aat_cli
+try:
+    from . import aat_cli
+except ImportError:
+    if str(SCRIPT_DIR) not in sys.path:
+        sys.path.insert(0, str(SCRIPT_DIR))
+    import aat_cli
 
 
 SERVER_INFO = {
@@ -117,6 +131,8 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     },
 ]
 
+KNOWN_TOOLS = {t["name"] for t in TOOL_DEFINITIONS}
+
 RESOURCE_DEFINITIONS: list[dict[str, Any]] = [
     {
         "uri": "aat://catalog",
@@ -134,7 +150,42 @@ RESOURCE_DEFINITIONS: list[dict[str, Any]] = [
 
 
 class ToolArgumentError(ValueError):
-    """Raised when an MCP tool call supplies invalid arguments."""
+    """Raised when an MCP tool call supplies invalid field values."""
+
+
+class UnknownResourceError(ValueError):
+    """Raised when resources/read requests an unknown URI."""
+
+
+def _opt_str(args: dict[str, Any], key: str, default: str = "") -> str:
+    if key not in args or args[key] is None:
+        return default
+    val = args[key]
+    if not isinstance(val, str):
+        raise ToolArgumentError(f"`{key}` must be a string.")
+    return val
+
+
+def _opt_enum(args: dict[str, Any], key: str, allowed: tuple[str, ...], default: str) -> str:
+    if key not in args or args[key] is None:
+        return default
+    val = args[key]
+    if not isinstance(val, str) or val not in allowed:
+        raise ToolArgumentError(f"`{key}` must be one of: {', '.join(allowed)}.")
+    return val
+
+
+def _opt_int(args: dict[str, Any], key: str, min_val: int, max_val: int, default: int) -> int:
+    if key not in args or args[key] is None:
+        return default
+    val = args[key]
+    if isinstance(val, bool) or not isinstance(val, int) or not (min_val <= val <= max_val):
+        raise ToolArgumentError(f"`{key}` must be an integer between {min_val} and {max_val}.")
+    return val
+
+
+def _is_valid_jsonrpc_id(req_id: Any) -> bool:
+    return isinstance(req_id, str) or (isinstance(req_id, int) and not isinstance(req_id, bool))
 
 
 class McpCatalogServer:
@@ -188,37 +239,34 @@ class McpCatalogServer:
             intent = args.get("intent")
             if not isinstance(intent, str) or not intent.strip():
                 raise ToolArgumentError("`intent` must be a non-empty string.")
-            platform = str(args.get("platform") or "")
-            lang = str(args.get("lang") or "en")
-            if lang not in ("en", "zh"):
-                raise ToolArgumentError("`lang` must be 'en' or 'zh'.")
-            raw_limit = args.get("limit", 5)
-            if isinstance(raw_limit, bool) or not isinstance(raw_limit, int) or not (1 <= raw_limit <= 20):
-                raise ToolArgumentError("`limit` must be an integer between 1 and 20.")
-            recs = aat_cli.recommend_tools(enriched, intent, platform=platform, limit=raw_limit)
-            summary_lines = [
-                f"{idx}. {t['name']} ({t['repo']}) | ★{t.get('stars', 0):,} | {t.get('status')} ({t.get('health_score')}/100) | match={t['match_score']}"
-                for idx, t in enumerate(recs, 1)
-            ]
-            text = (
-                "\n".join(summary_lines)
-                if summary_lines
-                else "No matching Antigravity-exclusive tools found."
-            )
-            return self._tool_ok(text, {"tools": recs, "count": len(recs)})
+            platform = _opt_str(args, "platform", "")
+            lang = _opt_enum(args, "lang", ("en", "zh"), "en")
+            limit = _opt_int(args, "limit", 1, 20, 5)
+            recs = aat_cli.recommend_tools(enriched, intent, platform=platform, limit=limit)
+            blocks: list[str] = []
+            for idx, t in enumerate(recs, 1):
+                desc = t["description_zh"] if lang == "zh" else t["description_en"]
+                score_s = f"{t['health_score']}/100" if t.get("health_score") is not None else "N/A"
+                line = (
+                    f"{idx}. {t['name']} ({t['repo']}) | ★{t.get('stars', 0):,} | "
+                    f"{t.get('status')} ({score_s}) | match={t['match_score']}\n"
+                    f"   {desc}\n"
+                    f"   URL: {t['url']}"
+                )
+                if t.get("install_hint"):
+                    line += f"\n   Install: {t['install_hint']}"
+                blocks.append(line)
+            empty_msg = "未找到匹配的 Antigravity 专有工具。" if lang == "zh" else "No matching Antigravity-exclusive tools found."
+            return self._tool_ok("\n".join(blocks) if blocks else empty_msg, {"tools": recs, "count": len(recs)})
 
         if name == "aat_search":
-            query = str(args.get("query") or "")
-            category = str(args.get("category") or "")
-            platform = str(args.get("platform") or "")
-            tag = str(args.get("tag") or "")
-            status = str(args.get("status") or "")
-            sort_by = str(args.get("sort") or "stars")
-            if sort_by not in ("stars", "score", "name", "recent"):
-                raise ToolArgumentError("`sort` must be one of: stars, score, name, recent.")
-            raw_limit = args.get("limit", 20)
-            if isinstance(raw_limit, bool) or not isinstance(raw_limit, int) or not (1 <= raw_limit <= 100):
-                raise ToolArgumentError("`limit` must be an integer between 1 and 100.")
+            query = _opt_str(args, "query", "")
+            category = _opt_str(args, "category", "")
+            platform = _opt_str(args, "platform", "")
+            tag = _opt_str(args, "tag", "")
+            status = _opt_str(args, "status", "")
+            sort_by = _opt_enum(args, "sort", ("stars", "score", "name", "recent"), "stars")
+            limit = _opt_int(args, "limit", 1, 100, 20)
             matched = aat_cli.filter_and_sort_tools(
                 enriched,
                 query=query,
@@ -227,9 +275,10 @@ class McpCatalogServer:
                 tag=tag,
                 status=status,
                 sort_by=sort_by,
-            )[:raw_limit]
+            )[:limit]
             lines = [
-                f"{idx}. {t['name']} ({t['repo']}) | ★{t.get('stars', 0):,} | {t.get('status')}"
+                f"{idx}. {t['name']} ({t['repo']}) | ★{t.get('stars', 0):,} | "
+                f"{t.get('status')} ({t.get('health_score')}/100) | {t['url']}\n   {t['description_en']}"
                 for idx, t in enumerate(matched, 1)
             ]
             return self._tool_ok(
@@ -241,12 +290,8 @@ class McpCatalogServer:
             idents = args.get("tools")
             if not isinstance(idents, list) or not (2 <= len(idents) <= 4) or not all(isinstance(x, str) and x.strip() for x in idents):
                 raise ToolArgumentError("`tools` must be an array of 2 to 4 non-empty tool identifiers.")
-            lang = str(args.get("lang") or "en")
-            if lang not in ("en", "zh"):
-                raise ToolArgumentError("`lang` must be 'en' or 'zh'.")
-            fmt = str(args.get("format") or "markdown")
-            if fmt not in ("markdown", "json"):
-                raise ToolArgumentError("`format` must be 'markdown' or 'json'.")
+            lang = _opt_enum(args, "lang", ("en", "zh"), "en")
+            fmt = _opt_enum(args, "format", ("markdown", "json"), "markdown")
 
             resolved: list[dict[str, Any]] = []
             seen_ids: set[str] = set()
@@ -292,22 +337,30 @@ class McpCatalogServer:
             return self._tool_ok(json.dumps(payload, indent=2, ensure_ascii=False), payload)
 
         if name == "aat_doctor":
-            raw_os = str(args.get("os") or "").strip().lower()
-            if raw_os and raw_os not in ("windows", "macos", "linux"):
-                raise ToolArgumentError("`os` must be one of: windows, macos, linux.")
-            lang = str(args.get("lang") or "en")
-            if lang not in ("en", "zh"):
-                raise ToolArgumentError("`lang` must be 'en' or 'zh'.")
+            raw_os = ""
+            if "os" in args and args["os"] is not None:
+                raw_os = _opt_enum(args, "os", ("windows", "macos", "linux"), "")
+            lang = _opt_enum(args, "lang", ("en", "zh"), "en")
             probe = self.env_probe() if callable(self.env_probe) else self.env_probe
             report = aat_cli.run_doctor(enriched, env_probe=probe, os_override=raw_os)
-            return self._tool_ok(json.dumps(report, indent=2, ensure_ascii=False), report)
+            env = report["environment"]
+            header = (
+                f"Antigravity 环境体检 ({env['os']}) | agy CLI: {'是' if env.get('agy_in_path') else '否'}"
+                if lang == "zh"
+                else f"Antigravity Environment Doctor ({env['os']}) | agy CLI: {'Yes' if env.get('agy_in_path') else 'No'}"
+            )
+            lines = [header]
+            for chk in report["checks"]:
+                title = chk["title_zh"] if lang == "zh" else chk["title_en"]
+                detail = chk["detail_zh"] if lang == "zh" else chk["detail_en"]
+                tool_names = ", ".join(t["name"] for t in chk["tools"])
+                lines.append(f"- [{chk['severity'].upper()}] {title}: {detail} -> {tool_names}")
+            return self._tool_ok("\n".join(lines), report)
 
         raise ToolArgumentError(f"Unknown tool: {name}")
 
     def _read_resource(self, uri: str) -> dict[str, Any]:
         if uri == "aat://catalog":
-            if not self.catalog_path.exists():
-                raise ValueError(f"Catalog file missing: {self.catalog_path}")
             return {
                 "contents": [
                     {
@@ -318,8 +371,6 @@ class McpCatalogServer:
                 ]
             }
         if uri == "aat://llms.txt":
-            if not self.llms_path.exists():
-                raise ValueError(f"llms.txt file missing: {self.llms_path}")
             return {
                 "contents": [
                     {
@@ -329,20 +380,27 @@ class McpCatalogServer:
                     }
                 ]
             }
-        raise ValueError(f"Unknown resource URI: {uri}")
+        raise UnknownResourceError(f"Unknown resource URI: {uri}")
 
     def handle_request(self, req: Any) -> dict[str, Any] | None:
-        if not isinstance(req, dict) or req.get("jsonrpc") != "2.0" or not isinstance(req.get("method"), str):
-            req_id = req.get("id") if isinstance(req, dict) else None
-            return self._jsonrpc_err(req_id, -32600, "Invalid Request")
+        if not isinstance(req, dict) or req.get("jsonrpc") != "2.0":
+            return self._jsonrpc_err(None, -32600, "Invalid Request")
 
-        method = req["method"]
         has_id = "id" in req
         req_id = req.get("id")
-        params = req.get("params")
+        if has_id and not _is_valid_jsonrpc_id(req_id):
+            return self._jsonrpc_err(None, -32600, "Invalid Request: `id` must be a string or integer.")
+
+        method = req.get("method")
+        if not isinstance(method, str) or not method:
+            return self._jsonrpc_err(req_id if has_id else None, -32600, "Invalid Request")
 
         if not has_id:
             return None
+
+        params = req.get("params")
+        if "params" in req and params is not None and not isinstance(params, dict):
+            return self._jsonrpc_err(req_id, -32602, "Invalid params: expected JSON object.")
 
         if method == "initialize":
             req_proto = params.get("protocolVersion") if isinstance(params, dict) else None
@@ -363,14 +421,14 @@ class McpCatalogServer:
             return self._jsonrpc_ok(req_id, {"tools": TOOL_DEFINITIONS})
 
         if method == "tools/call":
-            if not isinstance(params, dict) or not isinstance(params.get("name"), str):
+            if not isinstance(params, dict) or not isinstance(params.get("name"), str) or not params["name"]:
                 return self._jsonrpc_err(req_id, -32602, "Invalid params: expected `{name, arguments}`.")
             tool_name = params["name"]
-            tool_args = params.get("arguments")
-            if tool_args is None:
-                tool_args = {}
-            if not isinstance(tool_args, dict):
-                return self._jsonrpc_ok(req_id, self._tool_err("Tool `arguments` must be an object."))
+            if tool_name not in KNOWN_TOOLS:
+                return self._jsonrpc_err(req_id, -32602, f"Unknown tool: {tool_name}")
+            if "arguments" in params and params["arguments"] is not None and not isinstance(params["arguments"], dict):
+                return self._jsonrpc_err(req_id, -32602, "Invalid params: `arguments` must be an object.")
+            tool_args = params.get("arguments") or {}
             try:
                 return self._jsonrpc_ok(req_id, self._call_tool(tool_name, tool_args))
             except ToolArgumentError as exc:
@@ -382,12 +440,14 @@ class McpCatalogServer:
             return self._jsonrpc_ok(req_id, {"resources": RESOURCE_DEFINITIONS})
 
         if method == "resources/read":
-            if not isinstance(params, dict) or not isinstance(params.get("uri"), str):
+            if not isinstance(params, dict) or not isinstance(params.get("uri"), str) or not params["uri"]:
                 return self._jsonrpc_err(req_id, -32602, "Invalid params: expected `{uri}`.")
             try:
                 return self._jsonrpc_ok(req_id, self._read_resource(params["uri"]))
-            except ValueError as exc:
+            except UnknownResourceError as exc:
                 return self._jsonrpc_err(req_id, -32602, str(exc))
+            except (OSError, UnicodeError) as exc:
+                return self._jsonrpc_err(req_id, -32603, f"Internal error reading resource: {exc}")
 
         return self._jsonrpc_err(req_id, -32601, f"Method not found: {method}")
 
@@ -440,11 +500,14 @@ def run_self_test(server: McpCatalogServer) -> int:
     return 0
 
 
-def _reconfigure_utf8(stream: TextIO) -> None:
+def _reconfigure_utf8(stream: TextIO, *, newline: str | None = None) -> None:
     reconfig = getattr(stream, "reconfigure", None)
     if callable(reconfig):
         try:
-            reconfig(encoding="utf-8", errors="replace")
+            kwargs: dict[str, Any] = {"encoding": "utf-8", "errors": "replace"}
+            if newline is not None:
+                kwargs["newline"] = newline
+            reconfig(**kwargs)
         except Exception:
             pass
 
@@ -458,7 +521,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     _reconfigure_utf8(sys.stdin)
-    _reconfigure_utf8(sys.stdout)
+    _reconfigure_utf8(sys.stdout, newline="\n")
     _reconfigure_utf8(sys.stderr)
 
     server = McpCatalogServer(catalog_path=args.catalog, snapshot_path=args.snapshot, llms_path=args.llms)
