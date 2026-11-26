@@ -133,9 +133,10 @@ def build_rss_feed(bundle: dict[str, Any]) -> str:
         title = escape(f"{t['name']} ({cat_map.get(t['category'], t['category'])})")
         link = escape(t["url"])
         guid = escape(f"{SITE_URL}?tool={t['id']}")
+        score_disp = f"{t['telemetry']['health_score']}/100" if t["telemetry"].get("health_score") is not None else "N/A"
         desc = escape(
             f"{t['description_en']} | Exclusivity: {t['exclusivity_reason_en']} | "
-            f"Stars: {t['telemetry']['stars']:,} | Health: {t['telemetry']['health_score']}/100"
+            f"Stars: {t['telemetry']['stars']:,} | Health: {score_disp}"
         )
         added = t.get("added_at", "2026-11-18")
         pub_dt = datetime.fromisoformat(f"{added}T00:00:00+00:00").strftime("%a, %d %b %Y %H:%M:%S +0000")
@@ -188,6 +189,7 @@ def build_robots() -> str:
 def build_llms_txt(bundle: dict[str, Any]) -> str:
     summary = bundle["summary"]
     repo_slug = bundle["repository"]
+    avg_score_disp = f"{summary['average_health_score']}/100" if summary.get("average_health_score") is not None else "N/A"
     lines = [
         "# Awesome Antigravity Tools",
         "",
@@ -197,7 +199,7 @@ def build_llms_txt(bundle: dict[str, Any]) -> str:
         f"- **Interactive Explorer**: {SITE_URL}",
         f"- **Machine-Readable Bundle**: {SITE_URL}catalog-bundle.json",
         f"- **RSS Feed**: {SITE_URL}feed.xml",
-        f"- **Ecosystem Pulse**: {summary['total_tools']} tools across {summary['total_categories']} categories | {summary['total_stars']:,} combined stars | {summary['healthy_tools']}/{summary['total_tools']} active ({summary['health_ratio_pct']}%) | Avg Health Score: {summary['average_health_score']}/100",
+        f"- **Ecosystem Pulse**: {summary['total_tools']} tools across {summary['total_categories']} categories | {summary['total_stars']:,} combined stars | {summary['healthy_tools']}/{summary['total_tools']} active ({summary['health_ratio_pct']}%) | Avg Health Score: {avg_score_disp}",
         "",
     ]
 

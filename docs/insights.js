@@ -147,9 +147,10 @@ export function renderInsightsPanel(mountEl, bundle, lang) {
     const toolText = `${toolSign}${Math.abs(trend.toolDelta)} ${lang === "zh" ? "工具" : "tools"}`;
 
     const metaTop = el("div", "trend-meta");
+    const deltaEl = el("span", `trend-delta${trend.starDelta < 0 ? " is-negative" : ""}`, `${starText} · ${toolText}`);
     metaTop.append(
       el("span", "", `${trend.earliestDate} → ${trend.latestDate}`),
-      el("span", "trend-delta", `${starText} · ${toolText}`)
+      deltaEl
     );
 
     const metaRange = el("div", "trend-meta");
@@ -220,7 +221,7 @@ export function renderCompareTray(barEl, dialogEl, bodyEl, state, onRemove, onCl
   barEl.append(inner);
 }
 
-function renderComparisonTable(bodyEl, tools, lang) {
+export function renderComparisonTable(bodyEl, tools, lang) {
   bodyEl.textContent = "";
   const wrap = el("div", "table-scroll");
   const table = el("table", "compare-table");

@@ -6,7 +6,7 @@ import {
   parseParamsToState,
   serializeStateToParams,
 } from "./catalog-logic.js";
-import { renderCompareTray, renderInsightsPanel } from "./insights.js";
+import { renderCompareTray, renderComparisonTable, renderInsightsPanel } from "./insights.js";
 
 const I18N = {
   en: {
@@ -237,6 +237,9 @@ function applyI18n() {
   }
   els.searchInput.placeholder = t("searchPlaceholder");
   els.langToggle.textContent = t("langToggle");
+  if (els.tagFilterBar) {
+    els.tagFilterBar.setAttribute("aria-label", state.lang === "zh" ? "热门标签" : "Popular tags");
+  }
   if (els.footerContributeLink) {
     els.footerContributeLink.href =
       state.lang === "zh"
@@ -490,6 +493,7 @@ function renderToolsGrid() {
     const isCompared = state.compareIds.includes(tool.id);
     const cmpBtn = el("button", "btn btn-ghost btn-sm", isCompared ? t("comparing") : t("compare"));
     cmpBtn.type = "button";
+    cmpBtn.setAttribute("aria-pressed", String(isCompared));
     cmpBtn.addEventListener("click", () => toggleCompare(tool.id));
 
     const detBtn = el("button", "btn btn-primary btn-sm", t("details"));
@@ -703,7 +707,20 @@ async function boot() {
 
     if (state.openToolId) {
       const target = state.bundle.tools.find((item) => item.id === state.openToolId);
-      if (target) openToolDialog(target);
+      if (target) {
+        openToolDialog(target);
+      } else {
+        state.openToolId = "";
+        syncUrl();
+      }
+    } else if (state.compareIds.length >= 2) {
+      const selected = state.compareIds
+        .map((id) => state.bundle.tools.find((item) => item.id === id))
+        .filter(Boolean);
+      if (selected.length >= 2) {
+        renderComparisonTable(els.compareBody, selected, state.lang);
+        if (!els.compareDialog.open) els.compareDialog.showModal();
+      }
     }
   } catch (err) {
     els.resultsCount.textContent = `Failed to load catalog-bundle.json: ${err.message}`;

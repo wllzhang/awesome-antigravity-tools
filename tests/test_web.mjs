@@ -97,9 +97,15 @@ test("URL state serialization round-trips cleanly with tag, featured, and compar
   const parsed = parseParamsToState(`?${qs}`);
   assert.deepEqual(parsed, original);
 
-  const capped = parseParamsToState("?compare=a,b,a,c,d&featured=true");
+  const capped = parseParamsToState("?compare=a,b,a,c,d&featured=true&tag=%20&status=healthy");
   assert.deepEqual(capped.compareIds, ["a", "b", "c"]);
   assert.equal(capped.featuredOnly, true);
+  assert.equal(capped.tag, "all");
+  assert.equal(capped.status, "HEALTHY");
+
+  const normalizedAll = parseParamsToState("?tag=ALL&status=BOGUS");
+  assert.equal(normalizedAll.tag, "all");
+  assert.equal(normalizedAll.status, "all");
 });
 
 test("computeHistoryTrendSummary computes polylines and deltas deterministically", () => {

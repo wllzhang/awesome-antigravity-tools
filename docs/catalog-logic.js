@@ -143,13 +143,17 @@ export function parseParamsToState(searchString) {
   const params = new URLSearchParams(searchString || "");
   const rawCmp = params.get("compare") || "";
   const compareIds = normalizeCompareIds(rawCmp ? rawCmp.split(",") : []);
+  const rawTag = (params.get("tag") || "").trim();
+  const tag = !rawTag || rawTag.toLowerCase() === "all" ? "all" : rawTag;
+  const rawStatus = (params.get("status") || "all").trim().toUpperCase();
+  const status = ["HEALTHY", "STALE"].includes(rawStatus) ? rawStatus : "all";
   return {
     query: params.get("q") || "",
     category: params.get("cat") || "all",
     platform: params.get("platform") || "all",
-    tag: params.get("tag") || "all",
+    tag,
     featuredOnly: params.get("featured") === "1" || params.get("featured") === "true",
-    status: params.get("status") || "all",
+    status,
     sort: ["stars", "score", "recent", "name"].includes(params.get("sort")) ? params.get("sort") : "stars",
     lang: params.get("lang") === "zh" ? "zh" : "en",
     compareIds,

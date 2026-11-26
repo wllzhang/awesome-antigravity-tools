@@ -15,7 +15,7 @@
   --text: light-dark(#101828, #e6edf7);
   --text-muted: light-dark(#475467, #98a6bf);
   --accent: light-dark(#2563eb, #60a5fa);
-  --accent-strong: light-dark(#1d4ed8, #3b82f6);
+  --accent-strong: light-dark(#1d4ed8, #2563eb);
   --accent-soft: light-dark(#e8f0fe, #172a4a);
   --ok: light-dark(#047857, #34d399);
   --ok-bg: light-dark(#ecfdf5, #0b2e24);
@@ -396,7 +396,7 @@ select:focus-visible {
   gap: 0.4rem;
 }
 
-@container (min-width: 300px) {
+@container (min-width: 380px) {
   .card-top {
     flex-direction: row;
     align-items: flex-start;
@@ -430,10 +430,13 @@ select:focus-visible {
   font-size: 0.78rem;
   color: var(--text-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
 }
 
 .card-metrics {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.4rem;
   align-items: center;
   flex-shrink: 0;
@@ -796,6 +799,10 @@ select:focus-visible {
   color: var(--ok);
 }
 
+.trend-delta.is-negative {
+  color: var(--danger);
+}
+
 /* Floating Comparison Tray & Table */
 .compare-bar {
   position: sticky;
@@ -885,6 +892,10 @@ select:focus-visible {
 }
 
 @media print {
+  :root {
+    color-scheme: light !important;
+  }
+
   .site-header,
   .controls-panel,
   .compare-bar,
