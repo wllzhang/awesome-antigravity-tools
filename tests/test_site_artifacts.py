@@ -127,6 +127,41 @@ class TestSiteArtifacts(unittest.TestCase):
         self.assertTrue((REPO_ROOT / manifest["logo"]).exists())
         self.assertTrue((REPO_ROOT / "skills" / "antigravity-tools-advisor" / "SKILL.md").exists())
 
+    def test_llms_txt_and_logo_svg_integrity(self):
+        llms_path = DOCS_DIR / "llms.txt"
+        self.assertTrue(llms_path.exists())
+        llms_text = llms_path.read_text(encoding="utf-8")
+        catalog = json.loads((REPO_ROOT / "data" / "tools.json").read_text(encoding="utf-8"))
+        for tool in catalog["tools"]:
+            self.assertIn(tool["name"], llms_text)
+            self.assertIn(tool["url"], llms_text)
+
+        src_logo = (REPO_ROOT / "assets" / "logo.svg").read_text(encoding="utf-8").replace("\r\n", "\n")
+        dst_logo = (DOCS_DIR / "logo.svg").read_text(encoding="utf-8").replace("\r\n", "\n")
+        self.assertEqual(src_logo, dst_logo)
+
+    def test_rss_guids_use_query_tool_deeplinks(self):
+        rss_root = ET.fromstring((DOCS_DIR / "feed.xml").read_text(encoding="utf-8"))
+        guids = rss_root.findall("./channel/item/guid")
+        self.assertGreater(len(guids), 0)
+        for guid in guids:
+            self.assertEqual(guid.attrib.get("isPermaLink"), "true")
+            self.assertIn("?tool=", guid.text or "")
+            self.assertNotIn("#tool=", guid.text or "")
+
+    def test_health_check_workflow_stages_all_generated_docs(self):
+        wf_text = (REPO_ROOT / ".github" / "workflows" / "health-check.yml").read_text(encoding="utf-8")
+        for expected in (
+            "docs/catalog-bundle.json",
+            "docs/feed.xml",
+            "docs/sitemap.xml",
+            "docs/robots.txt",
+            "docs/llms.txt",
+            "docs/logo.svg",
+            "docs/.nojekyll",
+        ):
+            self.assertIn(expected, wf_text)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -430,6 +430,12 @@ class TestBadgesAndDiscovery(unittest.TestCase):
         )
         self.assertEqual([c["full_name"] for c in all_ranked], ["acme/antigravity-stale", "acme/agy-fresh"])
 
+    def test_discovery_default_queries_cover_agy_and_google_antigravity(self):
+        joined = "\n".join(discover_candidates.DEFAULT_QUERIES).lower()
+        self.assertIn("agy in:name", joined)
+        self.assertIn('"google antigravity"', joined)
+        self.assertIn("antigravity in:name", joined)
+
 
 class TestCliAndSubmissionParser(unittest.TestCase):
     def test_cli_search_stats_and_add(self):
@@ -713,6 +719,41 @@ ACP, CLI
         self.assertEqual(entry["repo"], "acme/gamma-edge")
         self.assertEqual(entry["platforms"], ["macOS", "Windows", "VS Code"])
         self.assertEqual(entry["exclusivity_reason_zh"], "专为 Google Antigravity agy acp 标准传输构建。")
+
+    def test_cli_end_to_end_smoke(self):
+        real_cat = str(REPO_ROOT / "data" / "tools.json")
+        real_snap = str(REPO_ROOT / "data" / "health_snapshot.json")
+
+        buf_stats = io.StringIO()
+        with redirect_stdout(buf_stats):
+            self.assertEqual(aat_cli.main(["--catalog", real_cat, "--snapshot", real_snap, "stats", "--json"]), 0)
+        stats_data = json.loads(buf_stats.getvalue())
+        self.assertGreaterEqual(stats_data["total_tools"], 37)
+
+        buf_rec = io.StringIO()
+        with redirect_stdout(buf_rec):
+            self.assertEqual(aat_cli.main(["--catalog", real_cat, "--snapshot", real_snap, "recommend", "quota hud"]), 0)
+        self.assertIn("recommended Antigravity-exclusive tool", buf_rec.getvalue())
+
+        buf_cmp = io.StringIO()
+        with redirect_stdout(buf_cmp):
+            self.assertEqual(
+                aat_cli.main(
+                    ["--catalog", real_cat, "--snapshot", real_snap, "compare", "agy-fast", "antigravity-agy-dart", "--markdown", "--lang", "zh"]
+                ),
+                0,
+            )
+        self.assertIn("专有性依据", buf_cmp.getvalue())
+
+        buf_doc = io.StringIO()
+        with redirect_stdout(buf_doc):
+            self.assertEqual(
+                aat_cli.main(
+                    ["--catalog", real_cat, "--snapshot", real_snap, "doctor", "--os", "windows", "--lang", "zh"]
+                ),
+                0,
+            )
+        self.assertIn("本地环境体检 (Windows)", buf_doc.getvalue())
 
 
 if __name__ == "__main__":
