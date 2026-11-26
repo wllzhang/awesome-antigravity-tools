@@ -24,6 +24,7 @@ DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
 DEFAULT_SNAPSHOT = REPO_ROOT / "data" / "health_snapshot.json"
 DEFAULT_HISTORY = REPO_ROOT / "data" / "health_history.json"
 DEFAULT_DOCS_DIR = REPO_ROOT / "docs"
+DEFAULT_LOGO = REPO_ROOT / "assets" / "logo.svg"
 SITE_URL = "https://wllzhang.github.io/awesome-antigravity-tools/"
 
 
@@ -131,7 +132,7 @@ def build_rss_feed(bundle: dict[str, Any]) -> str:
     for t in sorted_tools:
         title = escape(f"{t['name']} ({cat_map.get(t['category'], t['category'])})")
         link = escape(t["url"])
-        guid = escape(f"{SITE_URL}#tool={t['id']}")
+        guid = escape(f"{SITE_URL}?tool={t['id']}")
         desc = escape(
             f"{t['description_en']} | Exclusivity: {t['exclusivity_reason_en']} | "
             f"Stars: {t['telemetry']['stars']:,} | Health: {t['telemetry']['health_score']}/100"
@@ -142,7 +143,7 @@ def build_rss_feed(bundle: dict[str, Any]) -> str:
             "    <item>\n"
             f"      <title>{title}</title>\n"
             f"      <link>{link}</link>\n"
-            f"      <guid isPermaLink=\"false\">{guid}</guid>\n"
+            f"      <guid isPermaLink=\"true\">{guid}</guid>\n"
             f"      <pubDate>{pub_dt}</pubDate>\n"
             f"      <description>{desc}</description>\n"
             "    </item>"
@@ -182,6 +183,50 @@ def build_sitemap(bundle: dict[str, Any]) -> str:
 
 def build_robots() -> str:
     return f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n"
+
+
+def build_llms_txt(bundle: dict[str, Any]) -> str:
+    summary = bundle["summary"]
+    repo_slug = bundle["repository"]
+    lines = [
+        "# Awesome Antigravity Tools",
+        "",
+        "> Strictly curated, schema-validated directory of 100% Google Antigravity-exclusive engineering tools, IDE extensions, runtime hotfixes, and ACP gateways.",
+        "",
+        f"- **Canonical Repository**: https://github.com/{repo_slug}",
+        f"- **Interactive Explorer**: {SITE_URL}",
+        f"- **Machine-Readable Bundle**: {SITE_URL}catalog-bundle.json",
+        f"- **RSS Feed**: {SITE_URL}feed.xml",
+        f"- **Ecosystem Pulse**: {summary['total_tools']} tools across {summary['total_categories']} categories | {summary['total_stars']:,} combined stars | {summary['healthy_tools']}/{summary['total_tools']} active ({summary['health_ratio_pct']}%) | Avg Health Score: {summary['average_health_score']}/100",
+        "",
+    ]
+
+    by_cat: dict[str, list[dict[str, Any]]] = {c["id"]: [] for c in bundle["categories"]}
+    for tool in bundle["tools"]:
+        by_cat.setdefault(tool["category"], []).append(tool)
+
+    for cat in bundle["categories"]:
+        tools = sorted(by_cat.get(cat["id"], []), key=lambda t: (-t["telemetry"]["stars"], t["name"].lower()))
+        if not tools:
+            continue
+        lines.append(f"## {cat['name_en']} ({len(tools)})")
+        lines.append("")
+        lines.append(cat["description_en"])
+        lines.append("")
+        for t in tools:
+            tel = t["telemetry"]
+            plats = ", ".join(t.get("platforms", []))
+            tags = ", ".join(t.get("tags", []))
+            score = f"{tel['health_score']}/100" if tel.get("health_score") is not None else "N/A"
+            lines.append(
+                f"- [{t['name']}]({t['url']}) (`{t['repo']}` | {tel['status']} {score} | ★{tel['stars']:,} | {plats}): "
+                f"{t['description_en']} Exclusivity: {t['exclusivity_reason_en']} Tags: {tags}."
+            )
+            if t.get("install_hint"):
+                lines.append(f"  - Install: `{t['install_hint']}`")
+        lines.append("")
+
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def write_or_check(path: Path, content: str, check_only: bool) -> bool:
@@ -225,8 +270,11 @@ def main() -> int:
         args.docs_dir / "feed.xml": build_rss_feed(bundle),
         args.docs_dir / "sitemap.xml": build_sitemap(bundle),
         args.docs_dir / "robots.txt": build_robots(),
+        args.docs_dir / "llms.txt": build_llms_txt(bundle),
         args.docs_dir / ".nojekyll": "",
     }
+    if DEFAULT_LOGO.exists():
+        artifacts[args.docs_dir / "logo.svg"] = DEFAULT_LOGO.read_text(encoding="utf-8").replace("\r\n", "\n")
 
     ok = all(write_or_check(path, content, args.check) for path, content in artifacts.items())
     return 0 if ok else 1

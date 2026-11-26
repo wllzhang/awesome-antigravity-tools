@@ -11,259 +11,259 @@
     <item>
       <title>antigravity2-cn (Platform Fixes &amp; Runtime Patches)</title>
       <link>https://github.com/qqxpee/antigravity2-cn</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity2-cn</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity2-cn</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Zero-dependency Simplified and Traditional Chinese localization injector for Antigravity 2.0 Desktop using syntax-verified atomic ASAR patching and Shadow DOM code isolation. | Exclusivity: Purpose-built ASAR dynamic bundle injector targeting Antigravity 2.0 Desktop main process menus, Swarm sidecars, and settings UI. | Stars: 2,650 | Health: 93/100</description>
     </item>
     <item>
       <title>obsidian-prism (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/RMvdesi/obsidian-prism</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=obsidian-prism</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=obsidian-prism</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Optical UI suite for Google Antigravity Desktop featuring WebGL2 prism themes, damped-spring motion, a 512K context vial, reasoning slider, and pixel mascots. | Exclusivity: Targets Google Antigravity Desktop's workbench DOM, plugin.json sidecars, and reasoning level controls directly. | Stars: 1,792 | Health: 97/100</description>
     </item>
     <item>
       <title>agy-fast (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/INK-Q/agy-fast</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-fast</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-fast</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Zero-dependency, policy-compliant local MCP accelerator plugin for Google Antigravity (CLI, Desktop, and IDE) cutting agent turns, billable token quota, and upload traffic. | Exclusivity: Packaged strictly around Google Antigravity's native plugin.json, hooks.json, and MCP tool-call batching bottlenecks. | Stars: 1,630 | Health: 97/100</description>
     </item>
     <item>
       <title>antigravity-context-viewer (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/elviscjn-cjn/antigravity-context-viewer</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-context-viewer</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-context-viewer</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Context window and token usage dashboard for Google Antigravity 2.x tracking real-time context budgets, 5h/weekly model quotas, generation speed, and CLI history. | Exclusivity: Built exclusively for Antigravity 2.x Desktop and agy CLI telemetry stores with macOS ElectronAsarIntegrity watch mode. | Stars: 1,182 | Health: 93/100</description>
     </item>
     <item>
       <title>agy-powertools (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/WhiteBr1ck/agy-powertools</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-powertools</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-powertools</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Native workbench enhancement plugin for Antigravity 2.0 adding compact layout typography, phase summaries, context and cache telemetry, session branching, and zh-CN UI. | Exclusivity: Built directly on Antigravity 2.0's native plugin.json, hooks.json, and auxiliary sidecar architecture. | Stars: 1,167 | Health: 97/100</description>
     </item>
     <item>
       <title>antigravity-rtl (Platform Fixes &amp; Runtime Patches)</title>
       <link>https://github.com/mmnaderi/antigravity-rtl</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-rtl</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-rtl</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Smart Right-to-Left (RTL) layout and bidirectional typography patcher for Google Antigravity Desktop and Antigravity IDE supporting Persian, Arabic, and Hebrew. | Exclusivity: Patches Antigravity Desktop and IDE chat/markdown rendering CSS and DOM layout specifically for bidirectional RTL scripts. | Stars: 416 | Health: 84/100</description>
     </item>
     <item>
       <title>robotics-antigravity-plugin (Official CLI &amp; SDKs)</title>
       <link>https://github.com/google-deepmind/robotics-antigravity-plugin</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=robotics-antigravity-plugin</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=robotics-antigravity-plugin</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Official Google DeepMind Antigravity plugin suite providing Python tooling and workflows for MuJoCo simulation and real-world agentic robotics. | Exclusivity: First-party Google DeepMind repository packaged specifically around Antigravity's native plugins.json specification. | Stars: 364 | Health: 93/100</description>
     </item>
     <item>
       <title>agy-capsule (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/Lumidarin/agy-capsule</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-capsule</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-capsule</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Inline composer capsule HUD for Google Antigravity Desktop and Antigravity IDE displaying live context usage, model quotas, cache hit status, and generation speed. | Exclusivity: Injects hoverable telemetry capsules directly into the Antigravity Desktop composer bar and ships a dedicated agy-capsule-ide extension. | Stars: 356 | Health: 93/100</description>
     </item>
     <item>
       <title>paragravity (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/edison-land/paragravity</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=paragravity</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=paragravity</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Non-invasive parallel multi-account and isolated sandbox instance manager for Google Antigravity with CLI controls and local dashboard. | Exclusivity: Isolates Google Antigravity profile directories and runtime sandboxes specifically for concurrent multi-account sessions. | Stars: 340 | Health: 84/100</description>
     </item>
     <item>
       <title>agy-switch (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/anglee0323/agy-switch</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-switch</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-switch</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Cross-platform Tauri desktop app, tray widget, and CLI synchronizing Antigravity accounts, quota-based smart switching, and token analytics across Desktop, CLI, and IDE. | Exclusivity: Synchronizes credentials and quota-aware switching across Antigravity Desktop, agy CLI, Antigravity IDE 2.6+, and VS Code extension. | Stars: 243 | Health: 82/100</description>
     </item>
     <item>
       <title>porta (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/L1M80/porta</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=porta</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=porta</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Self-hosted lightweight remote web interface and mobile PWA companion for controlling and monitoring local Google Antigravity sessions over WebSocket. | Exclusivity: Connects directly to Google Antigravity's local language server and session runtime to expose a mobile-friendly PWA portal. | Stars: 215 | Health: 84/100</description>
     </item>
     <item>
       <title>Antigravity-agy-dart (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/zou172866/Antigravity-agy-dart</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-agy-dart</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-agy-dart</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Native Google Antigravity plugin combining automatic KV prompt-cache warm-up, SQLite FTS5 context compression, live context metering, and crashed session recovery. | Exclusivity: Built exclusively on Antigravity's plugin.json, lifecycle hooks, MCP server, and sidecar specifications. | Stars: 197 | Health: 93/100</description>
     </item>
     <item>
       <title>pi-antigravity-acp-provider (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/zacbemis/pi-antigravity-acp-provider</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=pi-antigravity-acp-provider</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=pi-antigravity-acp-provider</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>First-class Agent Client Protocol (`agy acp`) provider extension bridging Google Antigravity CLI sessions and models natively into the Pi coding agent. | Exclusivity: Communicates strictly with Google Antigravity's official agy acp server without reverse-engineered OAuth endpoints. | Stars: 117 | Health: 93/100</description>
     </item>
     <item>
       <title>agy-auth (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/fikrilal/agy-auth</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-auth</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-auth</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Lightweight Go CLI utility for fast multi-account profile management and credential switching across Google Antigravity CLI (`agy`) and Desktop. | Exclusivity: Manages Google Antigravity CLI and Desktop local OAuth session profiles directly. | Stars: 115 | Health: 93/100</description>
     </item>
     <item>
       <title>agy-hud (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/franksde/agy-hud</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-hud</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-hud</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Native terminal statusline HUD plugin for Google Antigravity CLI (`agy`) displaying real-time context consumption, model quota usage, active model info, and agent status. | Exclusivity: Built exclusively on Antigravity CLI's native plugin.json and lifecycle hooks statusline specification. | Stars: 85 | Health: 93/100</description>
     </item>
     <item>
       <title>agy-powerline (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/wassim-azi/agy-powerline</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-powerline</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-powerline</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Zero-dependency Powerline statusline plugin for Antigravity CLI (`agy`) featuring Gemini and Claude quota pacing, context meters, Git widgets, and 22 terminal themes. | Exclusivity: Designed specifically for Google Antigravity CLI's statusline protocol and Hydrogen/Neon/Argon/Carbon/Flash quota tiers. | Stars: 78 | Health: 93/100</description>
     </item>
     <item>
       <title>paseo-agy-acp (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/tiezbro/paseo-agy-acp</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=paseo-agy-acp</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=paseo-agy-acp</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>Apache-2.0 Paseo provider powered by the official `agy acp` kernel enabling dual Antigravity Pro account coexistence, mode mapping, admission queuing, and skill discovery. | Exclusivity: Built directly on Google Antigravity's official agy acp kernel to isolate secondary Antigravity Pro credentials in Paseo. | Stars: 71 | Health: 93/100</description>
     </item>
     <item>
       <title>agy-gyro (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/topjohnwu/agy-gyro</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-gyro</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-gyro</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
       <description>High-performance Rust local Antigravity Enterprise Gateway (`genai` wire protocol), transient HTTP 429/5xx retry proxy, and live token usage monitor. | Exclusivity: Implements Google Antigravity's first-class Enterprise Gateway genai wire protocol specifically across Desktop, IDE, and CLI. | Stars: 50 | Health: 89/100</description>
     </item>
     <item>
       <title>agy-remote-wecom (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/lukeinx/agy-remote-wecom</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-remote-wecom</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-remote-wecom</guid>
       <pubDate>Tue, 24 Nov 2026 00:00:00 +0000</pubDate>
       <description>Control local Antigravity (agy) terminal and background agy acp sessions from WeCom on macOS over an outbound WebSocket connection, with session resume, attachments, model/mode switching, and tool-approval cards. | Exclusivity: Built exclusively around Google Antigravity's native agy CLI, lifecycle hook plugin specification, and agy acp background session protocol. | Stars: 0 | Health: 79/100</description>
     </item>
     <item>
       <title>agy-meme (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/jiangnanquan/agy-meme</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-meme</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-meme</guid>
       <pubDate>Sat, 21 Nov 2026 00:00:00 +0000</pubDate>
       <description>Bidirectional Neko reaction stickers, Cmd/Ctrl+Shift+M inline composer picker, and Desktop-isolated zero-dependency MCP plugin (48 universal RGBA die-cut WebP stickers) for Google Antigravity Desktop. | Exclusivity: Built exclusively on Antigravity's native plugin.json specification and Antigravity Desktop 2.0+ Electron app.asar IPC/preload overlay with automatic agy CLI process-tree isolation. | Stars: 2 | Health: 83/100</description>
     </item>
     <item>
       <title>agy-desktop-exo (Platform Fixes &amp; Runtime Patches)</title>
       <link>https://github.com/jiangnanquan/agy-desktop-exo</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=agy-desktop-exo</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-desktop-exo</guid>
       <pubDate>Fri, 20 Nov 2026 00:00:00 +0000</pubDate>
       <description>UX enhancements (compact wide-layout toggle, inline Office/EPUB sidebar preview) and Simplified Chinese localization for Google Antigravity Desktop. | Exclusivity: Built exclusively for Antigravity Desktop 2.0+ Electron app.asar patching with strict content isolation and inside-out macOS codesigning. | Stars: 0 | Health: 63/100</description>
     </item>
     <item>
       <title>flow2api (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/TheSmallHanCat/flow2api</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=flow2api</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=flow2api</guid>
       <pubDate>Thu, 19 Nov 2026 00:00:00 +0000</pubDate>
       <description>OpenAI and Gemini compatible API gateway for Google Flow (Veo 3.1, Nano Banana, and Omni) featuring multi-account pooling, automatic cookie refresh, and proxy support. | Exclusivity: Companion Google AI Pro/Ultra media gateway exposing Google Flow image and video generation alongside Antigravity workflows over OpenAI/Gemini APIs. | Stars: 3,202 | Health: 93/100</description>
     </item>
     <item>
       <title>antigravity-proxy (Platform Fixes &amp; Runtime Patches)</title>
       <link>https://github.com/yuaotian/antigravity-proxy</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-proxy</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-proxy</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
       <description>Transparent Windows DLL-injection proxy utility that routes Antigravity process traffic through SOCKS5/HTTP proxies without requiring TUN mode. | Exclusivity: Targets Antigravity's Windows child processes (including language server binaries) that ignore system proxy settings. | Stars: 5,862 | Health: 93/100</description>
     </item>
     <item>
       <title>antigravity-sdk-python (Official CLI &amp; SDKs)</title>
       <link>https://github.com/google-antigravity/antigravity-sdk-python</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-sdk-python</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-sdk-python</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
       <description>Official Apache-2.0 Python SDK for building programmatic AI agents and workflows powered directly by Google Antigravity. | Exclusivity: Official Python client library purpose-built for Google Antigravity's agent runtime. | Stars: 4,227 | Health: 100/100</description>
     </item>
     <item>
       <title>antigravity-cli (Official CLI &amp; SDKs)</title>
       <link>https://github.com/google-antigravity/antigravity-cli</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-cli</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-cli</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
       <description>Official Antigravity CLI (`agy`) bringing the reasoning, execution, and orchestration capabilities of the Antigravity agent harness directly into the terminal. | Exclusivity: First-party official CLI harness for Google Antigravity (`agy` and `agy acp`). | Stars: 3,139 | Health: 84/100</description>
     </item>
     <item>
       <title>Antigravity-Chinese-Localization (Platform Fixes &amp; Runtime Patches)</title>
       <link>https://github.com/antigravity-cn-community/Antigravity-Chinese-Localization</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-chinese-localization</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-chinese-localization</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
       <description>MIT-licensed one-click Chinese localization toolkit and UI translation patch tailored for Google Antigravity IDE. | Exclusivity: Targets Antigravity IDE's bundled UI string tables and resource packages exclusively. | Stars: 2,809 | Health: 93/100</description>
     </item>
     <item>
       <title>AntigravityManager (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/Draculabo/AntigravityManager</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=draculabo-antigravity-manager</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=draculabo-antigravity-manager</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
       <description>Desktop application for managing Google accounts across Antigravity Classic, Antigravity IDE, and `agy` CLI with real-time quota views. | Exclusivity: Built specifically around Antigravity Classic, Antigravity IDE, and `agy` CLI local account and quota storage. | Stars: 2,595 | Health: 90/100</description>
     </item>
     <item>
       <title>antigravity-panel (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/n2ns/antigravity-panel</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-panel</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-panel</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
       <description>Quota monitor and cache manager for Google Antigravity IDE tracking Gemini, Claude, and GPT limits with usage trend analytics. | Exclusivity: Reads Google Antigravity IDE local quota telemetry and cache directories directly. | Stars: 915 | Health: 97/100</description>
     </item>
     <item>
       <title>ACP-Ant (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/czg86389-hub/ACP-Ant</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=acp-ant</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=acp-ant</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
       <description>OpenAI and Anthropic compatible API server bridging Google's official Antigravity CLI over ACP with per-account proxy and tool-calling support. | Exclusivity: Drives Google's official `agy` CLI strictly through its Agent Client Protocol interface. | Stars: 108 | Health: 93/100</description>
     </item>
     <item>
       <title>antigravity-acp (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/shubzkothekar/antigravity-acp</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-acp</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-acp</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
       <description>Bun-powered Agent Client Protocol server for Google Antigravity's `agy` CLI featuring live streaming and session history replay. | Exclusivity: Dedicated ACP server bridge written specifically for driving `agy` CLI sessions from ACP editors. | Stars: 88 | Health: 84/100</description>
     </item>
     <item>
       <title>refined-antigravity-acp (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/simonepri/refined-antigravity-acp</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=refined-antigravity-acp</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=refined-antigravity-acp</guid>
       <pubDate>Wed, 18 Nov 2026 00:00:00 +0000</pubDate>
       <description>Drop-in refined Google Antigravity ACP binary wrapper resolving protocol compatibility quirks for external ACP clients. | Exclusivity: Wraps and normalizes Google Antigravity's native ACP protocol stream specifically. | Stars: 22 | Health: 88/100</description>
     </item>
     <item>
       <title>Antigravity-Manager (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/lbjlaq/Antigravity-Manager</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-manager</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-manager</guid>
       <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
       <description>Native desktop account manager and one-click switcher for Antigravity built with Tauri v2 (Rust) and React. | Exclusivity: Targets Antigravity's local profile, authentication state, and account switching workflow natively. | Stars: 34,139 | Health: 93/100</description>
     </item>
     <item>
       <title>vscode-antigravity-cockpit (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/jlcodes99/vscode-antigravity-cockpit</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=vscode-antigravity-cockpit</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=vscode-antigravity-cockpit</guid>
       <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
       <description>VS Code extension for real-time Antigravity model quota tracking, status bar countdowns, multi-model pinning, and capability HUDs. | Exclusivity: Purpose-built HUD and quota dashboard tailored exclusively to Antigravity's model catalog and reset windows. | Stars: 4,856 | Health: 93/100</description>
     </item>
     <item>
       <title>liftgate (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/acking-you/liftgate</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=liftgate</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=liftgate</guid>
       <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
       <description>Run Antigravity as a local OpenAI Responses and Anthropic Messages gateway via official `agy acp` over stdio with native GPUI desktop and TUI controls. | Exclusivity: Built natively on Google Antigravity's official `agy acp` stdio Agent Client Protocol. | Stars: 46 | Health: 84/100</description>
     </item>
     <item>
       <title>antigravity-skill-porter (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
       <link>https://github.com/Pranav-Nexus/antigravity-skill-porter</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-skill-porter</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-skill-porter</guid>
       <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
       <description>CLI tool specifically adapting, wrapping, and validating external skills into native Antigravity plugins with `plugin.json` and tool name mapping. | Exclusivity: Targets Antigravity's native `plugin.json` manifest format and tool namespace mapping directly. | Stars: 6 | Health: 80/100</description>
     </item>
     <item>
       <title>vscode-antigravity-backend-fix (Platform Fixes &amp; Runtime Patches)</title>
       <link>https://github.com/HeshamNoaman/vscode-antigravity-backend-fix</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=vscode-antigravity-backend-fix</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=vscode-antigravity-backend-fix</guid>
       <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
       <description>Hotfix for the official VS Code Antigravity extension resolving the repeated ~202 MB `agy.exe` background download loop caused by Windows Defender timeouts. | Exclusivity: Patches the official VS Code Antigravity extension's `agy.exe` binary extraction and startup verification timeout. | Stars: 4 | Health: 75/100</description>
     </item>
     <item>
       <title>antigravity-junction-skill-fix (Platform Fixes &amp; Runtime Patches)</title>
       <link>https://github.com/wllzhang/antigravity-junction-skill-fix</link>
-      <guid isPermaLink="false">https://wllzhang.github.io/awesome-antigravity-tools/#tool=antigravity-junction-skill-fix</guid>
+      <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-junction-skill-fix</guid>
       <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
       <description>Zero-copy NTFS hardlink directory bridge that resolves Go language server discovery failures for Windows directory junctions (`mklink /J`) and symlinks (`mklink /D`). | Exclusivity: Solves the Antigravity Go language server (`language_server_windows_x64.exe`) reparse-point skip bug via a native `SessionStart` plugin hook. | Stars: 0 | Health: 79/100</description>
     </item>
