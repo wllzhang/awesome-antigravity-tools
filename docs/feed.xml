@@ -6,7 +6,7 @@
     <atom:link href="https://wllzhang.github.io/awesome-antigravity-tools/feed.xml" rel="self" type="application/rss+xml" />
     <description>Strictly 100% Google Antigravity-exclusive engineering tools, IDE extensions, runtime hotfixes, and ACP gateways.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 27 Nov 2026 02:22:42 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 27 Nov 2026 02:23:50 +0000</lastBuildDate>
     <docs>https://github.com/wllzhang/awesome-antigravity-tools</docs>
     <item>
       <title>antigravity2-cn (Platform Fixes &amp; Runtime Patches)</title>
@@ -20,7 +20,7 @@
       <link>https://github.com/RMvdesi/obsidian-prism</link>
       <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=obsidian-prism</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Optical UI suite for Google Antigravity Desktop featuring WebGL2 prism themes, damped-spring motion, a 512K context vial, reasoning slider, and pixel mascots. | Exclusivity: Targets Google Antigravity Desktop's workbench DOM, plugin.json sidecars, and reasoning level controls directly. | Stars: 2,298 | Health: 97/100</description>
+      <description>Optical UI suite for Google Antigravity Desktop featuring WebGL2 prism themes, damped-spring motion, a 512K context vial, reasoning slider, and pixel mascots. | Exclusivity: Targets Google Antigravity Desktop's workbench DOM, plugin.json sidecars, and reasoning level controls directly. | Stars: 2,301 | Health: 97/100</description>
     </item>
     <item>
       <title>agy-fast (Dedicated Gateways, ACP Adapters &amp; Migration Tooling)</title>
@@ -34,14 +34,14 @@
       <link>https://github.com/elviscjn-cjn/antigravity-context-viewer</link>
       <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-context-viewer</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Context window and token usage dashboard for Google Antigravity 2.x tracking real-time context budgets, 5h/weekly model quotas, generation speed, and CLI history. | Exclusivity: Built exclusively for Antigravity 2.x Desktop and agy CLI telemetry stores with macOS ElectronAsarIntegrity watch mode. | Stars: 1,363 | Health: 93/100</description>
+      <description>Context window and token usage dashboard for Google Antigravity 2.x tracking real-time context budgets, 5h/weekly model quotas, generation speed, and CLI history. | Exclusivity: Built exclusively for Antigravity 2.x Desktop and agy CLI telemetry stores with macOS ElectronAsarIntegrity watch mode. | Stars: 1,365 | Health: 93/100</description>
     </item>
     <item>
       <title>agy-powertools (IDE Extensions &amp; Cockpits)</title>
       <link>https://github.com/WhiteBr1ck/agy-powertools</link>
       <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=agy-powertools</guid>
       <pubDate>Thu, 26 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Native workbench enhancement plugin for Antigravity 2.0 adding compact layout typography, phase summaries, context and cache telemetry, session branching, and zh-CN UI. | Exclusivity: Built directly on Antigravity 2.0's native plugin.json, hooks.json, and auxiliary sidecar architecture. | Stars: 1,351 | Health: 97/100</description>
+      <description>Native workbench enhancement plugin for Antigravity 2.0 adding compact layout typography, phase summaries, context and cache telemetry, session branching, and zh-CN UI. | Exclusivity: Built directly on Antigravity 2.0's native plugin.json, hooks.json, and auxiliary sidecar architecture. | Stars: 1,353 | Health: 97/100</description>
     </item>
     <item>
       <title>antigravity-rtl (Platform Fixes &amp; Runtime Patches)</title>
@@ -230,7 +230,7 @@
       <link>https://github.com/lbjlaq/Antigravity-Manager</link>
       <guid isPermaLink="true">https://wllzhang.github.io/awesome-antigravity-tools/?tool=antigravity-manager</guid>
       <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
-      <description>Native desktop account manager and one-click switcher for Antigravity built with Tauri v2 (Rust) and React. | Exclusivity: Targets Antigravity's local profile, authentication state, and account switching workflow natively. | Stars: 34,207 | Health: 93/100</description>
+      <description>Native desktop account manager and one-click switcher for Antigravity built with Tauri v2 (Rust) and React. | Exclusivity: Targets Antigravity's local profile, authentication state, and account switching workflow natively. | Stars: 34,208 | Health: 93/100</description>
     </item>
     <item>
       <title>vscode-antigravity-cockpit (IDE Extensions &amp; Cockpits)</title>

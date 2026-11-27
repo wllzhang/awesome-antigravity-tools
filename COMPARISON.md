@@ -18,12 +18,12 @@
 
 | Tool | Status | Score | Stars | Language | License | Release | Platforms |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| [Antigravity-Manager](https://github.com/lbjlaq/Antigravity-Manager) | `HEALTHY` | **93** | 34,207 | Rust | NOASSERTION | `v5.0.4` | Windows, macOS, Linux |
-| [vscode-antigravity-cockpit](https://github.com/jlcodes99/vscode-antigravity-cockpit) | `HEALTHY` | **93** | 4,859 | TypeScript | MIT | - | VS Code, Antigravity IDE |
+| [Antigravity-Manager](https://github.com/lbjlaq/Antigravity-Manager) | `HEALTHY` | **93** | 34,208 | Rust | NOASSERTION | `v5.0.4` | Windows, macOS, Linux |
+| [vscode-antigravity-cockpit](https://github.com/jlcodes99/vscode-antigravity-cockpit) | `HEALTHY` | **93** | 4,859 | TypeScript | MIT | `v2.1.53` | VS Code, Antigravity IDE |
 | [AntigravityManager](https://github.com/Draculabo/AntigravityManager) | `HEALTHY` | **90** | 2,602 | TypeScript | NOASSERTION | `v0.33.1` | Windows, macOS, Linux |
-| [obsidian-prism](https://github.com/RMvdesi/obsidian-prism) | `HEALTHY` | **97** | 2,298 | JavaScript | GPL-3.0 | `v1.0.7` | Windows, macOS |
-| [antigravity-context-viewer](https://github.com/elviscjn-cjn/antigravity-context-viewer) | `HEALTHY` | **93** | 1,363 | JavaScript | MIT | `v0.9.3` | Windows, macOS, Linux |
-| [agy-powertools](https://github.com/WhiteBr1ck/agy-powertools) | `HEALTHY` | **97** | 1,351 | JavaScript | MIT | `v2.16.10` | Windows, macOS, Linux |
+| [obsidian-prism](https://github.com/RMvdesi/obsidian-prism) | `HEALTHY` | **97** | 2,301 | JavaScript | GPL-3.0 | `v1.0.7` | Windows, macOS |
+| [antigravity-context-viewer](https://github.com/elviscjn-cjn/antigravity-context-viewer) | `HEALTHY` | **93** | 1,365 | JavaScript | MIT | `v0.9.3` | Windows, macOS, Linux |
+| [agy-powertools](https://github.com/WhiteBr1ck/agy-powertools) | `HEALTHY` | **97** | 1,353 | JavaScript | MIT | `v2.16.10` | Windows, macOS, Linux |
 | [antigravity-panel](https://github.com/n2ns/antigravity-panel) | `HEALTHY` | **97** | 927 | TypeScript | Apache-2.0 | `v2.8.5` | VS Code, Antigravity IDE |
 | [agy-capsule](https://github.com/Lumidarin/agy-capsule) | `HEALTHY` | **93** | 373 | JavaScript | MIT | `v1.5.2` | Windows, macOS, Linux, Antigravity IDE |
 | [paragravity](https://github.com/edison-land/paragravity) | `HEALTHY` | **84** | 348 | Python | MIT | `v1.2.0` | Windows, macOS, Linux |

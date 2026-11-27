@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-11-27T02:22:42Z",
+  "generated_at": "2026-11-27T02:23:50Z",
   "repository": "wllzhang/awesome-antigravity-tools",
   "site_url": "https://wllzhang.github.io/awesome-antigravity-tools/",
   "summary": {
@@ -8,7 +8,7 @@
     "total_categories": 4,
     "healthy_tools": 37,
     "health_ratio_pct": 100.0,
-    "total_stars": 74632,
+    "total_stars": 74640,
     "total_forks": 8076,
     "average_health_score": 88.9,
     "by_status": {
@@ -499,7 +499,7 @@
       "telemetry": {
         "status": "HEALTHY",
         "health_score": 97,
-        "stars": 1351,
+        "stars": 1353,
         "forks": 60,
         "open_issues": 6,
         "language": "JavaScript",
@@ -576,7 +576,7 @@
       "telemetry": {
         "status": "HEALTHY",
         "health_score": 93,
-        "stars": 1363,
+        "stars": 1365,
         "forks": 116,
         "open_issues": 49,
         "language": "JavaScript",
@@ -612,7 +612,7 @@
       "telemetry": {
         "status": "HEALTHY",
         "health_score": 93,
-        "stars": 34207,
+        "stars": 34208,
         "forks": 3605,
         "open_issues": 1560,
         "language": "Rust",
@@ -718,7 +718,7 @@
       "telemetry": {
         "status": "HEALTHY",
         "health_score": 97,
-        "stars": 2298,
+        "stars": 2301,
         "forks": 92,
         "open_issues": 51,
         "language": "JavaScript",
@@ -794,7 +794,7 @@
         "open_issues": 29,
         "language": "TypeScript",
         "license": "MIT",
-        "latest_release": null,
+        "latest_release": "v2.1.53",
         "pushed_at": "2026-11-12T08:56:56Z",
         "days_inactive": 14
       }
@@ -1645,7 +1645,7 @@
     },
     {
       "date": "2026-11-27",
-      "generated_at": "2026-11-27T02:22:42Z",
+      "generated_at": "2026-11-27T02:23:50Z",
       "total": 37,
       "healthy": 37,
       "stale": 0,
@@ -1653,7 +1653,7 @@
       "archived": 0,
       "dead": 0,
       "health_ratio_pct": 100.0,
-      "total_stars": 74632,
+      "total_stars": 74640,
       "total_forks": 8076,
       "average_health_score": 88.9
     }

@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0.0",
-  "generated_at": "2026-11-27T02:22:42Z",
+  "generated_at": "2026-11-27T02:23:50Z",
   "summary": {
     "total": 37,
     "healthy": 37,
@@ -10,7 +10,7 @@
     "dead": 0,
     "error": 0,
     "health_ratio_pct": 100.0,
-    "total_stars": 74632,
+    "total_stars": 74640,
     "total_forks": 8076,
     "average_health_score": 88.9
   },
@@ -324,7 +324,7 @@
       "status": "HEALTHY",
       "code": 200,
       "health_score": 97,
-      "stars": 1351,
+      "stars": 1353,
       "forks": 60,
       "open_issues": 6,
       "language": "JavaScript",
@@ -342,7 +342,7 @@
       ],
       "archived": false,
       "days_inactive": 0,
-      "message": "Active (0d ago, 1351 stars)"
+      "message": "Active (0d ago, 1353 stars)"
     },
     {
       "id": "agy-switch",
@@ -384,7 +384,7 @@
       "status": "HEALTHY",
       "code": 200,
       "health_score": 93,
-      "stars": 1363,
+      "stars": 1365,
       "forks": 116,
       "open_issues": 49,
       "language": "JavaScript",
@@ -396,7 +396,7 @@
       "topics": [],
       "archived": false,
       "days_inactive": 1,
-      "message": "Active (1d ago, 1363 stars)"
+      "message": "Active (1d ago, 1365 stars)"
     },
     {
       "id": "antigravity-manager",
@@ -411,7 +411,7 @@
       "status": "HEALTHY",
       "code": 200,
       "health_score": 93,
-      "stars": 34207,
+      "stars": 34208,
       "forks": 3605,
       "open_issues": 1560,
       "language": "Rust",
@@ -426,7 +426,7 @@
       ],
       "archived": false,
       "days_inactive": 0,
-      "message": "Active (0d ago, 34207 stars)"
+      "message": "Active (0d ago, 34208 stars)"
     },
     {
       "id": "antigravity-panel",
@@ -520,7 +520,7 @@
       "status": "HEALTHY",
       "code": 200,
       "health_score": 97,
-      "stars": 2298,
+      "stars": 2301,
       "forks": 92,
       "open_issues": 51,
       "language": "JavaScript",
@@ -542,7 +542,7 @@
       ],
       "archived": false,
       "days_inactive": 1,
-      "message": "Active (1d ago, 2298 stars)"
+      "message": "Active (1d ago, 2301 stars)"
     },
     {
       "id": "paragravity",
@@ -602,8 +602,8 @@
       "license": "MIT",
       "default_branch": "main",
       "pushed_at": "2026-11-12T08:56:56Z",
-      "latest_release": null,
-      "latest_release_at": null,
+      "latest_release": "v2.1.53",
+      "latest_release_at": "2026-11-12T08:58:01Z",
       "topics": [],
       "archived": false,
       "days_inactive": 14,
