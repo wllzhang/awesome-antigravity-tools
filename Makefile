@@ -1,6 +1,6 @@
-.PHONY: all validate generate export build-site test audit discover serve
+.PHONY: all validate generate export build-site test mcp-test audit discover doctor serve
 
-all: generate validate test
+all: generate validate test mcp-test
 
 generate:
 	python3 scripts/aat_cli.py sync
@@ -21,12 +21,18 @@ test:
 	node --check docs/app.js
 	node --test tests/test_web.mjs
 
+mcp-test:
+	python3 scripts/mcp_server.py --self-test
+
 audit:
 	python3 scripts/health-check.py --use-gh-cli
 	$(MAKE) generate
 
 discover:
 	python3 scripts/discover_candidates.py --use-gh-cli --limit 15
+
+doctor:
+	python3 scripts/aat_cli.py doctor
 
 serve:
 	python3 -m http.server 8765 --directory docs

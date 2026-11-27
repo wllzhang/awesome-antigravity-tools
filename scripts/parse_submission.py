@@ -24,11 +24,12 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
+DEFAULT_EXCLUSIONS = REPO_ROOT / "data" / "exclusions.json"
 
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-GITHUB_URL_RE = re.compile(r"https?://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)")
+GITHUB_URL_RE = re.compile(r"https?://(?:www\.)?github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)", re.IGNORECASE)
 
 CATEGORY_ALIASES = {
     "official cli & sdks": "official-cli-sdks",
@@ -38,6 +39,32 @@ CATEGORY_ALIASES = {
     "platform fixes & system utilities": "platform-fixes-runtime-patches",
     "dedicated gateways, acp adapters & migration tooling": "dedicated-gateways-migration",
     "dedicated gateways & migration tooling": "dedicated-gateways-migration",
+}
+
+PLATFORM_ALIASES = {
+    "windows": "Windows",
+    "win": "Windows",
+    "win32": "Windows",
+    "win64": "Windows",
+    "macos": "macOS",
+    "mac": "macOS",
+    "darwin": "macOS",
+    "osx": "macOS",
+    "linux": "Linux",
+    "cross-platform": "Cross-Platform",
+    "cross platform": "Cross-Platform",
+    "all": "Cross-Platform",
+    "vscode": "VS Code",
+    "vs code": "VS Code",
+    "visual studio code": "VS Code",
+    "antigravity": "Antigravity IDE",
+    "antigravity ide": "Antigravity IDE",
+    "ide": "Antigravity IDE",
+    "mobile": "Mobile",
+    "ios": "Mobile",
+    "android": "Mobile",
+    "web": "Web",
+    "pwa": "Web",
 }
 
 
@@ -66,12 +93,33 @@ def parse_issue_form(body: str) -> dict[str, str]:
 
 
 def extract_github_slug(url_text: str) -> str | None:
-    match = GITHUB_URL_RE.search(url_text.strip())
+    cleaned = re.split(r"[?#]", url_text.strip(), maxsplit=1)[0].rstrip("/")
+    match = GITHUB_URL_RE.search(cleaned)
     if not match:
         return None
     owner, repo = match.group(1), match.group(2)
-    repo = repo.removesuffix(".git")
+    repo = re.sub(r"\.git$", "", repo, flags=re.IGNORECASE).rstrip(".")
+    if not owner or not repo or owner in (".", "..") or repo in (".", ".."):
+        return None
     return f"{owner}/{repo}"
+
+
+def normalize_platforms(raw_platforms: str) -> list[str]:
+    import validate_catalog
+
+    allowed_lower = {p.lower(): p for p in validate_catalog.ALLOWED_PLATFORMS}
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for token in re.split(r"[,;\n/|、]+", raw_platforms or ""):
+        cleaned = token.strip(" `")
+        if not cleaned:
+            continue
+        key = cleaned.lower()
+        canonical = PLATFORM_ALIASES.get(key) or allowed_lower.get(key)
+        if canonical and canonical not in seen:
+            seen.add(canonical)
+            normalized.append(canonical)
+    return normalized or ["Cross-Platform"]
 
 
 def resolve_category_id(raw_category: str, catalog: dict[str, Any]) -> str | None:
@@ -87,7 +135,26 @@ def resolve_category_id(raw_category: str, catalog: dict[str, Any]) -> str | Non
     return None
 
 
-def build_candidate_entry(sections: dict[str, str], catalog: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
+def load_exclusions_map(exclusions_path: Path = DEFAULT_EXCLUSIONS) -> dict[str, dict[str, Any]]:
+    if not exclusions_path.exists():
+        return {}
+    data = json.loads(exclusions_path.read_text(encoding="utf-8"))
+    entries = data.get("exclusions") or []
+    if not isinstance(entries, list):
+        return {}
+    return {
+        str(item["repo"]).lower(): item
+        for item in entries
+        if isinstance(item, dict) and item.get("repo")
+    }
+
+
+def build_candidate_entry(
+    sections: dict[str, str],
+    catalog: dict[str, Any],
+    *,
+    exclusions: dict[str, dict[str, Any]] | None = None,
+) -> tuple[dict[str, Any], list[str]]:
     import validate_catalog
 
     errors: list[str] = []
@@ -120,11 +187,14 @@ def build_candidate_entry(sections: dict[str, str], catalog: dict[str, Any]) -> 
         or sections.get("exclusivity rationale")
         or ""
     ).strip()
-    reason_zh = f"专为 Google Antigravity 生态构建：{reason_en[:80]}" if reason_en else ""
+    reason_zh = (
+        sections.get("antigravity exclusivity rationale (chinese, optional)")
+        or sections.get("exclusivity rationale (chinese, optional)")
+        or ""
+    ).strip() or (f"专为 Google Antigravity 生态构建：{reason_en[:80]}" if reason_en else "")
 
     raw_platforms = sections.get("platforms", "Cross-Platform")
-    platforms = [p.strip() for p in re.split(r"[,;\n]+", raw_platforms) if p.strip()]
-    platforms = [p for p in platforms if p in validate_catalog.ALLOWED_PLATFORMS] or ["Cross-Platform"]
+    platforms = normalize_platforms(raw_platforms)
 
     raw_tags = sections.get("tags", "CLI")
     tags = [t.strip(" `") for t in re.split(r"[,;\n]+", raw_tags) if t.strip(" `")][:5] or ["Antigravity"]
@@ -136,6 +206,11 @@ def build_candidate_entry(sections: dict[str, str], catalog: dict[str, Any]) -> 
         errors.append(f"Duplicate submission: `{slug}` is already listed in `data/tools.json`.")
     if slug.lower() == catalog.get("repository", "").lower():
         errors.append("Submission cannot reference `awesome-antigravity-tools` itself.")
+    if exclusions and slug.lower() in exclusions:
+        excl = exclusions[slug.lower()]
+        errors.append(
+            f"Excluded repository (`{excl.get('category', 'excluded')}`): `{slug}` is in `data/exclusions.json` — {excl.get('reason_en', '')}"
+        )
 
     tid = re.sub(r"[^a-z0-9]+", "-", tool_name.lower()).strip("-")
     entry: dict[str, Any] = {
@@ -216,6 +291,7 @@ def render_triage_comment(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Parse and validate a GitHub Issue tool submission.")
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    parser.add_argument("--exclusions", type=Path, default=DEFAULT_EXCLUSIONS)
     parser.add_argument("--input", type=Path, default=None, help="Path to markdown issue body (reads stdin if omitted)")
     parser.add_argument("--format", choices=["json", "comment"], default="comment")
     parser.add_argument("--verify-github", action="store_true", help="Verify live GitHub repo metadata via API")
@@ -224,9 +300,13 @@ def main() -> int:
 
     body = args.input.read_text(encoding="utf-8") if args.input else sys.stdin.read()
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
+    if args.exclusions != DEFAULT_EXCLUSIONS and not args.exclusions.exists():
+        print(f"[ERROR] Exclusions file not found: {args.exclusions}", file=sys.stderr)
+        return 1
+    exclusions = load_exclusions_map(args.exclusions)
 
     sections = parse_issue_form(body)
-    entry, errors = build_candidate_entry(sections, catalog)
+    entry, errors = build_candidate_entry(sections, catalog, exclusions=exclusions)
     github_meta = None
 
     if args.verify_github and entry["repo"] != "owner/repo":

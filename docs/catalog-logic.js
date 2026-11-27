@@ -15,12 +15,26 @@ export function filterAndSortTools(tools, state) {
   const tokens = query ? query.split(/\s+/).filter(Boolean) : [];
   const category = state.category || "all";
   const platform = state.platform || "all";
+  const language = (state.language || "all").trim();
+  const languageLower = language.toLowerCase();
+  const tag = (state.tag || "all").trim();
+  const tagLower = tag.toLowerCase();
+  const featuredOnly = Boolean(state.featuredOnly);
   const status = state.status || "all";
   const sort = state.sort || "stars";
 
   const filtered = tools.filter((tool) => {
     if (category !== "all" && tool.category !== category) return false;
     if (platform !== "all" && !(tool.platforms || []).includes(platform)) return false;
+    if (languageLower && languageLower !== "all") {
+      const toolLang = String(tool.telemetry?.language || "Unspecified").toLowerCase();
+      if (toolLang !== languageLower) return false;
+    }
+    if (tagLower && tagLower !== "all") {
+      const hasTag = (tool.tags || []).some((tg) => String(tg).toLowerCase() === tagLower);
+      if (!hasTag) return false;
+    }
+    if (featuredOnly && !tool.featured) return false;
     const toolStatus = (tool.telemetry?.status || "UNAUDITED").toUpperCase();
     if (status !== "all" && toolStatus !== status.toUpperCase()) return false;
 
@@ -101,27 +115,114 @@ export function getScoreTier(score) {
   return "danger";
 }
 
+function normalizeCompareIds(rawList) {
+  const seen = new Set();
+  const out = [];
+  for (const item of rawList || []) {
+    const cleaned = String(item || "").trim();
+    if (cleaned && !seen.has(cleaned)) {
+      seen.add(cleaned);
+      out.push(cleaned);
+      if (out.length >= 3) break;
+    }
+  }
+  return out;
+}
+
 export function serializeStateToParams(state) {
   const params = new URLSearchParams();
   if (state.query) params.set("q", state.query);
   if (state.category && state.category !== "all") params.set("cat", state.category);
   if (state.platform && state.platform !== "all") params.set("platform", state.platform);
+  if (state.language && state.language !== "all") params.set("code", state.language);
+  if (state.tag && state.tag !== "all") params.set("tag", state.tag);
+  if (state.featuredOnly) params.set("featured", "1");
   if (state.status && state.status !== "all") params.set("status", state.status);
   if (state.sort && state.sort !== "stars") params.set("sort", state.sort);
   if (state.lang && state.lang !== "en") params.set("lang", state.lang);
+  const cmp = normalizeCompareIds(state.compareIds);
+  if (cmp.length > 0) params.set("compare", cmp.join(","));
   if (state.openToolId) params.set("tool", state.openToolId);
   return params;
 }
 
 export function parseParamsToState(searchString) {
   const params = new URLSearchParams(searchString || "");
+  const rawCmp = params.get("compare") || "";
+  const compareIds = normalizeCompareIds(rawCmp ? rawCmp.split(",") : []);
+  const rawCode = (params.get("code") || "").trim();
+  const language = !rawCode || rawCode.toLowerCase() === "all" ? "all" : rawCode;
+  const rawTag = (params.get("tag") || "").trim();
+  const tag = !rawTag || rawTag.toLowerCase() === "all" ? "all" : rawTag;
+  const rawStatus = (params.get("status") || "all").trim().toUpperCase();
+  const status = ["HEALTHY", "STALE"].includes(rawStatus) ? rawStatus : "all";
   return {
     query: params.get("q") || "",
     category: params.get("cat") || "all",
     platform: params.get("platform") || "all",
-    status: params.get("status") || "all",
+    language,
+    tag,
+    featuredOnly: params.get("featured") === "1" || params.get("featured") === "true",
+    status,
     sort: ["stars", "score", "recent", "name"].includes(params.get("sort")) ? params.get("sort") : "stars",
     lang: params.get("lang") === "zh" ? "zh" : "en",
+    compareIds,
     openToolId: params.get("tool") || "",
+  };
+}
+
+export function computeHistoryTrendSummary(history, width = 240, height = 64, padY = 8) {
+  const list = Array.isArray(history)
+    ? [...history]
+        .filter((e) => e && typeof e.date === "string")
+        .sort((a, b) => a.date.localeCompare(b.date))
+    : [];
+  if (list.length === 0) {
+    return {
+      points: [],
+      starDelta: 0,
+      toolDelta: 0,
+      earliestDate: "",
+      latestDate: "",
+      starPolyline: "",
+      toolPolyline: "",
+      minStars: 0,
+      maxStars: 0,
+      minTools: 0,
+      maxTools: 0,
+    };
+  }
+
+  const starsArr = list.map((e) => Number(e.total_stars) || 0);
+  const toolsArr = list.map((e) => Number(e.total) || 0);
+  const minStars = Math.min(...starsArr);
+  const maxStars = Math.max(...starsArr);
+  const minTools = Math.min(...toolsArr);
+  const maxTools = Math.max(...toolsArr);
+  const usableH = Math.max(1, height - padY * 2);
+
+  const buildPolyline = (vals, minV, maxV) => {
+    const n = vals.length;
+    return vals
+      .map((val, idx) => {
+        const x = n === 1 ? width / 2 : (idx / (n - 1)) * width;
+        const y = maxV === minV ? height / 2 : padY + (1 - (val - minV) / (maxV - minV)) * usableH;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(" ");
+  };
+
+  return {
+    points: list,
+    starDelta: starsArr[starsArr.length - 1] - starsArr[0],
+    toolDelta: toolsArr[toolsArr.length - 1] - toolsArr[0],
+    earliestDate: list[0].date,
+    latestDate: list[list.length - 1].date,
+    starPolyline: buildPolyline(starsArr, minStars, maxStars),
+    toolPolyline: buildPolyline(toolsArr, minTools, maxTools),
+    minStars,
+    maxStars,
+    minTools,
+    maxTools,
   };
 }

@@ -3,7 +3,7 @@
   "displayName": "Awesome Antigravity Tools Advisor",
   "description": "Schema-validated catalog and advisor for 100% Google Antigravity-exclusive IDE extensions, runtime hotfixes, official CLI/SDKs, and ACP gateways.",
   "logo": "assets/logo.svg",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": {
     "name": "wllzhang",
     "url": "https://github.com/wllzhang"
@@ -13,6 +13,7 @@
   "suggestedPrompts": [
     "Recommend Antigravity-exclusive tools for monitoring model quotas",
     "Find Windows fixes for Antigravity proxy, Defender agy.exe loop, or skill junctions",
-    "Show healthy ACP gateways and adapters for Google Antigravity CLI"
+    "Show healthy ACP gateways and adapters for Google Antigravity CLI",
+    "Run a local Antigravity environment doctor check and compare top quota/context HUDs"
   ]
 }

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "awesome-antigravity-tools"
-version = "2.0.0"
+version = "2.1.0"
 description = "Schema-validated catalog, health telemetry engine, CLI, and static web explorer for 100% Google Antigravity-exclusive engineering tools."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -13,6 +13,7 @@ dependencies = []
 
 [project.scripts]
 aat = "scripts.aat_cli:main"
+aat-mcp = "scripts.mcp_server:main"
 
 [project.urls]
 Homepage = "https://wllzhang.github.io/awesome-antigravity-tools/"

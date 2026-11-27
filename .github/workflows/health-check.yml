@@ -78,7 +78,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add health_report.md health_report.zh-CN.md README.md README.zh-CN.md COMPARISON.md \
             data/health_snapshot.json data/health_history.json data/badges/ data/exports/ \
-            docs/catalog-bundle.json docs/feed.xml docs/sitemap.xml docs/robots.txt
+            docs/catalog-bundle.json docs/feed.xml docs/sitemap.xml docs/robots.txt docs/llms.txt docs/logo.svg docs/.nojekyll
           if git diff --staged --quiet; then
             echo "No changes in health audit artifacts."
             echo "updated=false" >> "$GITHUB_OUTPUT"

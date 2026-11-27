@@ -127,6 +127,70 @@ class TestSiteArtifacts(unittest.TestCase):
         self.assertTrue((REPO_ROOT / manifest["logo"]).exists())
         self.assertTrue((REPO_ROOT / "skills" / "antigravity-tools-advisor" / "SKILL.md").exists())
 
+        mcp_cfg = json.loads((REPO_ROOT / "mcp_config.json").read_text(encoding="utf-8"))
+        srv = mcp_cfg.get("mcpServers", {}).get("awesome-antigravity-tools")
+        self.assertIsInstance(srv, dict)
+        self.assertEqual(srv.get("args"), ["scripts/mcp_server.py"])
+        self.assertTrue((REPO_ROOT / "scripts" / "mcp_server.py").exists())
+
+    def test_llms_txt_and_logo_svg_integrity(self):
+        llms_path = DOCS_DIR / "llms.txt"
+        self.assertTrue(llms_path.exists())
+        llms_text = llms_path.read_text(encoding="utf-8")
+        catalog = json.loads((REPO_ROOT / "data" / "tools.json").read_text(encoding="utf-8"))
+        for tool in catalog["tools"]:
+            self.assertIn(tool["name"], llms_text)
+            self.assertIn(tool["url"], llms_text)
+
+        src_logo = (REPO_ROOT / "assets" / "logo.svg").read_text(encoding="utf-8").replace("\r\n", "\n")
+        dst_logo = (DOCS_DIR / "logo.svg").read_text(encoding="utf-8").replace("\r\n", "\n")
+        self.assertEqual(src_logo, dst_logo)
+
+    def test_rss_guids_use_query_tool_deeplinks(self):
+        rss_root = ET.fromstring((DOCS_DIR / "feed.xml").read_text(encoding="utf-8"))
+        guids = rss_root.findall("./channel/item/guid")
+        self.assertGreater(len(guids), 0)
+        for guid in guids:
+            self.assertEqual(guid.attrib.get("isPermaLink"), "true")
+            self.assertIn("?tool=", guid.text or "")
+            self.assertNotIn("#tool=", guid.text or "")
+
+    def test_health_check_workflow_stages_all_generated_docs(self):
+        wf_text = (REPO_ROOT / ".github" / "workflows" / "health-check.yml").read_text(encoding="utf-8")
+        for expected in (
+            "docs/catalog-bundle.json",
+            "docs/feed.xml",
+            "docs/sitemap.xml",
+            "docs/robots.txt",
+            "docs/llms.txt",
+            "docs/logo.svg",
+            "docs/.nojekyll",
+        ):
+            self.assertIn(expected, wf_text)
+
+    def test_discovery_radar_workflow_is_read_only_and_safe(self):
+        wf_path = REPO_ROOT / ".github" / "workflows" / "discovery-radar.yml"
+        self.assertTrue(wf_path.exists())
+        wf_text = wf_path.read_text(encoding="utf-8")
+        self.assertIn("contents: read", wf_text)
+        self.assertNotIn("contents: write", wf_text)
+        self.assertNotIn("issues: write", wf_text)
+        self.assertNotIn("pull-requests: write", wf_text)
+        for expected in (
+            "scripts/discover_candidates.py",
+            "--out-aat-cmd",
+            "discovery_radar.md",
+            "discovery_commands.sh",
+            "GITHUB_STEP_SUMMARY",
+            "actions/upload-artifact@v4",
+            "retention-days: 14",
+        ):
+            self.assertIn(expected, wf_text)
+        self.assertEqual(wf_text.count("scripts/discover_candidates.py"), 1)
+        for line in wf_text.splitlines():
+            if "${{ inputs." in line:
+                self.assertRegex(line, r"^\s*[A-Z0-9_]+:\s*\$\{\{\s*inputs\.")
+
 
 if __name__ == "__main__":
     unittest.main()

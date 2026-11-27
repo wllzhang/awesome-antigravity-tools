@@ -7,8 +7,8 @@
       "icon": "🚀",
       "name_en": "Official CLI & SDKs",
       "name_zh": "官方 CLI 与开发套件",
-      "description_en": "First-party command-line harnesses and SDKs maintained under `google-antigravity` for terminal workflows and programmatic agent orchestration.",
-      "description_zh": "由 `google-antigravity` 官方维护的终端命令行工具与 SDK，支持命令行编排与程序化 Agent 开发。"
+      "description_en": "First-party command-line harnesses, SDKs, and official plugins maintained by Google (`google-antigravity` and `google-deepmind`) for terminal workflows and programmatic agent orchestration.",
+      "description_zh": "由 Google 官方（`google-antigravity` 与 `google-deepmind`）维护的终端命令行工具、SDK 与官方原生插件，支持命令行编排与程序化 Agent 开发。"
     },
     {
       "id": "ide-extensions-cockpits",
@@ -83,6 +83,106 @@
       "featured": true
     },
     {
+      "id": "robotics-antigravity-plugin",
+      "name": "robotics-antigravity-plugin",
+      "repo": "google-deepmind/robotics-antigravity-plugin",
+      "url": "https://github.com/google-deepmind/robotics-antigravity-plugin",
+      "category": "official-cli-sdks",
+      "description_en": "Official Google DeepMind Antigravity plugin suite providing Python tooling and workflows for MuJoCo simulation and real-world agentic robotics.",
+      "description_zh": "Google DeepMind 官方发布的 Antigravity 机器人插件套件，提供面向 MuJoCo 仿真与真机控制的智能体工作流与工具。",
+      "exclusivity_reason_en": "First-party Google DeepMind repository packaged specifically around Antigravity's native plugins.json specification.",
+      "exclusivity_reason_zh": "Google DeepMind 官方专为 Antigravity 原生 plugins.json 插件体系构建的机器人工程套件。",
+      "platforms": [
+        "Linux",
+        "macOS",
+        "Cross-Platform"
+      ],
+      "tags": [
+        "Official",
+        "DeepMind",
+        "Python",
+        "Robotics",
+        "Plugin"
+      ],
+      "install_hint": "Clone repository and register via Antigravity plugins configuration per README",
+      "added_at": "2026-11-26",
+      "featured": true
+    },
+    {
+      "id": "agy-auth",
+      "name": "agy-auth",
+      "repo": "fikrilal/agy-auth",
+      "url": "https://github.com/fikrilal/agy-auth",
+      "category": "ide-extensions-cockpits",
+      "description_en": "Lightweight Go CLI utility for fast multi-account profile management and credential switching across Google Antigravity CLI (`agy`) and Desktop.",
+      "description_zh": "基于 Go 编写的轻量级命令行多账号管理工具，支持在 Google Antigravity CLI（`agy`）与桌面端之间快速切换登录身份。",
+      "exclusivity_reason_en": "Manages Google Antigravity CLI and Desktop local OAuth session profiles directly.",
+      "exclusivity_reason_zh": "专为 Google Antigravity CLI 与桌面端的本地会话配置切换而设计。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ],
+      "tags": [
+        "Go",
+        "CLI",
+        "Multi-Account"
+      ],
+      "install_hint": "Install via npm, Go, or prebuilt binaries from GitHub Releases",
+      "added_at": "2026-11-26"
+    },
+    {
+      "id": "agy-capsule",
+      "name": "agy-capsule",
+      "repo": "Lumidarin/agy-capsule",
+      "url": "https://github.com/Lumidarin/agy-capsule",
+      "category": "ide-extensions-cockpits",
+      "description_en": "Inline composer capsule HUD for Google Antigravity Desktop and Antigravity IDE displaying live context usage, model quotas, cache hit status, and generation speed.",
+      "description_zh": "嵌入 Antigravity 输入框底栏的悬浮胶囊 HUD（支持桌面端与独立 IDE 扩展），实时显示上下文占用、多模型配额、缓存状态与生成速度。",
+      "exclusivity_reason_en": "Injects hoverable telemetry capsules directly into the Antigravity Desktop composer bar and ships a dedicated agy-capsule-ide extension.",
+      "exclusivity_reason_zh": "直接挂载于 Antigravity 桌面端输入框底栏，并同步提供 Antigravity IDE 专属扩展包。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux",
+        "Antigravity IDE"
+      ],
+      "tags": [
+        "Desktop",
+        "HUD",
+        "Quota",
+        "Context",
+        "JavaScript"
+      ],
+      "install_hint": "Run install script for Desktop or install agy-capsule-ide from Open VSX",
+      "added_at": "2026-11-26"
+    },
+    {
+      "id": "agy-hud",
+      "name": "agy-hud",
+      "repo": "franksde/agy-hud",
+      "url": "https://github.com/franksde/agy-hud",
+      "category": "ide-extensions-cockpits",
+      "description_en": "Native terminal statusline HUD plugin for Google Antigravity CLI (`agy`) displaying real-time context consumption, model quota usage, active model info, and agent status.",
+      "description_zh": "专为 Google Antigravity CLI（`agy`）打造的终端状态栏 HUD 插件，实时展示上下文占用、模型配额余量、当前模型信息与智能体运行状态。",
+      "exclusivity_reason_en": "Built exclusively on Antigravity CLI's native plugin.json and lifecycle hooks statusline specification.",
+      "exclusivity_reason_zh": "完全基于 Antigravity CLI 原生 plugin.json 与终端状态栏钩子规范开发。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ],
+      "tags": [
+        "TypeScript",
+        "CLI",
+        "HUD",
+        "Quota",
+        "Plugin"
+      ],
+      "install_hint": "Install via Antigravity CLI plugin workflow per repository README",
+      "added_at": "2026-11-26"
+    },
+    {
       "id": "agy-meme",
       "name": "agy-meme",
       "repo": "jiangnanquan/agy-meme",
@@ -105,6 +205,110 @@
       ],
       "install_hint": "git clone https://github.com/jiangnanquan/agy-meme && cd agy-meme && ./install.sh",
       "added_at": "2026-11-21"
+    },
+    {
+      "id": "agy-powerline",
+      "name": "agy-powerline",
+      "repo": "wassim-azi/agy-powerline",
+      "url": "https://github.com/wassim-azi/agy-powerline",
+      "category": "ide-extensions-cockpits",
+      "description_en": "Zero-dependency Powerline statusline plugin for Antigravity CLI (`agy`) featuring Gemini and Claude quota pacing, context meters, Git widgets, and 22 terminal themes.",
+      "description_zh": "零依赖的 Antigravity CLI（`agy`）Powerline 终端状态栏插件，支持 Gemini/Claude 配额消耗速率预警、上下文仪表、Git 组件与 22 套主题。",
+      "exclusivity_reason_en": "Designed specifically for Google Antigravity CLI's statusline protocol and Hydrogen/Neon/Argon/Carbon/Flash quota tiers.",
+      "exclusivity_reason_zh": "针对 Google Antigravity CLI 状态栏协议及专属模型档位（Hydrogen/Neon/Argon/Carbon/Flash）配额节奏定制。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ],
+      "tags": [
+        "JavaScript",
+        "CLI",
+        "Statusline",
+        "Quota",
+        "Plugin"
+      ],
+      "install_hint": "npx agy-powerline@latest install",
+      "added_at": "2026-11-26"
+    },
+    {
+      "id": "agy-powertools",
+      "name": "agy-powertools",
+      "repo": "WhiteBr1ck/agy-powertools",
+      "url": "https://github.com/WhiteBr1ck/agy-powertools",
+      "category": "ide-extensions-cockpits",
+      "description_en": "Native workbench enhancement plugin for Antigravity 2.0 adding compact layout typography, phase summaries, context and cache telemetry, session branching, and zh-CN UI.",
+      "description_zh": "Antigravity 2.0 原生工作台增强插件，集成紧凑排版与阶段汇报、上下文与缓存监控、会话分支、本地用量面板及中文界面。",
+      "exclusivity_reason_en": "Built directly on Antigravity 2.0's native plugin.json, hooks.json, and auxiliary sidecar architecture.",
+      "exclusivity_reason_zh": "基于 Antigravity 2.0 原生 plugin.json、生命周期钩子与侧边栏 Sidecar 架构研发。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ],
+      "tags": [
+        "Desktop",
+        "Plugin",
+        "UX",
+        "Telemetry",
+        "JavaScript"
+      ],
+      "install_hint": "Run install.ps1 (Windows) or install.sh (macOS/Linux) per repository README",
+      "added_at": "2026-11-26",
+      "featured": true
+    },
+    {
+      "id": "agy-switch",
+      "name": "agy-switch",
+      "repo": "anglee0323/agy-switch",
+      "url": "https://github.com/anglee0323/agy-switch",
+      "category": "ide-extensions-cockpits",
+      "description_en": "Cross-platform Tauri desktop app, tray widget, and CLI synchronizing Antigravity accounts, quota-based smart switching, and token analytics across Desktop, CLI, and IDE.",
+      "description_zh": "跨平台 Antigravity 多客户端账号切换与用量统计工具（桌面端、系统托盘与终端 CLI），支持桌面 App、`agy` CLI、IDE 与 VS Code 扩展凭据同步及低额度智能切号。",
+      "exclusivity_reason_en": "Synchronizes credentials and quota-aware switching across Antigravity Desktop, agy CLI, Antigravity IDE 2.6+, and VS Code extension.",
+      "exclusivity_reason_zh": "深度适配 Antigravity 桌面端、agy CLI、独立 IDE 与 VS Code 扩展四端凭据存储与联动切号。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux",
+        "VS Code",
+        "Antigravity IDE"
+      ],
+      "tags": [
+        "Rust",
+        "Tauri",
+        "CLI",
+        "Multi-Account",
+        "Quota"
+      ],
+      "install_hint": "Download installer from GitHub Releases or install via Homebrew Cask",
+      "added_at": "2026-11-26"
+    },
+    {
+      "id": "antigravity-context-viewer",
+      "name": "antigravity-context-viewer",
+      "repo": "elviscjn-cjn/antigravity-context-viewer",
+      "url": "https://github.com/elviscjn-cjn/antigravity-context-viewer",
+      "category": "ide-extensions-cockpits",
+      "description_en": "Context window and token usage dashboard for Google Antigravity 2.x tracking real-time context budgets, 5h/weekly model quotas, generation speed, and CLI history.",
+      "description_zh": "面向 Google Antigravity 2.x 的对话上下文与用量看板，支持实时上下文预算、5h/周模型额度圆环、生成速度与桌面/CLI 历史统计。",
+      "exclusivity_reason_en": "Built exclusively for Antigravity 2.x Desktop and agy CLI telemetry stores with macOS ElectronAsarIntegrity watch mode.",
+      "exclusivity_reason_zh": "专为 Antigravity 2.x 桌面端与 agy CLI 本地用量遥测设计，适配 macOS 签名完整性免改盘模式。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ],
+      "tags": [
+        "Desktop",
+        "CLI",
+        "Context",
+        "Quota",
+        "JavaScript"
+      ],
+      "install_hint": "Clone repository and run node cli.js install or watch per README",
+      "added_at": "2026-11-26",
+      "featured": true
     },
     {
       "id": "antigravity-manager",
@@ -174,6 +378,55 @@
       ],
       "install_hint": "Download installer from GitHub Releases",
       "added_at": "2026-11-18"
+    },
+    {
+      "id": "obsidian-prism",
+      "name": "obsidian-prism",
+      "repo": "RMvdesi/obsidian-prism",
+      "url": "https://github.com/RMvdesi/obsidian-prism",
+      "category": "ide-extensions-cockpits",
+      "description_en": "Optical UI suite for Google Antigravity Desktop featuring WebGL2 prism themes, damped-spring motion, a 512K context vial, reasoning slider, and pixel mascots.",
+      "description_zh": "专为 Google Antigravity 桌面端打造的原生光学界面套件，内置四套深浅棱镜主题、512K 呼吸上下文试管、推理档位滑块与像素桌宠。",
+      "exclusivity_reason_en": "Targets Google Antigravity Desktop's workbench DOM, plugin.json sidecars, and reasoning level controls directly.",
+      "exclusivity_reason_zh": "深度面向 Google Antigravity 桌面端工作台渲染层、原生 Sidecar 与推理档位控件构建。",
+      "platforms": [
+        "Windows",
+        "macOS"
+      ],
+      "tags": [
+        "Desktop",
+        "UI",
+        "WebGL2",
+        "Plugin",
+        "JavaScript"
+      ],
+      "install_hint": "Download installer from GitHub Releases",
+      "added_at": "2026-11-26",
+      "featured": true
+    },
+    {
+      "id": "paragravity",
+      "name": "paragravity",
+      "repo": "edison-land/paragravity",
+      "url": "https://github.com/edison-land/paragravity",
+      "category": "ide-extensions-cockpits",
+      "description_en": "Non-invasive parallel multi-account and isolated sandbox instance manager for Google Antigravity with CLI controls and local dashboard.",
+      "description_zh": "无侵入式 Google Antigravity 多账号并行与独立沙箱多开管理器，支持同时运行多个隔离实例。",
+      "exclusivity_reason_en": "Isolates Google Antigravity profile directories and runtime sandboxes specifically for concurrent multi-account sessions.",
+      "exclusivity_reason_zh": "针对 Google Antigravity 本地配置目录与运行环境实现无侵入多实例沙箱隔离。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ],
+      "tags": [
+        "Python",
+        "CLI",
+        "Multi-Account",
+        "Sandbox"
+      ],
+      "install_hint": "Install via Homebrew or run install.sh per repository README",
+      "added_at": "2026-11-26"
     },
     {
       "id": "vscode-antigravity-cockpit",
@@ -292,6 +545,56 @@
       "featured": true
     },
     {
+      "id": "antigravity-rtl",
+      "name": "antigravity-rtl",
+      "repo": "mmnaderi/antigravity-rtl",
+      "url": "https://github.com/mmnaderi/antigravity-rtl",
+      "category": "platform-fixes-runtime-patches",
+      "description_en": "Smart Right-to-Left (RTL) layout and bidirectional typography patcher for Google Antigravity Desktop and Antigravity IDE supporting Persian, Arabic, and Hebrew.",
+      "description_zh": "面向 Google Antigravity 桌面端与 IDE 的智能从右至左（RTL）双向排版与字体补丁，原生适配波斯语、阿拉伯语与希伯来语。",
+      "exclusivity_reason_en": "Patches Antigravity Desktop and IDE chat/markdown rendering CSS and DOM layout specifically for bidirectional RTL scripts.",
+      "exclusivity_reason_zh": "专门修复 Antigravity 桌面端与 IDE 对话流及 Markdown 界面的 RTL 双向文字排版缺陷。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux",
+        "Antigravity IDE"
+      ],
+      "tags": [
+        "Localization",
+        "RTL",
+        "JavaScript",
+        "Patch"
+      ],
+      "install_hint": "npx antigravity-rtl",
+      "added_at": "2026-11-26"
+    },
+    {
+      "id": "antigravity2-cn",
+      "name": "antigravity2-cn",
+      "repo": "qqxpee/antigravity2-cn",
+      "url": "https://github.com/qqxpee/antigravity2-cn",
+      "category": "platform-fixes-runtime-patches",
+      "description_en": "Zero-dependency Simplified and Traditional Chinese localization injector for Antigravity 2.0 Desktop using syntax-verified atomic ASAR patching and Shadow DOM code isolation.",
+      "description_zh": "专为 Antigravity 2.0 Electron 新架构打造的零依赖简繁中文汉化注入引擎，采用语法校验原子替换与 Shadow DOM 代码区严格隔离，支持一键无损还原。",
+      "exclusivity_reason_en": "Purpose-built ASAR dynamic bundle injector targeting Antigravity 2.0 Desktop main process menus, Swarm sidecars, and settings UI.",
+      "exclusivity_reason_zh": "专门针对 Antigravity 2.0 桌面端 app.asar 主进程弹窗、Swarm 伴生面板与设置页构建动态汉化注入。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ],
+      "tags": [
+        "Desktop",
+        "Localization",
+        "Node.js",
+        "Patch"
+      ],
+      "install_hint": "Run platform one-click install script (.bat / .command / .sh) per repository README",
+      "added_at": "2026-11-26",
+      "featured": true
+    },
+    {
       "id": "vscode-antigravity-backend-fix",
       "name": "vscode-antigravity-backend-fix",
       "repo": "HeshamNoaman/vscode-antigravity-backend-fix",
@@ -333,6 +636,56 @@
       ],
       "install_hint": "Clone repo and install Python dependencies per README",
       "added_at": "2026-11-18"
+    },
+    {
+      "id": "agy-fast",
+      "name": "agy-fast",
+      "repo": "INK-Q/agy-fast",
+      "url": "https://github.com/INK-Q/agy-fast",
+      "category": "dedicated-gateways-migration",
+      "description_en": "Zero-dependency, policy-compliant local MCP accelerator plugin for Google Antigravity (CLI, Desktop, and IDE) cutting agent turns, billable token quota, and upload traffic.",
+      "description_zh": "面向 Google Antigravity（CLI、桌面端与 IDE）的零依赖合规本地 MCP 加速插件，显著降低对话轮次、Token 配额消耗与上传流量且不破坏原生 Diff。",
+      "exclusivity_reason_en": "Packaged strictly around Google Antigravity's native plugin.json, hooks.json, and MCP tool-call batching bottlenecks.",
+      "exclusivity_reason_zh": "严格基于 Google Antigravity 原生 plugin.json 与 hooks.json 规范构建，定向优化其高频工具调用往返开销。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux",
+        "Antigravity IDE"
+      ],
+      "tags": [
+        "TypeScript",
+        "MCP",
+        "Plugin",
+        "Performance"
+      ],
+      "install_hint": "Run install.ps1 (Windows) or install.sh (macOS/Linux) per repository README",
+      "added_at": "2026-11-26",
+      "featured": true
+    },
+    {
+      "id": "agy-gyro",
+      "name": "agy-gyro",
+      "repo": "topjohnwu/agy-gyro",
+      "url": "https://github.com/topjohnwu/agy-gyro",
+      "category": "dedicated-gateways-migration",
+      "description_en": "High-performance Rust local Antigravity Enterprise Gateway (`genai` wire protocol), transient HTTP 429/5xx retry proxy, and live token usage monitor.",
+      "description_zh": "基于 Rust 构建的高性能本地 Antigravity Enterprise Gateway（`genai` 协议网关）、HTTP 429/5xx 自动重试代理与实时 Token 监控器。",
+      "exclusivity_reason_en": "Implements Google Antigravity's first-class Enterprise Gateway genai wire protocol specifically across Desktop, IDE, and CLI.",
+      "exclusivity_reason_zh": "专门实现 Google Antigravity 原生 Enterprise Gateway (genai) 传输协议以增强全端重试稳定性。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ],
+      "tags": [
+        "Rust",
+        "Gateway",
+        "Proxy",
+        "Telemetry"
+      ],
+      "install_hint": "Download prebuilt binary from GitHub Releases or build with Cargo",
+      "added_at": "2026-11-26"
     },
     {
       "id": "agy-remote-wecom",
@@ -377,6 +730,32 @@
       ],
       "install_hint": "Run with Bun following repository instructions",
       "added_at": "2026-11-18"
+    },
+    {
+      "id": "antigravity-agy-dart",
+      "name": "Antigravity-agy-dart",
+      "repo": "zou172866/Antigravity-agy-dart",
+      "url": "https://github.com/zou172866/Antigravity-agy-dart",
+      "category": "dedicated-gateways-migration",
+      "description_en": "Native Google Antigravity plugin combining automatic KV prompt-cache warm-up, SQLite FTS5 context compression, live context metering, and crashed session recovery.",
+      "description_zh": "Google Antigravity 原生性能优化插件，集成 KV 提示词缓存自动预热保活、FTS5 上下文降噪、实时上下文监控与崩溃会话恢复。",
+      "exclusivity_reason_en": "Built exclusively on Antigravity's plugin.json, lifecycle hooks, MCP server, and sidecar specifications.",
+      "exclusivity_reason_zh": "完全围绕 Antigravity 原生 plugin.json、生命周期钩子、MCP 与 Sidecar 规范研发。",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux",
+        "Antigravity IDE"
+      ],
+      "tags": [
+        "JavaScript",
+        "Plugin",
+        "MCP",
+        "Cache",
+        "Context"
+      ],
+      "install_hint": "Run install.ps1 (Windows) or install.sh (macOS/Linux) per repository README",
+      "added_at": "2026-11-26"
     },
     {
       "id": "antigravity-skill-porter",
@@ -445,6 +824,73 @@
       "install_hint": "Build with Cargo or download binary from GitHub Releases",
       "added_at": "2026-11-17",
       "featured": true
+    },
+    {
+      "id": "paseo-agy-acp",
+      "name": "paseo-agy-acp",
+      "repo": "tiezbro/paseo-agy-acp",
+      "url": "https://github.com/tiezbro/paseo-agy-acp",
+      "category": "dedicated-gateways-migration",
+      "description_en": "Apache-2.0 Paseo provider powered by the official `agy acp` kernel enabling dual Antigravity Pro account coexistence, mode mapping, admission queuing, and skill discovery.",
+      "description_zh": "基于官方 `agy acp` 内核的 Apache-2.0 Paseo 适配器，支持与内置客户端共存登录第二个 Antigravity Pro 账号、模式映射与技能发现。",
+      "exclusivity_reason_en": "Built directly on Google Antigravity's official agy acp kernel to isolate secondary Antigravity Pro credentials in Paseo.",
+      "exclusivity_reason_zh": "直接基于官方 agy acp 内核实现 Paseo 双 Antigravity Pro 账号隔离与模式同步。",
+      "platforms": [
+        "Cross-Platform"
+      ],
+      "tags": [
+        "TypeScript",
+        "ACP",
+        "Provider",
+        "Multi-Account"
+      ],
+      "install_hint": "Install Paseo plugin per repository README",
+      "added_at": "2026-11-26"
+    },
+    {
+      "id": "pi-antigravity-acp-provider",
+      "name": "pi-antigravity-acp-provider",
+      "repo": "zacbemis/pi-antigravity-acp-provider",
+      "url": "https://github.com/zacbemis/pi-antigravity-acp-provider",
+      "category": "dedicated-gateways-migration",
+      "description_en": "First-class Agent Client Protocol (`agy acp`) provider extension bridging Google Antigravity CLI sessions and models natively into the Pi coding agent.",
+      "description_zh": "基于官方 `agy acp` 协议构建的原生扩展，将 Google Antigravity CLI 会话与模型无缝接入 Pi 编程智能体。",
+      "exclusivity_reason_en": "Communicates strictly with Google Antigravity's official agy acp server without reverse-engineered OAuth endpoints.",
+      "exclusivity_reason_zh": "严格通过 Google Antigravity 官方 agy acp 协议桥接，零逆向接口调用。",
+      "platforms": [
+        "Cross-Platform"
+      ],
+      "tags": [
+        "TypeScript",
+        "ACP",
+        "Provider"
+      ],
+      "install_hint": "Install as a Pi package per repository README",
+      "added_at": "2026-11-26"
+    },
+    {
+      "id": "porta",
+      "name": "porta",
+      "repo": "L1M80/porta",
+      "url": "https://github.com/L1M80/porta",
+      "category": "dedicated-gateways-migration",
+      "description_en": "Self-hosted lightweight remote web interface and mobile PWA companion for controlling and monitoring local Google Antigravity sessions over WebSocket.",
+      "description_zh": "轻量级自托管 Google Antigravity 远程 Web 控制端与移动端 PWA 伴侣应用，基于 WebSocket 实时同步与操控本机会话。",
+      "exclusivity_reason_en": "Connects directly to Google Antigravity's local language server and session runtime to expose a mobile-friendly PWA portal.",
+      "exclusivity_reason_zh": "直接对接 Google Antigravity 本地语言服务与会话运行时以提供远程移动 Web 访问。",
+      "platforms": [
+        "Cross-Platform",
+        "Mobile",
+        "Web"
+      ],
+      "tags": [
+        "TypeScript",
+        "Web",
+        "Mobile",
+        "PWA"
+      ],
+      "install_hint": "Deploy via pnpm or Docker following repository README",
+      "added_at": "2026-11-26"
     },
     {
       "id": "refined-antigravity-acp",

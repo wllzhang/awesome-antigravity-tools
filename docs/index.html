@@ -14,6 +14,13 @@
   </script>
   <title>Awesome Antigravity Tools — Strictly Antigravity-Exclusive Engineering Index</title>
   <meta name="description" content="A strictly curated, daily-audited directory of 100% Google Antigravity-exclusive tools, IDE extensions, runtime hotfixes, and ACP gateways.">
+  <link rel="canonical" href="https://wllzhang.github.io/awesome-antigravity-tools/">
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Awesome Antigravity Tools">
+  <meta property="og:description" content="100% Google Antigravity-exclusive tools, IDE extensions, runtime hotfixes, and ACP gateways.">
+  <meta property="og:url" content="https://wllzhang.github.io/awesome-antigravity-tools/">
+  <meta name="twitter:card" content="summary">
   <link rel="alternate" type="application/rss+xml" title="Awesome Antigravity Tools RSS" href="feed.xml">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -31,6 +38,9 @@
       </div>
 
       <nav class="header-actions" aria-label="Site controls">
+        <button id="shortcutsBtn" class="btn btn-ghost" type="button" aria-label="Keyboard shortcuts" data-i18n="shortcutsBtn">
+          ?
+        </button>
         <button id="langToggle" class="btn btn-ghost" type="button" aria-label="Switch language">
           中文
         </button>
@@ -86,6 +96,11 @@
             <option value="all" data-i18n="allPlatforms">All Platforms</option>
           </select>
 
+          <label for="languageFilter" class="sr-only" data-i18n="languageLabel">Language</label>
+          <select id="languageFilter" aria-label="Filter by programming language">
+            <option value="all" data-i18n="allLanguages">All Languages</option>
+          </select>
+
           <label for="statusFilter" class="sr-only" data-i18n="statusLabel">Health status</label>
           <select id="statusFilter" aria-label="Filter by health status">
             <option value="all" data-i18n="allStatuses">All Statuses</option>
@@ -104,10 +119,12 @@
       </div>
 
       <div id="categoryPills" class="category-pills" role="tablist" aria-label="Categories"></div>
+      <div id="tagFilterBar" class="tag-filter-bar" aria-label="Popular tags"></div>
 
       <div class="results-bar">
         <p id="resultsCount" class="results-count" role="status" aria-live="polite">Loading catalog...</p>
         <div class="results-actions">
+          <button id="featuredToggleBtn" class="btn btn-ghost btn-sm featured-toggle" type="button" aria-pressed="false" data-i18n="featuredOnly">Featured Only</button>
           <button id="resetFiltersBtn" class="btn btn-link" type="button" hidden data-i18n="resetFilters">Reset filters</button>
         </div>
       </div>
@@ -152,6 +169,28 @@
         <button id="compareCloseBtn" class="btn btn-ghost icon-btn" type="button" aria-label="Close comparison">✕</button>
       </header>
       <div id="compareBody" class="dialog-body"></div>
+      <footer class="dialog-footer">
+        <button id="compareCopyUrlBtn" class="btn btn-ghost" type="button" data-i18n="copyCompareLink">Copy Comparison Link</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog id="shortcutsDialog" class="tool-dialog" closedby="any" aria-labelledby="shortcutsTitle">
+    <div class="dialog-surface">
+      <header class="dialog-header">
+        <h2 id="shortcutsTitle" class="dialog-title" data-i18n="shortcutsHeading">Keyboard Shortcuts</h2>
+        <button id="shortcutsCloseBtn" class="btn btn-ghost icon-btn" type="button" aria-label="Close shortcuts">✕</button>
+      </header>
+      <div class="dialog-body">
+        <dl class="shortcuts-list">
+          <div class="shortcut-row"><dt><kbd>/</kbd></dt><dd data-i18n="shortcutSearch">Focus search box</dd></div>
+          <div class="shortcut-row"><dt><kbd>j</kbd> / <kbd>k</kbd></dt><dd data-i18n="shortcutNavigate">Move focus across tool cards</dd></div>
+          <div class="shortcut-row"><dt><kbd>Enter</kbd></dt><dd data-i18n="shortcutOpen">Open focused tool details</dd></div>
+          <div class="shortcut-row"><dt><kbd>l</kbd></dt><dd data-i18n="shortcutLang">Switch English / 中文</dd></div>
+          <div class="shortcut-row"><dt><kbd>Esc</kbd></dt><dd data-i18n="shortcutEsc">Clear search or close dialog</dd></div>
+          <div class="shortcut-row"><dt><kbd>?</kbd></dt><dd data-i18n="shortcutHelp">Toggle this shortcuts help</dd></div>
+        </dl>
+      </div>
     </div>
   </dialog>
 
@@ -169,6 +208,8 @@
         <a id="footerReportLink" href="https://github.com/wllzhang/awesome-antigravity-tools/blob/main/health_report.md" target="_blank" rel="noopener noreferrer" data-i18n="auditReport">Health Report</a>
         ·
         <a href="catalog-bundle.json" target="_blank" rel="noopener noreferrer">JSON API</a>
+        ·
+        <a href="llms.txt" target="_blank" rel="noopener noreferrer">LLMs.txt</a>
         ·
         <a href="feed.xml" target="_blank" rel="noopener noreferrer">RSS</a>
       </p>

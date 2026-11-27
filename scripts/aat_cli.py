@@ -5,9 +5,13 @@ Interactive Zero-Dependency CLI (`aat`) for awesome-antigravity-tools.
 Usage:
   python scripts/aat_cli.py list [--category ...] [--platform ...] [--sort stars]
   python scripts/aat_cli.py search <query> [--lang en|zh] [--json]
+  python scripts/aat_cli.py recommend <intent> [--platform ...] [--limit 5]
+  python scripts/aat_cli.py compare <tool1> <tool2> [tool3] [tool4] [--markdown]
+  python scripts/aat_cli.py doctor [--os windows|macos|linux] [--json]
   python scripts/aat_cli.py info <id-or-name>
   python scripts/aat_cli.py stats [--json]
   python scripts/aat_cli.py add --repo owner/name --category ... [fields...]
+  python scripts/aat_cli.py remove <id-or-name> [--sync-docs]
   python scripts/aat_cli.py verify [--check-sync]
 """
 
@@ -15,7 +19,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import os
+import platform as py_platform
 import re
+import shutil
 import sys
 from collections import Counter
 from datetime import date
@@ -27,6 +35,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_CATALOG = REPO_ROOT / "data" / "tools.json"
 DEFAULT_SNAPSHOT = REPO_ROOT / "data" / "health_snapshot.json"
+DEFAULT_EXCLUSIONS = REPO_ROOT / "data" / "exclusions.json"
 
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -137,10 +146,17 @@ def print_tools_table(tools: list[dict[str, Any]], lang: str = "en") -> None:
         print(f"    URL: {t['url']}\n")
 
 
-def cmd_list_or_search(args: argparse.Namespace, query: str = "") -> int:
-    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
+def load_enriched_catalog(
+    catalog_path: Path = DEFAULT_CATALOG, snapshot_path: Path = DEFAULT_SNAPSHOT
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]], dict[str, dict[str, Any]], list[dict[str, Any]]]:
+    catalog, health_map = load_catalog_and_health(catalog_path, snapshot_path)
     cat_map = {c["id"]: c for c in catalog.get("categories", [])}
     enriched = [enrich_tool(t, health_map, cat_map) for t in catalog.get("tools", [])]
+    return catalog, health_map, cat_map, enriched
+
+
+def cmd_list_or_search(args: argparse.Namespace, query: str = "") -> int:
+    _catalog, _health_map, _cat_map, enriched = load_enriched_catalog(args.catalog, args.snapshot)
     filtered = filter_and_sort_tools(
         enriched,
         query=query,
@@ -158,15 +174,295 @@ def cmd_list_or_search(args: argparse.Namespace, query: str = "") -> int:
     return 0
 
 
-def cmd_info(args: argparse.Namespace) -> int:
-    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
-    cat_map = {c["id"]: c for c in catalog.get("categories", [])}
-    target = args.tool.strip().lower()
-    found = None
+def find_tool(
+    catalog: dict[str, Any],
+    health_map: dict[str, dict[str, Any]],
+    cat_map: dict[str, dict[str, Any]],
+    identifier: str,
+) -> dict[str, Any] | None:
+    target = identifier.strip().lower()
     for t in catalog.get("tools", []):
         if target in (t["id"].lower(), t["name"].lower(), t["repo"].lower()):
-            found = enrich_tool(t, health_map, cat_map)
-            break
+            return enrich_tool(t, health_map, cat_map)
+    return None
+
+
+_SYNONYM_CLUSTERS: list[tuple[tuple[str, ...], tuple[str, ...]]] = [
+    (("quota", "配额", "额度"), ("quota", "配额", "额度", "hud", "cockpit", "usage", "用量", "limit")),
+    (("proxy", "代理", "tun"), ("proxy", "代理", "tun", "socks5", "http", "retry", "重试", "enterprise gateway")),
+    (("chinese", "汉化", "中文", "localization"), ("chinese", "汉化", "中文", "localization", "zh-cn", "asar", "rtl", "语言包")),
+    (("acp", "gateway", "网关"), ("acp", "gateway", "网关", "adapter", "适配器", "stdio", "agy acp", "openai", "anthropic", "gemini")),
+    (("symlink", "junction", "硬链接", "符号链接"), ("junction", "symlink", "硬链接", "符号链接", "ntfs", "mklink", "reparse")),
+    (("statusline", "hud", "状态栏"), ("statusline", "hud", "状态栏", "powerline", "capsule", "胶囊", "cockpit", "telemetry")),
+    (("account", "账号", "多账号", "多开"), ("account", "accounts", "账号", "switch", "切换", "multi-account", "多账号", "多开", "sandbox")),
+    (("cache", "缓存", "加速"), ("cache", "缓存", "token", "加速", "accelerator", "fast", "kv", "fts5", "context", "上下文")),
+    (("mobile", "手机", "远程", "wecom"), ("mobile", "手机", "远程", "wecom", "企微", "企业微信", "pwa", "remote", "websocket")),
+    (("defender",), ("defender", "agy.exe", "202", "backend", "timeout")),
+    (("context", "上下文"), ("context", "上下文", "token", "用量", "usage", "vial")),
+    (("theme", "主题"), ("theme", "主题", "ui", "optical", "webgl2", "ux", "光学")),
+    (("flow",), ("flow", "google-flow", "veo", "nano banana", "omni")),
+    (("robotics",), ("robotics", "机器人", "mujoco", "deepmind")),
+]
+
+INTENT_SYNONYMS: dict[str, tuple[str, ...]] = {
+    key: cluster for keys, cluster in _SYNONYM_CLUSTERS for key in keys
+}
+
+_STOPWORDS = {
+    "i", "a", "an", "the", "to", "for", "of", "in", "on", "is", "do", "how",
+    "my", "me", "we", "you", "it", "and", "or", "with", "need", "want", "fix",
+    "use", "best", "tool", "tools",
+}
+_CJK_RE = re.compile(r"[\u4e00-\u9fff]")
+
+
+def _extract_intent_tokens(intent: str) -> tuple[list[str], set[str]]:
+    intent_l = intent.strip().lower()
+    raw_tokens = re.findall(r"[a-z0-9_.-]+|[\u4e00-\u9fff]+", intent_l)
+    primary: list[str] = []
+    seen_p: set[str] = set()
+
+    def add_primary(tok: str) -> None:
+        if tok and tok not in seen_p:
+            seen_p.add(tok)
+            primary.append(tok)
+
+    for tok in raw_tokens:
+        is_cjk = bool(_CJK_RE.search(tok))
+        if not is_cjk:
+            if len(tok) <= 1 or tok in _STOPWORDS:
+                continue
+            add_primary(tok)
+        else:
+            add_primary(tok)
+            if len(tok) > 2:
+                matched_sub = [k for k in INTENT_SYNONYMS if _CJK_RE.search(k) and len(k) >= 2 and k in tok]
+                for sub in matched_sub:
+                    add_primary(sub)
+                if not matched_sub:
+                    for i in range(len(tok) - 1):
+                        add_primary(tok[i : i + 2])
+
+    expanded: set[str] = set()
+    for tok in list(primary):
+        is_cjk = bool(_CJK_RE.search(tok))
+        for key, syns in INTENT_SYNONYMS.items():
+            if tok == key or (is_cjk and _CJK_RE.search(key) and len(key) >= 2 and key in tok):
+                expanded.update(syns)
+    return primary, expanded
+
+
+def recommend_tools(
+    tools: list[dict[str, Any]],
+    intent: str,
+    *,
+    platform: str = "",
+    limit: int = 5,
+) -> list[dict[str, Any]]:
+    intent_l = intent.strip().lower()
+    if not intent_l or limit <= 0:
+        return []
+    plat_f = platform.strip().lower()
+    primary_tokens, expanded_tokens = _extract_intent_tokens(intent_l)
+    synonym_only = expanded_tokens - set(primary_tokens)
+
+    scored: list[dict[str, Any]] = []
+    for t in tools:
+        plats_l = [p.lower() for p in t.get("platforms", [])]
+        if plat_f and not any(plat_f in p for p in plats_l):
+            continue
+
+        tid = t.get("id", "").lower()
+        tname = t.get("name", "").lower()
+        tags_l = [tg.lower() for tg in t.get("tags", [])]
+        text_l = " ".join(
+            [
+                t.get("repo", ""),
+                t.get("description_en", ""),
+                t.get("description_zh", ""),
+                t.get("exclusivity_reason_en", ""),
+                t.get("exclusivity_reason_zh", ""),
+                str(t.get("language") or ""),
+            ]
+        ).lower()
+
+        relevance = 0.0
+        reasons: list[str] = []
+
+        if intent_l in (tid, tname):
+            relevance += 45.0
+            reasons.append("exact-name")
+
+        for tok in primary_tokens:
+            if tok in tid or tok in tname:
+                relevance += 35.0
+                reasons.append(f"name:{tok}")
+            if any(tok == tg or tok in tg for tg in tags_l):
+                relevance += 18.0
+                reasons.append(f"tag:{tok}")
+            if any(tok in p for p in plats_l):
+                relevance += 10.0
+                reasons.append(f"platform:{tok}")
+            if tok in text_l:
+                relevance += 12.0
+                reasons.append(f"desc:{tok}")
+
+        for syn in sorted(synonym_only):
+            if syn in tid or syn in tname:
+                relevance += 14.0
+                reasons.append(f"syn-name:{syn}")
+            if any(syn == tg or syn in tg for tg in tags_l):
+                relevance += 10.0
+                reasons.append(f"syn-tag:{syn}")
+            if syn in text_l:
+                relevance += 6.0
+                reasons.append(f"syn-desc:{syn}")
+
+        if relevance <= 0.0:
+            continue
+
+        status = str(t.get("status") or "UNAUDITED").upper()
+        if status in ("ARCHIVED", "DEAD"):
+            relevance -= 40.0
+            reasons.append(f"penalty:{status.lower()}")
+        elif status in ("STALE", "VERY_STALE"):
+            relevance -= 15.0
+            reasons.append(f"penalty:{status.lower()}")
+
+        if t.get("featured"):
+            relevance += 6.0
+            reasons.append("featured")
+
+        hs = t.get("health_score")
+        if isinstance(hs, (int, float)):
+            relevance += hs * 0.15
+
+        stars = max(0, int(t.get("stars", 0)))
+        relevance += min(6.0, math.log10(stars + 1) * 1.2)
+
+        final_score = round(max(0.0, relevance), 1)
+        if final_score <= 0.0:
+            continue
+
+        dedup_reasons = list(dict.fromkeys(reasons))
+        scored.append(
+            {
+                **t,
+                "match_score": final_score,
+                "match_reasons": dedup_reasons,
+            }
+        )
+
+    scored.sort(key=lambda x: (x["match_score"], x.get("stars", 0), x["name"].lower()), reverse=True)
+    return scored[:limit]
+
+
+def _md_cell(value: Any) -> str:
+    return re.sub(r"\s+", " ", str(value or "-")).strip().replace("|", "\\|")
+
+
+def render_comparison_markdown(tools: list[dict[str, Any]], lang: str = "en") -> str:
+    header_label = "维度" if lang == "zh" else "Metric"
+    headers = [header_label, *[f"[{_md_cell(t['name'])}]({t['url']})" for t in tools]]
+    aligns = [":---", *([":---"] * len(tools))]
+    rows = [
+        ("仓库" if lang == "zh" else "Repository", lambda t: f"`{_md_cell(t['repo'])}`"),
+        ("分类" if lang == "zh" else "Category", lambda t: _md_cell(t["category_zh"] if lang == "zh" else t["category_en"])),
+        ("健康状态" if lang == "zh" else "Status", lambda t: f"`{_md_cell(t['status'])}`"),
+        ("健康分" if lang == "zh" else "Health Score", lambda t: f"{t['health_score']}/100" if t.get("health_score") is not None else "-"),
+        ("Stars", lambda t: f"★{max(0, int(t.get('stars', 0))):,}"),
+        ("主语言" if lang == "zh" else "Language", lambda t: _md_cell(t.get("language") or "-")),
+        ("开源协议" if lang == "zh" else "License", lambda t: _md_cell(t.get("license") or "-")),
+        ("最新版本" if lang == "zh" else "Latest Release", lambda t: f"`{_md_cell(t['latest_release'])}`" if t.get("latest_release") else "-"),
+        ("最近推送" if lang == "zh" else "Last Push", lambda t: f"{t['days_inactive']}天前" if (lang == "zh" and t.get("days_inactive") is not None) else (f"{t['days_inactive']}d ago" if t.get("days_inactive") is not None else "-")),
+        ("平台" if lang == "zh" else "Platforms", lambda t: _md_cell(", ".join(t.get("platforms", [])))),
+        ("标签" if lang == "zh" else "Tags", lambda t: _md_cell(", ".join(t.get("tags", [])))),
+        ("专有性依据" if lang == "zh" else "Exclusivity", lambda t: _md_cell(t["exclusivity_reason_zh"] if lang == "zh" else t["exclusivity_reason_en"])),
+        ("安装提示" if lang == "zh" else "Install Hint", lambda t: _md_cell(t.get("install_hint") or "-")),
+    ]
+    lines = [
+        "| " + " | ".join(headers) + " |",
+        "| " + " | ".join(aligns) + " |",
+    ]
+    for label, getter in rows:
+        vals = [getter(t) for t in tools]
+        lines.append("| " + " | ".join([f"**{label}**", *vals]) + " |")
+    return "\n".join(lines) + "\n"
+
+
+def cmd_recommend(args: argparse.Namespace) -> int:
+    _catalog, _health_map, _cat_map, enriched = load_enriched_catalog(args.catalog, args.snapshot)
+    recs = recommend_tools(enriched, args.intent, platform=args.platform, limit=args.limit)
+    if args.json:
+        print(json.dumps(recs, indent=2, ensure_ascii=False))
+        return 0
+    if not recs:
+        print("未找到匹配的 Antigravity 专有工具。" if args.lang == "zh" else "No matching Antigravity-exclusive tools found for that intent.")
+        return 0
+    print(f"Top {len(recs)} recommended Antigravity-exclusive tool(s) for '{args.intent}':\n")
+    for idx, t in enumerate(recs, 1):
+        desc = t["description_zh"] if args.lang == "zh" else t["description_en"]
+        score_s = f"{t['health_score']}/100" if t.get("health_score") is not None else "N/A"
+        print(f"{idx:>2}. {t['name']}  ({t['repo']})  ★{t['stars']:,} | {t['status']} ({score_s}) | Match: {t['match_score']}")
+        print(f"    {desc}")
+        print(f"    Signals: {', '.join(t['match_reasons'][:5])} | URL: {t['url']}")
+        if t.get("install_hint"):
+            print(f"    Install: {t['install_hint']}")
+        print()
+    return 0
+
+
+def cmd_compare(args: argparse.Namespace) -> int:
+    if not (2 <= len(args.tools) <= 4):
+        print("[ERROR] `compare` requires between 2 and 4 tool identifiers.", file=sys.stderr)
+        return 1
+    catalog, health_map, cat_map, _enriched = load_enriched_catalog(args.catalog, args.snapshot)
+
+    resolved: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for ident in args.tools:
+        found = find_tool(catalog, health_map, cat_map, ident)
+        if not found:
+            print(f"[ERROR] Tool not found: {ident}", file=sys.stderr)
+            return 1
+        if found["id"] in seen_ids:
+            print(f"[ERROR] Duplicate tool specified for comparison: {found['id']}", file=sys.stderr)
+            return 1
+        seen_ids.add(found["id"])
+        resolved.append(found)
+
+    if args.json:
+        print(json.dumps({"tools": resolved}, indent=2, ensure_ascii=False))
+        return 0
+    if args.markdown:
+        sys.stdout.write(render_comparison_markdown(resolved, lang=args.lang))
+        return 0
+
+    rows = [
+        ("仓库" if args.lang == "zh" else "Repository", lambda t: t["repo"]),
+        ("分类" if args.lang == "zh" else "Category", lambda t: t["category_zh"] if args.lang == "zh" else t["category_en"]),
+        ("状态" if args.lang == "zh" else "Status", lambda t: f"{t['status']} ({t['health_score']}/100)" if t.get("health_score") is not None else t["status"]),
+        ("Stars", lambda t: f"★{t.get('stars', 0):,}"),
+        ("主语言" if args.lang == "zh" else "Language", lambda t: t.get("language") or "-"),
+        ("开源协议" if args.lang == "zh" else "License", lambda t: t.get("license") or "-"),
+        ("版本" if args.lang == "zh" else "Release", lambda t: t.get("latest_release") or "-"),
+        ("平台" if args.lang == "zh" else "Platforms", lambda t: ", ".join(t.get("platforms", []))),
+        ("标签" if args.lang == "zh" else "Tags", lambda t: ", ".join(t.get("tags", []))),
+        ("安装" if args.lang == "zh" else "Install", lambda t: t.get("install_hint") or "-"),
+    ]
+    col_w = 28
+    head_metric = "维度" if args.lang == "zh" else "Metric"
+    print(" | ".join([head_metric.ljust(14), *[t["name"][:col_w].ljust(col_w) for t in resolved]]))
+    print("-+-".join(["-" * 14, *["-" * col_w for _ in resolved]]))
+    for label, getter in rows:
+        cells = [str(getter(t))[:col_w].ljust(col_w) for t in resolved]
+        print(" | ".join([label.ljust(14), *cells]))
+    return 0
+
+
+def cmd_info(args: argparse.Namespace) -> int:
+    catalog, health_map, cat_map, _enriched = load_enriched_catalog(args.catalog, args.snapshot)
+    found = find_tool(catalog, health_map, cat_map, args.tool)
     if not found:
         print(f"[ERROR] Tool not found: {args.tool}", file=sys.stderr)
         return 1
@@ -193,9 +489,7 @@ def cmd_info(args: argparse.Namespace) -> int:
 
 
 def cmd_stats(args: argparse.Namespace) -> int:
-    catalog, health_map = load_catalog_and_health(args.catalog, args.snapshot)
-    cat_map = {c["id"]: c for c in catalog.get("categories", [])}
-    enriched = [enrich_tool(t, health_map, cat_map) for t in catalog.get("tools", [])]
+    catalog, _health_map, _cat_map, enriched = load_enriched_catalog(args.catalog, args.snapshot)
 
     by_cat = Counter(t["category"] for t in enriched)
     by_lang = Counter(t["language"] or "Unspecified" for t in enriched)
@@ -241,15 +535,50 @@ def cmd_stats(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_add(args: argparse.Namespace) -> int:
-    import generate_docs
+def _save_validated_catalog(
+    catalog: dict[str, Any],
+    catalog_path: Path,
+    snapshot_path: Path,
+    sync_docs: bool,
+    success_message: str,
+) -> int:
     import validate_catalog
 
+    catalog = validate_catalog.sort_catalog_tools(catalog)
+    errors, warnings = validate_catalog.validate_catalog_data(catalog)
+    if errors:
+        for e in errors:
+            print(f"[ERROR] {e}", file=sys.stderr)
+        return 1
+    for w in warnings:
+        print(f"[WARN] {w}")
+
+    catalog_path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    print(success_message)
+
+    if sync_docs:
+        return sync_all_derived_artifacts(catalog_path, snapshot_path)
+    return 0
+
+
+def cmd_add(args: argparse.Namespace) -> int:
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
-    repo = args.repo.strip().removeprefix("https://github.com/").strip("/")
+    repo = args.repo.strip().removeprefix("https://github.com/").strip("/").removesuffix(".git")
     if "/" not in repo:
         print(f"[ERROR] Invalid repo slug: {repo}", file=sys.stderr)
         return 1
+
+    exclusions_path = getattr(args, "exclusions", DEFAULT_EXCLUSIONS)
+    if exclusions_path.exists():
+        excl_data = json.loads(exclusions_path.read_text(encoding="utf-8"))
+        for item in excl_data.get("exclusions") or []:
+            if isinstance(item, dict) and str(item.get("repo", "")).lower() == repo.lower():
+                reason = item.get("reason_en") or item.get("category") or "excluded policy"
+                print(
+                    f"[ERROR] Excluded repository ({item.get('category', 'excluded')}): '{repo}' is listed in {exclusions_path} — {reason}",
+                    file=sys.stderr,
+                )
+                return 1
 
     name = args.name.strip() if args.name else repo.split("/", 1)[1]
     tid = args.id.strip() if args.id else re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
@@ -274,20 +603,293 @@ def cmd_add(args: argparse.Namespace) -> int:
         entry["featured"] = True
 
     catalog["tools"].append(entry)
-    catalog = validate_catalog.sort_catalog_tools(catalog)
-    errors, warnings = validate_catalog.validate_catalog_data(catalog)
-    if errors:
-        for e in errors:
-            print(f"[ERROR] {e}", file=sys.stderr)
+    return _save_validated_catalog(
+        catalog, args.catalog, args.snapshot, args.sync_docs, f"[+] Added '{name}' ({repo}) to {args.catalog}"
+    )
+
+
+def cmd_remove(args: argparse.Namespace) -> int:
+    catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
+    target = args.tool.strip().lower()
+    tools = catalog.get("tools", [])
+    idx_to_remove = next(
+        (
+            idx
+            for idx, t in enumerate(tools)
+            if target in (t["id"].lower(), t["name"].lower(), t["repo"].lower())
+        ),
+        None,
+    )
+
+    if idx_to_remove is None:
+        print(f"[ERROR] Tool not found: {args.tool}", file=sys.stderr)
         return 1
-    for w in warnings:
-        print(f"[WARN] {w}")
 
-    args.catalog.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
-    print(f"[+] Added '{name}' ({repo}) to {args.catalog}")
+    removed = tools.pop(idx_to_remove)
+    return _save_validated_catalog(
+        catalog,
+        args.catalog,
+        args.snapshot,
+        args.sync_docs,
+        f"[+] Removed '{removed['name']}' ({removed['repo']}) from {args.catalog}",
+    )
 
-    if args.sync_docs:
-        return sync_all_derived_artifacts(args.catalog, args.snapshot)
+
+def _normalize_os_name(raw_os: str = "") -> str:
+    val = (raw_os or py_platform.system()).strip().lower()
+    if val in ("windows", "win32", "win"):
+        return "Windows"
+    if val in ("darwin", "macos", "mac", "osx"):
+        return "macOS"
+    if val in ("linux",):
+        return "Linux"
+    return "Cross-Platform"
+
+
+def _is_reparse_or_symlink(path: Path) -> bool:
+    try:
+        if path.is_symlink():
+            return True
+        is_junc = getattr(path, "is_junction", None)
+        if callable(is_junc) and is_junc():
+            return True
+        st = os.lstat(path)
+        attrs = getattr(st, "st_file_attributes", 0)
+        return bool(attrs & 0x0400)
+    except OSError:
+        return False
+
+
+def default_env_probe(os_override: str = "") -> dict[str, Any]:
+    os_name = _normalize_os_name(os_override)
+    host_os = _normalize_os_name("")
+    agy_in_path = bool(shutil.which("agy"))
+    proxy_vars = [
+        k for k in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")
+        if os.environ.get(k)
+    ]
+    junction_paths: list[str] = []
+    if os_name == "Windows" and host_os == "Windows":
+        candidate_roots = [
+            Path.home() / ".gemini" / "config" / "skills",
+            Path.home() / ".gemini" / "antigravity" / "skills",
+        ]
+        for root in candidate_roots:
+            if _is_reparse_or_symlink(root):
+                junction_paths.append(str(root))
+                continue
+            if not root.exists():
+                continue
+            try:
+                for child in root.iterdir():
+                    if _is_reparse_or_symlink(child):
+                        junction_paths.append(str(child))
+            except OSError:
+                pass
+    return {
+        "os": os_name,
+        "agy_in_path": agy_in_path,
+        "proxy_configured": bool(proxy_vars),
+        "proxy_vars": proxy_vars,
+        "windows_junction_risk": bool(junction_paths),
+        "junction_paths": junction_paths,
+    }
+
+
+def run_doctor(
+    tools: list[dict[str, Any]],
+    *,
+    env_probe: dict[str, Any] | None = None,
+    os_override: str = "",
+) -> dict[str, Any]:
+    probe = dict(env_probe) if env_probe is not None else default_env_probe(os_override)
+    if os_override:
+        probe["os"] = _normalize_os_name(os_override)
+    os_name = probe.get("os", "Cross-Platform")
+
+    by_id = {t["id"]: t for t in tools}
+
+    def pick(*ids: str) -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
+        for tid in ids:
+            t = by_id.get(tid)
+            if t:
+                items.append(
+                    {
+                        "id": t["id"],
+                        "name": t["name"],
+                        "repo": t["repo"],
+                        "url": t["url"],
+                        "status": t.get("status", "UNAUDITED"),
+                        "health_score": t.get("health_score"),
+                        "install_hint": t.get("install_hint", ""),
+                    }
+                )
+        return items
+
+    checks: list[dict[str, Any]] = []
+
+    if os_name == "Windows":
+        if probe.get("windows_junction_risk"):
+            checks.append(
+                {
+                    "id": "windows-skill-junctions",
+                    "severity": "warn",
+                    "title_en": "Windows NTFS junction/symlink skills detected",
+                    "title_zh": "检测到 Windows NTFS 联接/符号链接技能目录",
+                    "detail_en": f"Detected {len(probe.get('junction_paths', []))} reparse-point skill path(s); Antigravity Go language server skips junctions.",
+                    "detail_zh": f"检测到 {len(probe.get('junction_paths', []))} 个重解析点技能路径；Antigravity Go 语言服务器会跳过此类目录。",
+                    "tools": pick("antigravity-junction-skill-fix"),
+                }
+            )
+        else:
+            checks.append(
+                {
+                    "id": "windows-skill-junctions",
+                    "severity": "ok",
+                    "title_en": "No NTFS junction/symlink skills detected in user skill roots",
+                    "title_zh": "未在用户技能目录检测到 NTFS 联接/符号链接风险",
+                    "detail_en": "If you later link external skills with mklink /J or Skills Manager, bridge them with antigravity-junction-skill-fix.",
+                    "detail_zh": "若后续通过 mklink /J 或 Skills Manager 联接外部技能，可使用 antigravity-junction-skill-fix 桥接。",
+                    "tools": pick("antigravity-junction-skill-fix"),
+                }
+            )
+
+        if probe.get("proxy_configured"):
+            vars_str = ", ".join(probe.get("proxy_vars", []))
+            checks.append(
+                {
+                    "id": "windows-network-and-defender",
+                    "severity": "info",
+                    "title_en": f"Proxy environment detected ({vars_str})",
+                    "title_zh": f"检测到代理环境变量（{vars_str}）",
+                    "detail_en": "Use antigravity-proxy for non-TUN DLL process forwarding, and vscode-antigravity-backend-fix if Defender triggers agy.exe re-downloads.",
+                    "detail_zh": "若未开 TUN 模式，可用 antigravity-proxy 进行进程级转发；若遇 Defender 超时重复下载 agy.exe，可用 vscode-antigravity-backend-fix。",
+                    "tools": pick("antigravity-proxy", "vscode-antigravity-backend-fix"),
+                }
+            )
+        else:
+            checks.append(
+                {
+                    "id": "windows-network-and-defender",
+                    "severity": "info",
+                    "title_en": "Windows runtime safeguards",
+                    "title_zh": "Windows 运行时常见问题防护",
+                    "detail_en": "For non-TUN SOCKS5/HTTP proxying or VS Code Defender agy.exe download loops, use these targeted patches.",
+                    "detail_zh": "针对免 TUN 代理转发或 VS Code 扩展因 Defender 超时重复下载 agy.exe 的问题，可按需选用以下补丁。",
+                    "tools": pick("antigravity-proxy", "vscode-antigravity-backend-fix"),
+                }
+            )
+
+    if probe.get("agy_in_path"):
+        checks.append(
+            {
+                "id": "agy-cli-toolchain",
+                "severity": "ok",
+                "title_en": "Official `agy` CLI detected on PATH",
+                "title_zh": "已在 PATH 中检测到官方 `agy` CLI",
+                "detail_en": "Enhance terminal workflows with statusline HUDs, MCP turn acceleration, and local ACP / Enterprise Gateways.",
+                "detail_zh": "可搭配终端状态栏 HUD、MCP 回合加速插件及本地 ACP / Enterprise Gateway 网关工具。",
+                "tools": pick("agy-hud", "agy-powerline", "agy-fast", "liftgate", "agy-gyro"),
+            }
+        )
+    else:
+        checks.append(
+            {
+                "id": "agy-cli-toolchain",
+                "severity": "info",
+                "title_en": "Official `agy` CLI not detected on PATH",
+                "title_zh": "未在 PATH 中检测到官方 `agy` CLI",
+                "detail_en": "Install the official CLI harness (`agy`) to unlock terminal orchestration and ACP gateway integrations.",
+                "detail_zh": "安装官方命令行本体（`agy`）后即可解锁终端编排与 ACP 网关生态工具。",
+                "tools": pick("antigravity-cli"),
+            }
+        )
+
+    if os_name == "macOS":
+        checks.append(
+            {
+                "id": "macos-remote-control",
+                "severity": "info",
+                "title_en": "macOS remote & mobile session control",
+                "title_zh": "macOS 远程与移动端遥控",
+                "detail_en": "Control local `agy` & `agy acp` sessions from WeCom or a self-hosted mobile PWA.",
+                "detail_zh": "可通过企业微信机器人或自托管移动端 PWA 远程监控并操控本机 Antigravity 会话。",
+                "tools": pick("agy-remote-wecom", "porta"),
+            }
+        )
+
+    checks.append(
+        {
+            "id": "desktop-cockpit-telemetry",
+            "severity": "info",
+            "title_en": "Desktop & IDE telemetry, localization, and quota cockpits",
+            "title_zh": "桌面端与 IDE 遥测看板、汉化与配额监控",
+            "detail_en": "Monitor real-time context windows, 5h/weekly quotas, and customize UI/localization safely.",
+            "detail_zh": "实时监控上下文窗口、5 小时与周配额，并按需启用 2.0 工作台增强与中文汉化。",
+            "tools": pick(
+                "antigravity-context-viewer",
+                "agy-powertools",
+                "vscode-antigravity-cockpit",
+                "antigravity2-cn",
+            ),
+        }
+    )
+
+    seen_rec: set[str] = set()
+    recommended_tools: list[dict[str, Any]] = []
+    for chk in checks:
+        for item in chk["tools"]:
+            if item["id"] not in seen_rec:
+                seen_rec.add(item["id"])
+                recommended_tools.append(item)
+
+    return {
+        "environment": probe,
+        "checks": checks,
+        "recommended_tools": recommended_tools,
+    }
+
+
+def cmd_doctor(args: argparse.Namespace) -> int:
+    _catalog, _health_map, _cat_map, enriched = load_enriched_catalog(args.catalog, args.snapshot)
+    report = run_doctor(enriched, os_override=args.os)
+
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+        return 0
+
+    env = report["environment"]
+    if args.lang == "zh":
+        print(f"=== Awesome Antigravity Tools — 本地环境体检 ({env['os']}) ===")
+        print(f"agy CLI 就绪:       {'是' if env.get('agy_in_path') else '否'}")
+        print(f"代理环境变量:       {', '.join(env.get('proxy_vars') or []) or '无'}")
+        if env.get("os") == "Windows":
+            print(f"重解析点技能目录:   检测到 {len(env.get('junction_paths') or [])} 个")
+            for jp in env.get("junction_paths") or []:
+                print(f"  - {jp}")
+    else:
+        print(f"=== Awesome Antigravity Tools — Environment Doctor ({env['os']}) ===")
+        print(f"agy CLI in PATH:    {'Yes' if env.get('agy_in_path') else 'No'}")
+        print(f"Proxy env vars:     {', '.join(env.get('proxy_vars') or []) or 'None'}")
+        if env.get("os") == "Windows":
+            print(f"Junction skills:    {len(env.get('junction_paths') or [])} detected")
+            for jp in env.get("junction_paths") or []:
+                print(f"  - {jp}")
+    print()
+
+    for chk in report["checks"]:
+        badge = {"ok": "[OK]", "warn": "[WARN]", "info": "[INFO]"}.get(chk["severity"], "[INFO]")
+        title = chk["title_zh"] if args.lang == "zh" else chk["title_en"]
+        detail = chk["detail_zh"] if args.lang == "zh" else chk["detail_en"]
+        print(f"{badge} {title}")
+        print(f"       {detail}")
+        for tool in chk["tools"]:
+            sc = f"{tool['health_score']}/100" if tool.get("health_score") is not None else "N/A"
+            print(f"       -> {tool['name']} ({tool['status']} {sc}) | {tool['url']}")
+            if tool.get("install_hint"):
+                print(f"          Install: {tool['install_hint']}")
+        print()
     return 0
 
 
@@ -395,6 +997,19 @@ def build_parser() -> argparse.ArgumentParser:
     p_search.add_argument("--lang", choices=["en", "zh"], default="en")
     p_search.add_argument("--json", action="store_true")
 
+    p_rec = sub.add_parser("recommend", help="Recommend tools by natural-language intent (EN/ZH)")
+    p_rec.add_argument("intent", help="Goal, bug symptom, or capability query")
+    p_rec.add_argument("-p", "--platform", default="")
+    p_rec.add_argument("-n", "--limit", type=int, default=5)
+    p_rec.add_argument("--lang", choices=["en", "zh"], default="en")
+    p_rec.add_argument("--json", action="store_true")
+
+    p_cmp = sub.add_parser("compare", help="Compare 2 to 4 tools side by side")
+    p_cmp.add_argument("tools", nargs="+", help="Tool ids, names, or owner/repo slugs")
+    p_cmp.add_argument("--markdown", action="store_true", help="Output as GitHub-flavored Markdown table")
+    p_cmp.add_argument("--lang", choices=["en", "zh"], default="en")
+    p_cmp.add_argument("--json", action="store_true")
+
     p_info = sub.add_parser("info", help="Show detailed metadata and live telemetry for one tool")
     p_info.add_argument("tool", help="Tool id, name, or owner/repo")
     p_info.add_argument("--json", action="store_true")
@@ -418,6 +1033,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_add.add_argument("--featured", action="store_true")
     p_add.add_argument("--sync-docs", action="store_true", help="Regenerate READMEs, badges, exports, and web bundle")
 
+    p_rm = sub.add_parser("remove", help="Remove a tool from data/tools.json by id, name, or repo")
+    p_rm.add_argument("tool", help="Tool id, name, or owner/repo")
+    p_rm.add_argument("--sync-docs", action="store_true", help="Regenerate READMEs, badges, exports, and web bundle")
+
+    p_doc = sub.add_parser("doctor", help="Diagnose local Antigravity environment and suggest matching catalog tools")
+    p_doc.add_argument("--os", choices=["windows", "macos", "linux"], default="", help="Override detected OS for inspection")
+    p_doc.add_argument("--lang", choices=["en", "zh"], default="en")
+    p_doc.add_argument("--json", action="store_true")
+
     sub.add_parser("sync", help="Canonicalize catalog order and regenerate all derived docs, badges, exports, and site bundle")
 
     p_verify = sub.add_parser("verify", help="Validate catalog schema and optional full artifact sync")
@@ -434,12 +1058,20 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_list_or_search(args)
     if args.command == "search":
         return cmd_list_or_search(args, query=args.query)
+    if args.command == "recommend":
+        return cmd_recommend(args)
+    if args.command == "compare":
+        return cmd_compare(args)
     if args.command == "info":
         return cmd_info(args)
     if args.command == "stats":
         return cmd_stats(args)
     if args.command == "add":
         return cmd_add(args)
+    if args.command == "remove":
+        return cmd_remove(args)
+    if args.command == "doctor":
+        return cmd_doctor(args)
     if args.command == "sync":
         return sync_all_derived_artifacts(args.catalog, args.snapshot)
     if args.command == "verify":

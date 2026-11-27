@@ -2,7 +2,7 @@
  * Ecosystem Insights visualization panel & Side-by-Side Tool Comparison drawer.
  */
 
-import { formatCompactNumber, getStatusLabel } from "./catalog-logic.js";
+import { computeHistoryTrendSummary, formatCompactNumber, getStatusLabel } from "./catalog-logic.js";
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -69,12 +69,20 @@ export function renderInsightsPanel(mountEl, bundle, lang) {
   grid.append(renderBarList(lang === "zh" ? "主力开发语言" : "Primary Languages", langs, maxLang));
 
   // 3. Health score buckets
-  const buckets = [
-    { label: "90-100 (Elite)", value: 0 },
-    { label: "75-89 (Strong)", value: 0 },
-    { label: "50-74 (Moderate)", value: 0 },
-    { label: "<50 (Needs Review)", value: 0 },
-  ];
+  const buckets =
+    lang === "zh"
+      ? [
+          { label: "90-100 (卓越)", value: 0 },
+          { label: "75-89 (良好)", value: 0 },
+          { label: "50-74 (一般)", value: 0 },
+          { label: "<50 (待复查)", value: 0 },
+        ]
+      : [
+          { label: "90-100 (Elite)", value: 0 },
+          { label: "75-89 (Strong)", value: 0 },
+          { label: "50-74 (Moderate)", value: 0 },
+          { label: "<50 (Needs Review)", value: 0 },
+        ];
   for (const tool of bundle.tools) {
     const sc = tool.telemetry?.health_score;
     if (typeof sc !== "number") continue;
@@ -85,6 +93,76 @@ export function renderInsightsPanel(mountEl, bundle, lang) {
   }
   const maxB = Math.max(1, ...buckets.map((b) => b.value));
   grid.append(renderBarList(lang === "zh" ? "健康度评分分布" : "Health Score Distribution", buckets, maxB));
+
+  // 4. 90-Day Ecosystem Trend SVG Sparkline (if >= 2 history entries)
+  const trend = computeHistoryTrendSummary(bundle.history);
+  if (trend.points.length >= 2) {
+    const trendCard = el("div", "insight-card");
+    trendCard.append(el("h3", "insight-title", lang === "zh" ? "生态增长趋势" : "90-Day Ecosystem Trend"));
+    const wrap = el("div", "trend-chart");
+
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("class", "trend-svg");
+    svg.setAttribute("viewBox", "0 0 240 64");
+    svg.setAttribute("role", "img");
+    svg.setAttribute(
+      "aria-label",
+      lang === "zh" ? "生态合计 Stars 历史增长折线图" : "Combined GitHub stars historical trend chart"
+    );
+
+    const baseline = document.createElementNS(ns, "line");
+    baseline.setAttribute("x1", "0");
+    baseline.setAttribute("y1", "56");
+    baseline.setAttribute("x2", "240");
+    baseline.setAttribute("y2", "56");
+    baseline.setAttribute("stroke", "currentColor");
+    baseline.setAttribute("stroke-opacity", "0.18");
+    baseline.setAttribute("stroke-width", "1");
+    svg.append(baseline);
+
+    const polyline = document.createElementNS(ns, "polyline");
+    polyline.setAttribute("fill", "none");
+    polyline.setAttribute("stroke", "var(--accent)");
+    polyline.setAttribute("stroke-width", "2.5");
+    polyline.setAttribute("stroke-linecap", "round");
+    polyline.setAttribute("stroke-linejoin", "round");
+    polyline.setAttribute("points", trend.starPolyline);
+    svg.append(polyline);
+
+    const pts = trend.starPolyline.split(" ");
+    const lastPt = pts[pts.length - 1]?.split(",");
+    if (lastPt && lastPt.length === 2) {
+      const dot = document.createElementNS(ns, "circle");
+      dot.setAttribute("cx", lastPt[0]);
+      dot.setAttribute("cy", lastPt[1]);
+      dot.setAttribute("r", "3.5");
+      dot.setAttribute("fill", "var(--accent-strong)");
+      svg.append(dot);
+    }
+
+    const starSign = trend.starDelta >= 0 ? "+" : "-";
+    const toolSign = trend.toolDelta >= 0 ? "+" : "-";
+    const starText = `${starSign}${formatCompactNumber(Math.abs(trend.starDelta))} ★`;
+    const toolText = `${toolSign}${Math.abs(trend.toolDelta)} ${lang === "zh" ? "工具" : "tools"}`;
+
+    const metaTop = el("div", "trend-meta");
+    const deltaEl = el("span", `trend-delta${trend.starDelta < 0 ? " is-negative" : ""}`, `${starText} · ${toolText}`);
+    metaTop.append(
+      el("span", "", `${trend.earliestDate} → ${trend.latestDate}`),
+      deltaEl
+    );
+
+    const metaRange = el("div", "trend-meta");
+    metaRange.append(
+      el("span", "", `${formatCompactNumber(trend.minStars)} → ${formatCompactNumber(trend.maxStars)} ★`),
+      el("span", "", `${trend.points.length} ${lang === "zh" ? "次巡检记录" : "audits"}`)
+    );
+
+    wrap.append(svg, metaTop, metaRange);
+    trendCard.append(wrap);
+    grid.append(trendCard);
+  }
 
   details.append(grid);
   mountEl.append(details);
@@ -143,7 +221,7 @@ export function renderCompareTray(barEl, dialogEl, bodyEl, state, onRemove, onCl
   barEl.append(inner);
 }
 
-function renderComparisonTable(bodyEl, tools, lang) {
+export function renderComparisonTable(bodyEl, tools, lang) {
   bodyEl.textContent = "";
   const wrap = el("div", "table-scroll");
   const table = el("table", "compare-table");
@@ -170,7 +248,15 @@ function renderComparisonTable(bodyEl, tools, lang) {
     [lang === "zh" ? "主语言" : "Language", (t) => t.telemetry?.language || "—"],
     [lang === "zh" ? "开源协议" : "License", (t) => t.telemetry?.license || "—"],
     [lang === "zh" ? "最新版本" : "Latest Release", (t) => t.telemetry?.latest_release || "—"],
-    [lang === "zh" ? "最近更新" : "Last Push", (t) => (t.telemetry?.days_inactive != null ? `${t.telemetry.days_inactive}d ago` : "—")],
+    [
+      lang === "zh" ? "最近更新" : "Last Push",
+      (t) =>
+        t.telemetry?.days_inactive != null
+          ? lang === "zh"
+            ? `${t.telemetry.days_inactive} 天前`
+            : `${t.telemetry.days_inactive}d ago`
+          : "—",
+    ],
     [lang === "zh" ? "支持平台" : "Platforms", (t) => (t.platforms || []).join(", ")],
     [lang === "zh" ? "标签" : "Tags", (t) => (t.tags || []).join(", ")],
     [

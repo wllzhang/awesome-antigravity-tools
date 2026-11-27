@@ -2,6 +2,18 @@
 
 All notable changes to **awesome-antigravity-tools** are documented in this file.
 
+## [2.1.0] - 2026-11-27
+
+A major ecosystem expansion, native MCP distribution upgrade, and curatorial hardening release across the catalog, CLI, discovery radar, and static web explorer.
+
+### Added
+- **Expanded Curated Catalog (19 → 37 Verified Tools across 4 Categories)**: Added 18 live-verified Antigravity-exclusive projects across all 4 categories: Official CLI & SDKs (`robotics-antigravity-plugin`), IDE Extensions & Cockpits (`agy-auth`, `agy-capsule`, `agy-hud`, `agy-powerline`, `agy-powertools`, `agy-switch`, `antigravity-context-viewer`, `obsidian-prism`, `paragravity`), Platform Fixes & Runtime Patches (`antigravity-rtl`, `antigravity2-cn`), and Dedicated Gateways & Migration (`agy-fast`, `agy-gyro`, `Antigravity-agy-dart`, `paseo-agy-acp`, `pi-antigravity-acp-provider`, `porta`).
+- **Zero-Dependency Native Stdio MCP Server (`scripts/mcp_server.py` + `mcp_config.json`)**: Implements JSON-RPC 2.0 over UTF-8 LF stdio with 6 read-only tools (`aat_recommend`, `aat_search`, `aat_compare`, `aat_info`, `aat_stats`, `aat_doctor`), 2 resources (`aat://catalog`, `aat://llms.txt`), strict JSON-RPC validation (`-32700`/`-32600`/`-32601`/`-32602`/`-32603`), `--self-test` mode, `pyproject.toml` v2.1.0 console entrypoint (`aat-mcp`), and updated `skills/antigravity-tools-advisor/SKILL.md`.
+- **Canonical Exclusions Ledger & Weekly Discovery Radar (`data/exclusions.json` + `.github/workflows/discovery-radar.yml`)**: Records 14 rejected/excluded repositories across strict policy categories (`tos-risk-proxy`, `region-bypass`, `cross-agent`, `prompt-pack`, `pruned-stale`, `pruned-dead`) with zero-overlap validation in `scripts/validate_catalog.py`, integrated filtering across `discover_candidates.py`, `parse_submission.py`, and `aat_cli.py add`, plus a read-only weekly discovery GitHub Actions workflow (`--out-aat-cmd`).
+- **CLI Decision Workflows (`scripts/aat_cli.py`)**: Added bilingual intent recommender (`recommend`), 2–4 tool side-by-side matrix (`compare --markdown`), validated tool removal (`remove --sync-docs`), and local environment diagnostics (`doctor --os windows|macos|linux --json`).
+- **Web Explorer Power-User UX & Agent Surfaces (`docs/`)**: Added tag chip filtering (`?tag=`), featured toggle (`?featured=1`), programming language filtering (`?code=`), 90-day star-growth SVG trend chart (`docs/insights.js`), per-card install-hint copy button, `?` keyboard shortcuts dialog (`#shortcutsDialog`), persistent `?tool=` RSS deep-links (`docs/feed.xml`), vector brand mark (`docs/logo.svg`), and agent-readable `docs/llms.txt`.
+- **Developer Documentation & Quality Gates**: Added canonical `AGENTS.md`, `Makefile`/`scripts/dev.ps1` `doctor` and `mcp-test` tasks, and expanded Python `unittest` (`tests/test_mcp_server.py`, `tests/test_tooling.py`, `tests/test_site_artifacts.py`) and Node.js (`tests/test_web.mjs`) suites.
+
 ## [2.0.0] - 2026-11-18
 
 A complete architectural evolution from a hand-edited Markdown list into a schema-validated, self-auditing, bilingual Antigravity-exclusive engineering index platform.
