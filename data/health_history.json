@@ -155,6 +155,20 @@
       "total_stars": 76224,
       "total_forks": 8146,
       "average_health_score": 89.0
+    },
+    {
+      "date": "2026-11-28",
+      "generated_at": "2026-11-28T09:54:39Z",
+      "total": 37,
+      "healthy": 37,
+      "stale": 0,
+      "very_stale": 0,
+      "archived": 0,
+      "dead": 0,
+      "health_ratio_pct": 100.0,
+      "total_stars": 78470,
+      "total_forks": 8236,
+      "average_health_score": 89.0
     }
   ]
 }

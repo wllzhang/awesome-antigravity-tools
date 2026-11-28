@@ -26,7 +26,7 @@ Most "awesome" lists in the AI agent space are flooded with two types of noise:
 - Directly fixes critical Antigravity bugs, OS runtime limitations, or telemetry blind spots.
 - Verified daily by our automated health audit (`scripts/health-check.py`) and backed by a single-source-of-truth JSON catalog (`data/tools.json`).
 
-> **Ecosystem Pulse**: `37` curated tools across `4` categories · `76.2k` combined GitHub stars · `37/37` active (`100.0%`) · Avg Health Score: `89.0/100` ([Full Audit](health_report.md))
+> **Ecosystem Pulse**: `37` curated tools across `4` categories · `78.5k` combined GitHub stars · `37/37` active (`100.0%`) · Avg Health Score: `89.0/100` ([Full Audit](health_report.md))
 
 ---
 
